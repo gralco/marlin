@@ -49,7 +49,7 @@
   #define FIRMWARE_URL "https://github.com/fmalpartida/Marlin/tree/SAV-MkI-config"
 #elif MB(MINI_RAMBO)
   #define MACHINE_NAME "LulzBot Mini"
-  #define FIRWARE_URL  "https://code.alephobjects.com/diffusion/MARLIN/browse/Foxglove/"
+  #define FIRWARE_URL  "https://code.alephobjects.com/diffusion/MARLIN/repository/Foxglove/"
 #else
   #ifdef CUSTOM_MENDEL_NAME
     #define MACHINE_NAME CUSTOM_MENDEL_NAME
