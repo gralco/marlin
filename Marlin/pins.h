@@ -2496,7 +2496,7 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
 /*****************************************************************
 * Mini Rambo Pin Assignments
 ******************************************************************/
-#if MB(RAMBO_MINI)
+#if MB(MINI_RAMBO)
 #define KNOWN_BOARD
 #ifndef __AVR_ATmega2560__
 #error Oops!  Make sure you have 'Arduino Mega 2560' selected from the 'Tools -> Boards' menu.
