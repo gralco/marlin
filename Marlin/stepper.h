@@ -48,11 +48,6 @@
 extern bool abort_on_endstop_hit;
 #endif
 
-// Switch endstop variables
-#define STD_ENDSTOP_PERIOD 50
-#define HOME_PROBE_ENDSTOP_PERIOD 20
-extern unsigned int endstop_trig_period;
-
 // Initialize and start the stepper motor subsystem
 void st_init();
 
@@ -70,8 +65,6 @@ long st_get_position(uint8_t axis);
 // Get current position in mm
 float st_get_position_mm(uint8_t axis);
 #endif  //ENABLE_AUTO_BED_LEVELING
-
-extern bool probing;
 
 // The stepper subsystem goes to sleep when it runs out of things to execute. Call this
 // to notify the subsystem that it is time to go to work.
