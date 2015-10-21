@@ -169,6 +169,7 @@
 // M503 - print the current settings (from memory not from EEPROM)
 // M540 - Use S[0|1] to enable or disable the stop SD card print on endstop hit (requires ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED)
 // M600 - Pause for filament change X[pos] Y[pos] Z[relative lift] E[initial retract] L[later retract distance for removal]
+// M601 - Resume the print from filament change
 // M665 - set delta configurations
 // M666 - set delta endstop adjustment
 // M605 - Set dual x-carriage movement mode: S<mode> [ X<duplication x-offset> R<duplication temp offset> ]
@@ -242,6 +243,8 @@ float min_pos[3] = { X_MIN_POS, Y_MIN_POS, Z_MIN_POS };
 float max_pos[3] = { X_MAX_POS, Y_MAX_POS, Z_MAX_POS };
 bool axis_known_position[3] = {false, false, false};
 float zprobe_zoffset;
+
+bool probing = false;
 
 // Extruder offset
 #if EXTRUDERS > 1
@@ -344,7 +347,11 @@ const char echomagic[] PROGMEM = "echo:";
 //===========================================================================
 //=============================Private Variables=============================
 //===========================================================================
+bool change_filament = false;
+
 const char axis_codes[NUM_AXIS] = {'X', 'Y', 'Z', 'E'};
+const uint8_t axis_max_pin[] = {X_MAX_PIN, Y_MAX_PIN, Z_MAX_PIN};
+const bool axis_max_endstop_inverting[] = {X_MAX_ENDSTOP_INVERTING, Y_MAX_ENDSTOP_INVERTING, Z_MAX_ENDSTOP_INVERTING};
 static float destination[NUM_AXIS] = {  0.0, 0.0, 0.0, 0.0};
 
 #ifndef DELTA
@@ -608,9 +615,28 @@ void setup()
   lcd_init();
   _delay_ms(1000);	// wait 1sec to display the splash screen
 
-  #if defined(CONTROLLERFAN_PIN) && CONTROLLERFAN_PIN > -1
+#if defined(CONTROLLERFAN_PIN) && CONTROLLERFAN_PIN > -1
+  #ifdef CONTROLLERFAN_SPEED_START
     SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
-  #endif
+    digitalWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_START); // kickstart for controller fan
+    analogWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_START);
+  #endif //CONTROLLERFAN_SPEED_START  
+  #endif //CONTROLLERFAN_PIN
+  
+#if defined(CONTROLLERFAN_PIN) && CONTROLLERFAN_PIN > -1
+    //SET_OUTPUT(CONTROLLERFAN_PIN); //Set pin used for driver cooling fan
+	// set case fan to normal speed
+	if (CONTROLLERFAN_SPEED_FULL <= CONTROLLERFAN_SPEED_MAX)
+	{
+            digitalWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_FULL); 
+            analogWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_FULL);
+	}
+	else 
+	{
+            digitalWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_MAX); 
+            analogWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_MAX);
+	}
+  #endif //CONTROLLERFAN_PIN
 
   #ifdef DIGIPOT_I2C
     digipot_i2c_init();
@@ -763,6 +789,9 @@ void get_command()
         //If command was e-stop process now
         if(strcmp(cmdbuffer[bufindw], "M112") == 0)
           kill();
+        //If command was M601 stop change filament mode
+        if(strcmp(cmdbuffer[bufindw], "M601") == 0)
+          change_filament = false;
         
         bufindw = (bufindw + 1)%BUFSIZE;
         buflen += 1;
@@ -1065,7 +1094,7 @@ static void run_z_probe() {
     st_synchronize();
 
     // move back down slowly to find bed
-    feedrate = homing_feedrate[Z_AXIS]/4;
+    feedrate = homing_feedrate[Z_AXIS]/40;
     zPosition -= home_retract_mm(Z_AXIS) * 2;
     plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS], feedrate/60, active_extruder);
     st_synchronize();
@@ -1152,13 +1181,17 @@ static void retract_z_probe() {
 /// Probe bed height at position (x,y), returns the measured z value
 static float probe_pt(float x, float y, float z_before) {
   // move to right place
+  probing = true;
   do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], z_before);
   do_blocking_move_to(x - X_PROBE_OFFSET_FROM_EXTRUDER, y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS]);
+  probing = false;
 
 #ifndef Z_PROBE_SLED
   engage_z_probe();   // Engage Z Servo endstop if available
 #endif // Z_PROBE_SLED
+  probing = true;
   run_z_probe();
+  probing = false;
   float measured_z = current_position[Z_AXIS];
 #ifndef Z_PROBE_SLED
   retract_z_probe();
@@ -1436,6 +1469,11 @@ void process_commands()
       plan_bed_level_matrix.set_to_identity();  //Reset the plane ("erase" all leveling data)
 #endif //ENABLE_AUTO_BED_LEVELING
 
+      probing = false;
+
+      //set endstop switch trigger period to less
+      endstop_trig_period = HOME_PROBE_ENDSTOP_PERIOD;
+      
       saved_feedrate = feedrate;
       saved_feedmultiply = feedmultiply;
       feedmultiply = 100;
@@ -1630,14 +1668,26 @@ void process_commands()
           }
         #endif
       #endif
-
-
+      
+      #ifdef Z_RAISE_AFTER_HOMING
+          if((home_all_axis) || (code_seen(axis_codes[Z_AXIS]))) {
+              destination[Z_AXIS] = Z_RAISE_AFTER_HOMING * home_dir(Z_AXIS) * (-1);    // Set destination away from bed
+              feedrate = max_feedrate[Z_AXIS];
+              plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate, active_extruder);
+              st_synchronize();
+		}
+      #endif
 
       if(code_seen(axis_codes[Z_AXIS])) {
         if(code_value_long() != 0) {
           current_position[Z_AXIS]=code_value()+add_homing[Z_AXIS];
         }
       }
+      #ifdef Z_RAISE_AFTER_HOMING
+        if((home_all_axis) || (code_seen(axis_codes[Z_AXIS]))) {
+        current_position[Z_AXIS] += Z_RAISE_AFTER_HOMING + zprobe_zoffset; //Sets Z distance back to 0 for auto leveling
+	    }
+      #endif
       #ifdef ENABLE_AUTO_BED_LEVELING
         if((home_all_axis) || (code_seen(axis_codes[Z_AXIS]))) {
           current_position[Z_AXIS] += zprobe_zoffset;  //Add Z_Probe offset (the distance is negative)
@@ -1659,6 +1709,8 @@ void process_commands()
       feedmultiply = saved_feedmultiply;
       previous_millis_cmd = millis();
       endstops_hit_on_purpose();
+      //set endstop switch trigger back to std period
+      endstop_trig_period = STD_ENDSTOP_PERIOD;
       break;
 
 #ifdef ENABLE_AUTO_BED_LEVELING
@@ -1667,6 +1719,9 @@ void process_commands()
             #if Z_MIN_PIN == -1
             #error "You must have a Z_MIN endstop in order to enable Auto Bed Leveling feature!!! Z_MIN_PIN must point to a valid hardware pin."
             #endif
+            
+            //set endstop switch trigger period to less
+            endstop_trig_period = HOME_PROBE_ENDSTOP_PERIOD;
 
             // Prevent user from running a G29 without first homing in X and Y
             if (! (axis_known_position[X_AXIS] && axis_known_position[Y_AXIS]) )
@@ -1744,6 +1799,7 @@ void process_commands()
                 {
                   // raise extruder
                   z_before = current_position[Z_AXIS] + Z_RAISE_BETWEEN_PROBINGS;
+                  LCD_MESSAGEPGM(MSG_AUTO_LEVEL);
                 }
 
                 float measured_z = probe_pt(xProbe, yProbe, z_before);
@@ -1805,6 +1861,11 @@ void process_commands()
             apply_rotation_xyz(plan_bed_level_matrix, x_tmp, y_tmp, z_tmp);         //Apply the correction sending the probe offset
             current_position[Z_AXIS] = z_tmp - real_z + current_position[Z_AXIS];   //The difference is added to current position and sent to planner.
             plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+            
+            //set endstop switch trigger back to std period
+            endstop_trig_period = STD_ENDSTOP_PERIOD;
+            SERIAL_ECHOLNPGM("Probing done!");
+            
 #ifdef Z_PROBE_SLED
             dock_sled(true, -SLED_DOCKING_OFFSET); // correct for over travel.
 #endif // Z_PROBE_SLED
@@ -1820,7 +1881,9 @@ void process_commands()
 
             feedrate = homing_feedrate[Z_AXIS];
 
+            probing = true;
             run_z_probe();
+            probing = false;
             SERIAL_PROTOCOLPGM(MSG_BED);
             SERIAL_PROTOCOLPGM(" X: ");
             SERIAL_PROTOCOL(current_position[X_AXIS]);
@@ -2221,7 +2284,9 @@ void process_commands()
         engage_z_probe();	
 
 	setup_for_endstop_move();
+        probing = true;
 	run_z_probe();
+        probing = false;
 
 	current_position[Z_AXIS] = Z_current = st_get_position_mm(Z_AXIS);
 	Z_start_location = st_get_position_mm(Z_AXIS) + Z_RAISE_BEFORE_PROBING;
@@ -2293,7 +2358,9 @@ void process_commands()
 		}
 
 		setup_for_endstop_move();
+                probing = true;
                 run_z_probe();
+                probing = false;
 
 		sample_set[n] = current_position[Z_AXIS];
 
@@ -2808,6 +2875,10 @@ Sigma_Exit:
       #if defined(Z_MIN_PIN) && Z_MIN_PIN > -1
         SERIAL_PROTOCOLPGM(MSG_Z_MIN);
         SERIAL_PROTOCOLLN(((READ(Z_MIN_PIN)^Z_MIN_ENDSTOP_INVERTING)?MSG_ENDSTOP_HIT:MSG_ENDSTOP_OPEN));
+      #endif
+      #if defined(Z2_MIN_PIN) && Z2_MIN_PIN > -1
+        SERIAL_PROTOCOLPGM(MSG_Z2_MIN);
+        SERIAL_PROTOCOLLN(((READ(Z2_MIN_PIN)^Z2_MIN_ENDSTOP_INVERTING)?MSG_ENDSTOP_HIT:MSG_ENDSTOP_OPEN));
       #endif
       #if defined(Z_MAX_PIN) && Z_MAX_PIN > -1
         SERIAL_PROTOCOLPGM(MSG_Z_MAX);
@@ -3551,6 +3622,7 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
     #ifdef FILAMENTCHANGEENABLE
     case 600: //Pause for filament change X[pos] Y[pos] Z[relative lift] E[initial retract] L[later retract distance for removal]
     {
+        change_filament = true;
         float target[4];
         float lastpos[4];
         target[X_AXIS]=current_position[X_AXIS];
@@ -3633,7 +3705,7 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
         delay(100);
         LCD_ALERTMESSAGEPGM(MSG_FILAMENTCHANGE);
         uint8_t cnt=0;
-        while(!lcd_clicked()){
+        while(!lcd_clicked() && change_filament){
           cnt++;
           manage_heater();
           manage_inactivity(true);
@@ -3936,7 +4008,11 @@ void get_coordinates()
   for(int8_t i=0; i < NUM_AXIS; i++) {
     if(code_seen(axis_codes[i]))
     {
-      destination[i] = (float)code_value() + (axis_relative_modes[i] || relative_mode)*current_position[i];
+      float check_destination = (float)code_value() + (axis_relative_modes[i] || relative_mode)*current_position[i];
+      if(i == E_AXIS || check_destination <= current_position[i] || !(digitalRead(axis_max_pin[i])^axis_max_endstop_inverting[i])/* || probing*/)
+        destination[i] = check_destination;
+      else
+        destination[i] = current_position[i];
       seen[i]=true;
     }
     else destination[i] = current_position[i]; //Are these else lines really needed?
@@ -4196,9 +4272,9 @@ void controllerFan()
        || !READ(E2_ENABLE_PIN)
     #endif
     #if EXTRUDER > 1
-      #if defined(X2_ENABLE_PIN) && X2_ENABLE_PIN > -1
-       || !READ(X2_ENABLE_PIN)
-      #endif
+      //~ #if defined(X2_ENABLE_PIN) && X2_ENABLE_PIN > -1
+       //~ || !READ(X2_ENABLE_PIN)
+      //~ #endif
        || !READ(E1_ENABLE_PIN)
     #endif
        || !READ(E0_ENABLE_PIN)) //If any of the drivers are enabled...
@@ -4208,14 +4284,30 @@ void controllerFan()
 
     if ((millis() - lastMotor) >= (CONTROLLERFAN_SECS*1000UL) || lastMotor == 0) //If the last time any driver was enabled, is longer since than CONTROLLERSEC...
     {
-        digitalWrite(CONTROLLERFAN_PIN, 0);
-        analogWrite(CONTROLLERFAN_PIN, 0);
+    if (CONTROLLERFAN_SPEED_IDLE >= CONTROLLERFAN_SPEED_MIN)
+    {
+		digitalWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_IDLE);
+		analogWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_IDLE);
     }
     else
     {
-        // allows digital or PWM fan output to be used (see M42 handling)
-        digitalWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED);
-        analogWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED);
+        digitalWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_MIN);
+        analogWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_MIN);
+    }
+    }
+    else
+    {
+	if (CONTROLLERFAN_SPEED_FULL <= CONTROLLERFAN_SPEED_MAX)
+	{
+        
+        digitalWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_FULL);
+        analogWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_FULL);
+    }
+    else
+    {
+		digitalWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_MAX);
+		analogWrite(CONTROLLERFAN_PIN, CONTROLLERFAN_SPEED_MAX);
+	}
     }
   }
 }
