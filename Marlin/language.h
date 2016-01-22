@@ -69,7 +69,7 @@
 
 
 #ifndef UUID
-   #define UUID "845f003c-aebd-4e53-a6b9-7d0984fde609"
+   #define UUID "564bab1c-704c-4225-b329-ac1a093d2638"
 #endif
 
 
