@@ -4276,7 +4276,7 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
         disable_e1();
         disable_e2();
         delay(100);
-        LCD_ALERTMESSAGEPGM(MSG_FILAMENTCHANGE);
+        LCD_MESSAGEPGM(MSG_FILAMENTCHANGE);
         uint8_t cnt=0;
         while(!lcd_clicked() && change_filament){
           cnt++;
@@ -4288,10 +4288,10 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
           #if BEEPER > 0
             SET_OUTPUT(BEEPER);
 
-            WRITE(BEEPER,HIGH);
+          /*WRITE(BEEPER,HIGH);
             delay(3);
             WRITE(BEEPER,LOW);
-            delay(3);
+            delay(3);*/
           #else
 			#if !defined(LCD_FEEDBACK_FREQUENCY_HZ) || !defined(LCD_FEEDBACK_FREQUENCY_DURATION_MS)
               lcd_buzz(1000/6,100);
@@ -4301,6 +4301,7 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
           #endif
           }
         }
+        LCD_MESSAGEPGM(MSG_DWELL);
 
         //return to normal
         if(code_seen('L'))
