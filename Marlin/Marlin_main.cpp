@@ -3393,7 +3393,7 @@ Sigma_Exit:
       SERIAL_PROTOCOL(float(st_get_position(Z_AXIS))/axis_steps_per_unit[Z_AXIS]);
 
       #ifdef TRACK_LAYER
-        SERIAL_PROTOCOLPGM("  Layer:");
+        SERIAL_PROTOCOLPGM(" Apprx Layer:");
         SERIAL_PROTOCOL(current_layer);
       #endif //TRACK_LAYER
 

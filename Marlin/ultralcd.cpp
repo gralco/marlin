@@ -130,6 +130,7 @@ static void menu_action_setting_edit_float5(const char* pstr, float* ptr, float 
 static void menu_action_setting_edit_float51(const char* pstr, float* ptr, float minValue, float maxValue);
 static void menu_action_setting_edit_float52(const char* pstr, float* ptr, float minValue, float maxValue);
 static void menu_action_setting_edit_long5(const char* pstr, unsigned long* ptr, unsigned long minValue, unsigned long maxValue);
+static void menu_action_setting_edit_long6(const char* pstr, unsigned long* ptr, unsigned long minValue, unsigned long maxValue);
 static void menu_action_setting_edit_callback_bool(const char* pstr, bool* ptr, menuFunc_t callbackFunc);
 static void menu_action_setting_edit_callback_int3(const char* pstr, int* ptr, int minValue, int maxValue, menuFunc_t callbackFunc);
 static void menu_action_setting_edit_callback_float3(const char* pstr, float* ptr, float minValue, float maxValue, menuFunc_t callbackFunc);
@@ -553,7 +554,7 @@ static void lcd_tune_menu()
 
 #ifdef TRACK_LAYER
     unsigned long layer = current_layer;
-    MENU_ITEM_EDIT(long5, MSG_LAYER, &layer, layer, layer);
+    MENU_ITEM_EDIT(long6, MSG_LAYER, &layer, layer, layer);
 #endif //TRACK_LAYER
 
 #ifdef BABYSTEPPING
@@ -1276,6 +1277,7 @@ menu_edit_type(float, float5, ftostr5, 0.01)
 menu_edit_type(float, float51, ftostr51, 10)
 menu_edit_type(float, float52, ftostr52, 100)
 menu_edit_type(unsigned long, long5, ftostr5, 0.01)
+menu_edit_type(unsigned long, long6, ftostr5, 1)
 
 #ifdef REPRAPWORLD_KEYPAD
 	static void reprapworld_keypad_move_z_up() {

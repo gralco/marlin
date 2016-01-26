@@ -60,7 +60,7 @@
 #define MSG_FLOW0                           "Flow 0"
 #define MSG_FLOW1                           "Flow 1"
 #define MSG_FLOW2                           "Flow 2"
-#define MSG_LAYER                           "Layer"
+#define MSG_LAYER                           "Apprx Layer"
 #define MSG_CONFIGURATION                   "Configuration"
 #define MSG_MIN                             " \002 Min"
 #define MSG_MAX                             " \002 Max"
