@@ -611,7 +611,7 @@ void setup()
   MCUSR=0;
 
   SERIAL_ECHOPGM(MSG_MARLIN);
-  SERIAL_ECHOLNPGM(VERSION_STRING);
+  SERIAL_ECHOLNPGM(VERSION_STRING" Dual");
   #ifdef STRING_VERSION_CONFIG_H
     #ifdef STRING_CONFIG_H_AUTHOR
       SERIAL_ECHO_START;
@@ -3346,19 +3346,45 @@ Sigma_Exit:
       }
       break;
     case 92: // M92
+      if(!(code_seen(axis_codes[X_AXIS]) || code_seen(axis_codes[Y_AXIS]) || code_seen(axis_codes[Z_AXIS]) || code_seen(axis_codes[E_AXIS])))
+      {
+        SERIAL_ECHOLNPGM("Steps per unit:");
+        SERIAL_ECHO_START;
+        SERIAL_ECHOPAIR(" X",axis_steps_per_unit[X_AXIS]);
+        SERIAL_ECHOPAIR(" Y",axis_steps_per_unit[Y_AXIS]);
+        SERIAL_ECHOPAIR(" Z",axis_steps_per_unit[Z_AXIS]);
+        #if EXTRUDERS == 1
+          SERIAL_ECHOPAIR(" E",axis_steps_per_unit[E_AXIS]);
+        #else
+        //SERIAL_ECHOPAIR(" Active-E",axis_steps_per_unit[E_AXIS]);
+          SERIAL_ECHOPAIR(" E1 ",axis_steps_per_unit[E_AXIS]);
+          SERIAL_ECHOPAIR(" E2 ",axis_steps_per_unit[E_AXIS+1]);
+          #if EXTRUDERS > 2
+            SERIAL_ECHOPAIR(" E3 ",axis_steps_per_unit[E_AXIS+2]);
+            #if EXTRUDERS > 3
+              SERIAL_ECHOPAIR(" E4 ",axis_steps_per_unit[E_AXIS+3]);
+            #endif
+          #endif
+        #endif
+        SERIAL_ECHOLN("");
+      }
+          
       for(int8_t i=0; i < NUM_AXIS; i++)
       {
         if(code_seen(axis_codes[i]))
         {
           if(i == 3) { // E
             float value = code_value();
+            uint8_t tmp_extruder = 0;
+            if(code_seen('T'))
+              tmp_extruder = code_value();
             if(value < 20.0) {
               float factor = axis_steps_per_unit[i] / value; // increase e constants if M92 E14 is given for netfab.
               max_e_jerk *= factor;
               max_feedrate[i] *= factor;
               axis_steps_per_sqr_second[i] *= factor;
             }
-            axis_steps_per_unit[i] = value;
+            axis_steps_per_unit[i+tmp_extruder] = value;
           }
           else {
             axis_steps_per_unit[i] = code_value();

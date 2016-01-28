@@ -531,7 +531,11 @@ static void lcd_tune_menu()
     MENU_ITEM(back, MSG_MAIN, lcd_main_menu);
     MENU_ITEM_EDIT(int3, MSG_SPEED, &feedmultiply, 10, 999);
 #if TEMP_SENSOR_0 != 0
-    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &target_temperature[0], 0, HEATER_0_MAXTEMP - 15);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE
+    #if EXTRUDERS > 1
+      "1"
+    #endif
+    , &target_temperature[0], 0, HEATER_0_MAXTEMP - 15);
 #endif
 #if EXTRUDERS > 1
     MENU_ITEM_EDIT(int3, MSG_NOZZLE1, &target_temperature[1], 0, HEATER_1_MAXTEMP - 15);
@@ -542,8 +546,11 @@ static void lcd_tune_menu()
 #if TEMP_SENSOR_BED != 0
     MENU_ITEM_EDIT(int3, MSG_BED, &target_temperature_bed, 0, BED_MAXTEMP - 15);
 #endif
-    MENU_ITEM_EDIT(int3, MSG_FLOW, &extrudemultiply, 10, 999);
-    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &fanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_FLOW
+    #if EXTRUDERS > 1
+      " 1"
+    #endif
+    , &extrudemultiply, 10, 999);
 //    MENU_ITEM_EDIT(int3, MSG_FLOW0, &extruder_multiply[0], 10, 999);
 #if EXTRUDERS > 1
     MENU_ITEM_EDIT(int3, MSG_FLOW1, &extruder_multiply[1], 10, 999);
@@ -551,6 +558,7 @@ static void lcd_tune_menu()
 #if EXTRUDERS > 2
     MENU_ITEM_EDIT(int3, MSG_FLOW2, &extruder_multiply[2], 10, 999);
 #endif
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &fanSpeed, 0, 255);
 
 #ifdef TRACK_LAYER
     unsigned long layer = current_layer;
@@ -800,27 +808,60 @@ static void _lcd_move(const char *name, int axis, int min, int max) {
 static void lcd_move_x() { _lcd_move(PSTR("X"), X_AXIS, X_MIN_POS, X_MAX_POS); }
 static void lcd_move_y() { _lcd_move(PSTR("Y"), Y_AXIS, Y_MIN_POS, Y_MAX_POS); }
 static void lcd_move_z() { _lcd_move(PSTR("Z"), Z_AXIS, Z_MIN_POS, Z_MAX_POS); }
-
-static void lcd_move_e()
-{
-    if (encoderPosition != 0)
-    {
-        current_position[E_AXIS] += float((int)encoderPosition) * move_menu_scale;
-        encoderPosition = 0;
-        #ifdef DELTA
-        calculate_delta(current_position);
-        plan_buffer_line(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS], current_position[E_AXIS], manual_feedrate[E_AXIS]/60, active_extruder);
-        #else
-        plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], manual_feedrate[E_AXIS]/60, active_extruder);
-        #endif
-        lcdDrawUpdate = 1;
-    }
-    if (lcdDrawUpdate)
-    {
-        lcd_implementation_drawedit(PSTR("Extruder"), ftostr31(current_position[E_AXIS]));
-    }
-    if (LCD_CLICKED) lcd_goto_menu(lcd_move_menu_axis);
+static void lcd_move_e(
+  #if EXTRUDERS > 1
+    uint8_t e
+  #endif
+) {
+  #if EXTRUDERS > 1
+    unsigned short original_active_extruder = active_extruder;
+    active_extruder = e;
+  #endif
+  if (encoderPosition != 0) {
+    current_position[E_AXIS] += float((int)encoderPosition) * move_menu_scale;
+    encoderPosition = 0;
+  #ifdef DELTA
+    calculate_delta(current_position);
+    plan_buffer_line(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS], current_position[E_AXIS], manual_feedrate[E_AXIS]/60, active_extruder);
+  #else
+    plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], manual_feedrate[E_AXIS]/60, active_extruder);
+  #endif
+    lcdDrawUpdate = 1;
+  }
+  if (lcdDrawUpdate) {
+    PGM_P pos_label;
+    #if EXTRUDERS == 1
+      pos_label = PSTR(MSG_MOVE_E);
+    #else
+      switch (e) {
+        case 0: pos_label = PSTR(MSG_MOVE_E MSG_MOVE_E1); break;
+        case 1: pos_label = PSTR(MSG_MOVE_E MSG_MOVE_E2); break;
+        #if EXTRUDERS > 2
+          case 2: pos_label = PSTR(MSG_MOVE_E MSG_MOVE_E3); break;
+          #if EXTRUDERS > 3
+            case 3: pos_label = PSTR(MSG_MOVE_E MSG_MOVE_E4); break;
+          #endif //EXTRUDERS > 3
+        #endif //EXTRUDERS > 2
+      }
+    #endif //EXTRUDERS > 1
+    lcd_implementation_drawedit(pos_label, ftostr31(current_position[E_AXIS]));
+  }
+  if (LCD_CLICKED) lcd_goto_menu(lcd_move_menu_axis);
+  #if EXTRUDERS > 1
+    active_extruder = original_active_extruder;
+  #endif
 }
+
+#if EXTRUDERS > 1
+  static void lcd_move_e0() { lcd_move_e(0); }
+  static void lcd_move_e1() { lcd_move_e(1); }
+  #if EXTRUDERS > 2
+    static void lcd_move_e2() { lcd_move_e(2); }
+    #if EXTRUDERS > 3
+      static void lcd_move_e3() { lcd_move_e(3); }
+    #endif
+  #endif
+#endif // EXTRUDERS > 1
 
 static void lcd_move_menu_axis()
 {
@@ -828,10 +869,20 @@ static void lcd_move_menu_axis()
     MENU_ITEM(back, MSG_MOVE_AXIS, lcd_move_menu);
     MENU_ITEM(submenu, MSG_MOVE_X, lcd_move_x);
     MENU_ITEM(submenu, MSG_MOVE_Y, lcd_move_y);
-  //if (move_menu_scale < 10.0)
-  //{
-        MENU_ITEM(submenu, MSG_MOVE_Z, lcd_move_z);
-        MENU_ITEM(submenu, MSG_MOVE_E, lcd_move_e);
+  //if (move_menu_scale < 10.0) {
+    MENU_ITEM(submenu, MSG_MOVE_Z, lcd_move_z);
+    #if EXTRUDERS == 1
+      MENU_ITEM(submenu, MSG_MOVE_E, lcd_move_e);
+    #else
+      MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E1, lcd_move_e0);
+      MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E2, lcd_move_e1);
+      #if EXTRUDERS > 2
+        MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E3, lcd_move_e2);
+        #if EXTRUDERS > 3
+          MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E4, lcd_move_e3);
+        #endif
+      #endif
+    #endif // EXTRUDERS > 1
   //}
     END_MENU();
 }
@@ -993,7 +1044,18 @@ static void lcd_control_advanced_menu()
     MENU_ITEM_EDIT(float52, MSG_XSTEPS, &axis_steps_per_unit[X_AXIS], 5, 9999);
     MENU_ITEM_EDIT(float52, MSG_YSTEPS, &axis_steps_per_unit[Y_AXIS], 5, 9999);
     MENU_ITEM_EDIT(float51, MSG_ZSTEPS, &axis_steps_per_unit[Z_AXIS], 5, 9999);
-    MENU_ITEM_EDIT(float51, MSG_ESTEPS, &axis_steps_per_unit[E_AXIS], 5, 9999);
+    #if EXTRUDERS > 1
+      MENU_ITEM_EDIT(float51, MSG_E0STEPS, &axis_steps_per_unit[E_AXIS], 5, 9999);
+      MENU_ITEM_EDIT(float51, MSG_E1STEPS, &axis_steps_per_unit[E_AXIS+1], 5, 9999);
+      #if EXTRUDERS > 2
+        MENU_ITEM_EDIT(float51, MSG_E2STEPS, &axis_steps_per_unit[E_AXIS+2], 5, 9999);
+        #if EXTRUDERS > 3
+          MENU_ITEM_EDIT(float51, MSG_E3STEPS, &axis_steps_per_unit[E_AXIS+3], 5, 9999);
+        #endif
+      #endif
+    #else
+      MENU_ITEM_EDIT(float51, MSG_ESTEPS, &axis_steps_per_unit[E_AXIS], 5, 9999);
+    #endif
 #ifdef ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED
     MENU_ITEM_EDIT(bool, MSG_ENDSTOP_ABORT, &abort_on_endstop_hit);
 #endif

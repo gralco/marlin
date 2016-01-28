@@ -2417,7 +2417,7 @@ DaveX plan for Teensylu/printrboard-type pinouts (ref teensylu & sprinter) for a
 #define SDPOWER            -1
 #define SDSS               53
 #define LED_PIN            13
-#define FAN_PIN            8 //6 for dual extruder
+#define FAN_PIN            6
 #define FAN1_PIN           -1
 #define FAN2_PIN           2
 #define PS_ON_PIN          4

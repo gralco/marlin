@@ -82,14 +82,14 @@ void Config_StoreZOffset()
 // wrong data being written to the variables.
 // ALSO:  always make sure the variables in the Store and retrieve sections are in the same order.
 
-#define EEPROM_VERSION "V17"
+#define EEPROM_VERSION "V18"
 
 #ifdef EEPROM_SETTINGS
 void Config_StoreSettings() 
 {
   char ver[4]= "000";
   int i=EEPROM_OFFSET;
-  EEPROM_WRITE_VAR(i,ver); // invalidate data first 
+  EEPROM_WRITE_VAR(i,ver); // invalidate data first
   EEPROM_WRITE_VAR(i,axis_steps_per_unit);
   EEPROM_WRITE_VAR(i,max_feedrate);  
   EEPROM_WRITE_VAR(i,max_acceleration_units_per_sq_second);
@@ -215,7 +215,18 @@ void Config_PrintSettings()
     SERIAL_ECHOPAIR("  M92 X",axis_steps_per_unit[X_AXIS]);
     SERIAL_ECHOPAIR(" Y",axis_steps_per_unit[Y_AXIS]);
     SERIAL_ECHOPAIR(" Z",axis_steps_per_unit[Z_AXIS]);
-    SERIAL_ECHOPAIR(" E",axis_steps_per_unit[E_AXIS]);
+    #if EXTRUDERS == 1
+      SERIAL_ECHOPAIR(" E",axis_steps_per_unit[E_AXIS]);
+    #else
+      SERIAL_ECHOPAIR(" E1 ",axis_steps_per_unit[E_AXIS]);
+      SERIAL_ECHOPAIR(" E2 ",axis_steps_per_unit[E_AXIS+1]);
+      #if EXTRUDERS > 2
+        SERIAL_ECHOPAIR(" E3 ",axis_steps_per_unit[E_AXIS+2]);
+        #if EXTRUDERS > 3
+          SERIAL_ECHOPAIR(" E4 ",axis_steps_per_unit[E_AXIS+3]);
+        #endif
+      #endif
+    #endif
     SERIAL_ECHOLN("");
       
     SERIAL_ECHO_START;
@@ -519,9 +530,18 @@ void Config_ResetDefault()
     float tmp1[]=DEFAULT_AXIS_STEPS_PER_UNIT;
     float tmp2[]=DEFAULT_MAX_FEEDRATE;
     long tmp3[]=DEFAULT_MAX_ACCELERATION;
+  #if EXTRUDERS == 1
+    for (short i=0;i<4;i++)
+  #elif EXTRUDERS == 2
+    for (short i=0;i<5;i++)
+  #elif EXTRUDERS == 3
+    for (short i=0;i<6;i++)
+  #elif EXTRUDERS == 4
+    for (short i=0;i<7;i++)
+  #endif
+      axis_steps_per_unit[i]=tmp1[i];
     for (short i=0;i<4;i++) 
     {
-        axis_steps_per_unit[i]=tmp1[i];  
         max_feedrate[i]=tmp2[i];  
         max_acceleration_units_per_sq_second[i]=tmp3[i];
 		#ifdef SCARA

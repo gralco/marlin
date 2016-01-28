@@ -66,7 +66,15 @@
 
 unsigned long minsegmenttime;
 float max_feedrate[NUM_AXIS]; // set the max speeds
-float axis_steps_per_unit[NUM_AXIS];
+#if EXTRUDERS == 1
+  float axis_steps_per_unit[NUM_AXIS];
+#elif EXTRUDERS == 2
+  float axis_steps_per_unit[NUM_AXIS+1];
+#elif EXTRUDERS == 3
+  float axis_steps_per_unit[NUM_AXIS+2];
+#elif EXTRUDERS == 4
+  float axis_steps_per_unit[NUM_AXIS+3];
+#endif
 unsigned long max_acceleration_units_per_sq_second[NUM_AXIS]; // Use M201 to override by software
 float minimumfeedrate;
 float acceleration;         // Normal acceleration mm/s^2  THIS IS THE DEFAULT ACCELERATION for all moves. M204 SXXXX
@@ -545,11 +553,23 @@ void check_axes_activity()
     }
 
     //analogWrite(FAN_PIN,tail_fan_speed);
-    sbi(TCCR4A, COM4C1);
+    #if EXTRUDERS > 1
+      sbi(TCCR4A, COM4A1);
+    #else
+      sbi(TCCR4A, COM4C1);
+    #endif
     if((tail_fan_speed*208 + 12495) < 25000 && (millis() - jumpstart_time) < 250)
-      OCR4C = 32768;
+      #if EXTRUDERS > 1
+        OCR4A = 32768;
+      #else
+        OCR4C = 32768;
+      #endif
     else
-      OCR4C = (tail_fan_speed*208 + 12495); // set pwm duty, (2^8-1) is the top of the counter
+      #if EXTRUDERS > 1
+        OCR4A = (tail_fan_speed*208 + 12495); // set pwm duty, (2^8-1) is the top of the counter
+      #else
+        OCR4C = (tail_fan_speed*208 + 12495); // set pwm duty, (2^8-1) is the top of the counter
+      #endif
   }
   #endif//!FAN_SOFT_PWM
 #endif//FAN_PIN > -1
@@ -741,8 +761,21 @@ void plan_buffer_line(const float &x, const float &y, const float &z, const floa
   long target[4];
   target[X_AXIS] = lround(x*axis_steps_per_unit[X_AXIS]);
   target[Y_AXIS] = lround(y*axis_steps_per_unit[Y_AXIS]);
-  target[Z_AXIS] = lround(z*axis_steps_per_unit[Z_AXIS]);     
-  target[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS]);
+  target[Z_AXIS] = lround(z*axis_steps_per_unit[Z_AXIS]);
+  if(active_extruder==0)
+    target[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS]);
+  #if EXTRUDERS > 1
+    else if(active_extruder==1)
+      target[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS+1]);
+    #if EXTRUDERS > 2
+      else if(active_extruder==2)
+        target[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS+2]);
+      #if EXTRUDERS > 3
+        else if(active_extruder==3)
+          target[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS+3]);
+      #endif
+    #endif
+  #endif
 
   #ifdef PREVENT_DANGEROUS_EXTRUDE
   if(target[E_AXIS]!=position[E_AXIS])

@@ -44,9 +44,21 @@
 #define MSG_MOVE_X                          "Move X"
 #define MSG_MOVE_Y                          "Move Y"
 #define MSG_MOVE_Z                          "Move Z"
-#define MSG_MOVE_E                          "Extruder"
-#define MSG_MOVE_E1                         "Extruder2"
-#define MSG_MOVE_E2                         "Extruder3"
+#ifndef MSG_MOVE_E
+  #define MSG_MOVE_E                          "Extruder"
+#endif
+#ifndef MSG_MOVE_E1
+  #define MSG_MOVE_E1                         "1"
+#endif
+#ifndef MSG_MOVE_E2
+  #define MSG_MOVE_E2                         "2"
+#endif
+#ifndef MSG_MOVE_E3
+  #define MSG_MOVE_E3                         "3"
+#endif
+#ifndef MSG_MOVE_E4
+  #define MSG_MOVE_E4                         "4"
+#endif
 #define MSG_MOVE_01MM                       "Move 0.1mm"
 #define MSG_MOVE_1MM                        "Move 1mm"
 #define MSG_MOVE_10MM                       "Move 10mm"
@@ -57,9 +69,9 @@
 #define MSG_BED                             "Bed"
 #define MSG_FAN_SPEED                       "Fan speed"
 #define MSG_FLOW                            "Flow"
-#define MSG_FLOW0                           "Flow 0"
-#define MSG_FLOW1                           "Flow 1"
-#define MSG_FLOW2                           "Flow 2"
+#define MSG_FLOW0                           "Flow 1"
+#define MSG_FLOW1                           "Flow 2"
+#define MSG_FLOW2                           "Flow 3"
 #define MSG_LAYER                           "Apprx Layer"
 #define MSG_CONFIGURATION                   "Configuration"
 #define MSG_MIN                             " \002 Min"
@@ -89,6 +101,10 @@
 #define MSG_YSTEPS                          "Ysteps/mm"
 #define MSG_ZSTEPS                          "Zsteps/mm"
 #define MSG_ESTEPS                          "Esteps/mm"
+#define MSG_E0STEPS                         "E1steps/mm"
+#define MSG_E1STEPS                         "E2steps/mm"
+#define MSG_E2STEPS                         "E3steps/mm"
+#define MSG_E3STEPS                         "E4steps/mm"
 #define MSG_TEMPERATURE                     "Temperature"
 #define MSG_ADVANCED                        "Advanced settings"
 #define MSG_VOLUMETRIC                      "Filament"
