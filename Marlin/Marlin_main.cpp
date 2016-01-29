@@ -1239,12 +1239,12 @@ void probing_failed() {
     {
       SERIAL_ERRORLNPGM(MSG_REWIPE);
       LCD_MESSAGEPGM(MSG_REWIPE);
-      do_blocking_move_to(-16.0, 25.0, 10.0);
+      do_blocking_move_to(-16.0, 73.0, 10.0);
       do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], 1.0);
       for(uint8_t i=0; i<6; i++)
       {
         do_blocking_move_to(current_position[X_AXIS], 95.0, current_position[Z_AXIS]);
-        do_blocking_move_to(current_position[X_AXIS], 25.0, current_position[Z_AXIS]);
+        do_blocking_move_to(current_position[X_AXIS], 73.0, current_position[Z_AXIS]);
       }
       do_blocking_move_to(LEFT_PROBE_BED_POSITION, FRONT_PROBE_BED_POSITION, 10.0);
       if(!reprobe_attempts[0])
