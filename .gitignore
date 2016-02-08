@@ -1,4 +1,7 @@
 *.o
+Marlin/obj
+Marlin/*.hex
+Marlin/Marlin.cpp
 applet/
 *~
 *.orig
@@ -6,3 +9,4 @@ applet/
 *.bak
 *.DS_Store
 *.idea
+/libraries/
