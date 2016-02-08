@@ -38,7 +38,7 @@ coresdir = ${hardwdir}/rambo/cores/arduino
 avrdir = ${hardwdir}/tools/avr/bin
 
 DEST ?= ${basedir}
-MACHINE = Nutmeg_Single
+MACHINE = Nutmeg_Flexy
 NOW = $(shell date +"%b_%d_%y")
 
 all:
