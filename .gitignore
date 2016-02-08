@@ -1,3 +1,7 @@
+*.o
+Marlin/obj
+Marlin/*.hex
+Marlin/Marlin.cpp
 applet/
 *~
 *.orig
