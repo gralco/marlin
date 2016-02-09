@@ -2057,7 +2057,6 @@ void process_commands()
           planner_disabled_below_z = current_position[Z_AXIS];
       }
       #endif
-      MYSERIAL.flush();
       break;
 
 #ifdef ENABLE_AUTO_BED_LEVELING
@@ -2282,8 +2281,6 @@ void process_commands()
 
             SET_OUTPUT(Z_PROBE_PIN);
             WRITE(Z_PROBE_PIN, LOW); //Disable Z_PROBE when not in use
-
-            MYSERIAL.flush();
         }
         break;
 #ifndef Z_PROBE_SLED
@@ -3109,7 +3106,6 @@ Sigma_Exit:
         if(card.sdprinting)
           starttime=millis();
         previous_millis_cmd = millis();
-        MYSERIAL.flush();
 #if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
         if(!cancel_heatup)
           target_temp_reached[tmp_extruder] = true;
@@ -3194,7 +3190,6 @@ Sigma_Exit:
         else
           LCD_MESSAGEPGM(MSG_BED_COOL_DONE);
         previous_millis_cmd = millis();
-        MYSERIAL.flush();
 #if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
         if(!cancel_heatup)
           target_temp_reached[EXTRUDERS] = true;
