@@ -358,7 +358,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 // Travel limits after homing
 #define X_MAX_POS 300
 #define X_MIN_POS -20
-#define Y_MAX_POS 305
+#define Y_MAX_POS 303
 #define Y_MIN_POS -20
 #define Z_MAX_POS 270
 #define Z_MIN_POS 0
@@ -393,10 +393,10 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
   #ifdef AUTO_BED_LEVELING_GRID
 
     // set the rectangle in which to probe
-    #define LEFT_PROBE_BED_POSITION -11
+    #define LEFT_PROBE_BED_POSITION -9
     #define RIGHT_PROBE_BED_POSITION 288
-    #define BACK_PROBE_BED_POSITION 286
-    #define FRONT_PROBE_BED_POSITION -8
+    #define BACK_PROBE_BED_POSITION 289
+    #define FRONT_PROBE_BED_POSITION -9
 
      // set the number of grid points per dimension
      // I wouldn't see a reason to go above 3 (=9 probing points on the bed)
