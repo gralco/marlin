@@ -32,17 +32,40 @@
   ring_buffer rx_buffer  =  { { 0 }, 0, 0 };
 #endif
 
+bool rxbuf_filled = false;
+
 FORCE_INLINE void store_char(unsigned char c)
 {
+  static bool overflow = false;
+  if(overflow && !(c == '\n' || c == '\r' || (c == ':' && comment_mode == false)))
+    return;
+  else if(overflow && (c == '\n' || c == '\r' || (c == ':' && comment_mode == false)))
+  {
+    overflow = false;
+    return;
+  }
+
   int i = (unsigned int)(rx_buffer.head + 1) % RX_BUFFER_SIZE;
 
   // if we should be storing the received character into the location
   // just before the tail (meaning that the head would advance to the
   // current location of the tail), we're about to overflow the buffer
-  // and so we don't write the character or advance the head.
+  // and so we need to move the head back to the end of the previous line.
   if (i != rx_buffer.tail) {
     rx_buffer.buffer[rx_buffer.head] = c;
     rx_buffer.head = i;
+  }
+  else {
+    overflow = true;
+    i = (uint8_t)(rx_buffer.head - 1) % RX_BUFFER_SIZE;
+    for(; !(rx_buffer.buffer[i] == '\n' ||
+            rx_buffer.buffer[i] == '\r' ||
+            (rx_buffer.buffer[i] == ':' && comment_mode != true)) &&
+            rx_buffer.head != rx_buffer.tail; rx_buffer.head = i)
+      i = (uint8_t)(rx_buffer.head - 1) % RX_BUFFER_SIZE;
+    rx_buffer.head = (uint8_t)(i + 1) % RX_BUFFER_SIZE;;
+    if(!rxbuf_filled)
+      rxbuf_filled = true;
   }
 }
 

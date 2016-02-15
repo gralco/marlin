@@ -366,7 +366,7 @@ static int buflen = 0;
 //static int i = 0;
 static char serial_char;
 static int serial_count = 0;
-static boolean comment_mode = false;
+boolean comment_mode = false;
 static char *strchr_pointer; // just a pointer to find chars in the command string like X, Y, Z, E, etc
 
 const int sensitive_pins[] = SENSITIVE_PINS; // Sensitive pin list for M42
@@ -788,6 +788,7 @@ void get_command()
         
         bufindw = (bufindw + 1)%BUFSIZE;
         buflen += 1;
+        rxbuf_filled = false;
       }
       serial_count = 0; //clear buffer
     }
@@ -4400,6 +4401,16 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) //default argument s
 	
   if(buflen < (BUFSIZE-1))
     get_command();
+
+  static bool reportrx_once = true;
+  if(rxbuf_filled && reportrx_once)
+  {
+    SERIAL_ERROR_START;
+    SERIAL_ERRORPGM(MSG_ERR_RXBUF_FULL);
+    reportrx_once = false;
+  }
+  else if(!rxbuf_filled)
+   reportrx_once = true;
 
   if( (millis() - previous_millis_cmd) >  max_inactive_time )
     if(max_inactive_time)

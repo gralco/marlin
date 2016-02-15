@@ -208,6 +208,7 @@ void setPwmFrequency(uint8_t pin, int val);
   #define CRITICAL_SECTION_END    SREG = _sreg;
 #endif //CRITICAL_SECTION_START
 
+extern boolean comment_mode;
 extern float homing_feedrate[];
 extern bool axis_relative_modes[];
 extern int feedmultiply;
@@ -218,6 +219,7 @@ extern float filament_size[EXTRUDERS]; // cross-sectional area of filament (in m
 extern float volumetric_multiplier[EXTRUDERS]; // reciprocal of cross-sectional area of filament (in square millimeters), stored this way to reduce computational burden in planner
 extern float current_position[NUM_AXIS] ;
 extern float add_homing[3];
+extern bool rxbuf_filled;
 #ifdef DELTA
 extern float endstop_adj[3];
 extern float delta_radius;
