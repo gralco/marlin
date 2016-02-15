@@ -437,6 +437,7 @@ static bool send_ok[BUFSIZE];
 #endif
 
 #if ENABLED(HOST_KEEPALIVE_FEATURE)
+boolean comment_mode = false;
 
   // States for managing Marlin and host communication
   // Marlin sends messages if blocked or busy
@@ -967,6 +968,7 @@ void get_command() {
 
       // Add the command to the queue
       _enqueuecommand(serial_line_buffer, true);
+      rxbuf_filled = false;
     }
     else if (serial_count >= MAX_CMD_SIZE - 1) {
       // Keep fetching, but ignore normal characters beyond the max length
@@ -7164,6 +7166,16 @@ void plan_arc(
     SERIAL_EOL;
     */
   }
+
+  static bool reportrx_once = true;
+  if(rxbuf_filled && reportrx_once)
+  {
+    SERIAL_ERROR_START;
+    SERIAL_ERRORPGM(MSG_ERR_RXBUF_FULL);
+    reportrx_once = false;
+  }
+  else if(!rxbuf_filled)
+   reportrx_once = true;
 
 #endif // SCARA
 
