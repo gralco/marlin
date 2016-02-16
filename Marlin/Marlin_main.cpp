@@ -4297,7 +4297,7 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
         disable_e1();
         disable_e2();
         delay(100);
-        LCD_MESSAGEPGM(MSG_FILAMENTCHANGE);
+        LCD_MESSAGEPGM(MSG_PRESSTORESUME);
         uint8_t cnt=0;
         while(!lcd_clicked() && change_filament){
           cnt++;
