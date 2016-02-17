@@ -647,7 +647,7 @@ void setup()
 
 void loop()
 {
-  if(buflen < (BUFSIZE-1))
+  if(buflen < BUFSIZE)
     get_command();
   #ifdef SDSUPPORT
   card.checkautostart(false);
@@ -4399,7 +4399,7 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) //default argument s
 #endif
    
 	
-  if(buflen < (BUFSIZE-1))
+  if(buflen < BUFSIZE)
     get_command();
 
   static bool reportrx_once = true;
