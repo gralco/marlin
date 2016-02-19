@@ -344,6 +344,14 @@ const char echomagic[] PROGMEM = "echo:";
 //===========================================================================
 //=============================Private Variables=============================
 //===========================================================================
+#if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
+  #ifdef TEMP_SENSOR_BED
+    bool target_temp_reached[EXTRUDERS+1] = { false };
+  #else
+    bool target_temp_reached[EXTRUDERS] = { false };
+  #endif
+#endif
+
 const char axis_codes[NUM_AXIS] = {'X', 'Y', 'Z', 'E'};
 static float destination[NUM_AXIS] = {  0.0, 0.0, 0.0, 0.0};
 
@@ -2409,6 +2417,9 @@ Sigma_Exit:
       if(setTargetedHotend(104)){
         break;
       }
+#if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
+      target_temp_reached[tmp_extruder] = false;
+#endif
       if (code_seen('S')) setTargetHotend(code_value(), tmp_extruder);
 #ifdef DUAL_X_CARRIAGE
       if (dual_x_carriage_mode == DXC_DUPLICATION_MODE && tmp_extruder == 0)
@@ -2420,6 +2431,9 @@ Sigma_Exit:
       kill();
       break;
     case 140: // M140 set bed temp
+#if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
+      target_temp_reached[EXTRUDERS] = false;
+#endif
       if (code_seen('S')) setTargetBed(code_value());
       break;
     case 105 : // M105
@@ -2491,6 +2505,9 @@ Sigma_Exit:
       if(setTargetedHotend(109)){
         break;
       }
+#if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
+      target_temp_reached[tmp_extruder] = false;
+#endif
       LCD_MESSAGEPGM(MSG_HEATING);
       #ifdef AUTOTEMP
         autotemp_enabled=false;
@@ -2560,6 +2577,9 @@ Sigma_Exit:
             #endif
             codenum = millis();
           }
+#if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
+          target_temp_reached[tmp_extruder] = false;
+#endif
           manage_heater();
           manage_inactivity();
           lcd_update();
@@ -2577,10 +2597,17 @@ Sigma_Exit:
         LCD_MESSAGEPGM(MSG_HEATING_COMPLETE);
         starttime=millis();
         previous_millis_cmd = millis();
+#if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
+        if(!cancel_heatup)
+          target_temp_reached[tmp_extruder] = true;
+#endif
       }
       break;
     case 190: // M190 - Wait for bed heater to reach target.
     #if defined(TEMP_BED_PIN) && TEMP_BED_PIN > -1
+#if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
+        target_temp_reached[EXTRUDERS] = false;
+#endif
         LCD_MESSAGEPGM(MSG_BED_HEATING);
         if (code_seen('S')) {
           setTargetBed(code_value());
@@ -2608,12 +2635,19 @@ Sigma_Exit:
             SERIAL_PROTOCOLLN("");
             codenum = millis();
           }
+#if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
+          target_temp_reached[EXTRUDERS] = false;
+#endif
           manage_heater();
           manage_inactivity();
           lcd_update();
         }
         LCD_MESSAGEPGM(MSG_BED_DONE);
         previous_millis_cmd = millis();
+#if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
+        if(!cancel_heatup)
+          target_temp_reached[EXTRUDERS] = true;
+#endif
     #endif
         break;
 
