@@ -390,6 +390,23 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
      // I wouldn't see a reason to go above 3 (=9 probing points on the bed)
     #define AUTO_BED_LEVELING_GRID_POINTS 2
 
+    #define REPROBE // Re-attempts probing
+
+    #ifdef REPROBE
+      #define Z_RETRY_PT 10 // Z height to move the hotend after failed probe
+      #define NUM_ATTEMPTS 3 // Number of attempts to make before quiting
+      #define PROBE_FAIL_PANIC // Completely give up printing if the final attempt fails (use G26 to get out of failed state)
+      #define REWIPE // Re-attempts wiping
+      #ifdef REWIPE
+        #define NUM_REWIPES 6 // Number of (back-and-forth) re-wipe attemps to make 
+        // Re-wipe location
+        #define X_REWIPE_FIRST_PT 45
+        #define X_REWIPE_SECOND_PT 115
+        #define Y_REWIPE_FIRST_PT 173
+        #define Y_REWIPE_SECOND_PT 173
+        #define Z_REWIPE_PT -1 // Depth to re-wipe at
+      #endif
+    #endif
 
   #else  // not AUTO_BED_LEVELING_GRID
     // with no grid, just probe 3 arbitrary points.  A simple cross-product
@@ -416,6 +433,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
   #define XY_TRAVEL_SPEED 18000         // X and Y axis travel speed between probes, in mm/min
 
+  #define MIN_PROBE_PT -2             //How far the extruder should move down to probe
   #define Z_RAISE_BEFORE_PROBING 5    //How much the extruder will be raised before traveling to the first probing point.
   #define Z_RAISE_BETWEEN_PROBINGS 5  //How much the extruder will be raised when traveling from between next probing points
 

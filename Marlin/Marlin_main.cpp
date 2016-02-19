@@ -75,6 +75,7 @@
 // G4  - Dwell S<seconds> or P<milliseconds>
 // G10 - retract filament according to settings of M207
 // G11 - retract recover filament according to settings of M208
+// G26 - acknowledge the beginning of a print for failed probes
 // G28 - Home all Axis
 // G29 - Detailed Z-Probe, probes the bed at 3 or more points.  Will fail if you haven't homed yet.
 // G30 - Single Z Probe, probes bed at current XY location.
@@ -242,6 +243,11 @@ float min_pos[3] = { X_MIN_POS, Y_MIN_POS, Z_MIN_POS };
 float max_pos[3] = { X_MAX_POS, Y_MAX_POS, Z_MAX_POS };
 bool axis_known_position[3] = {false, false, false};
 float zprobe_zoffset;
+
+#ifdef REPROBE
+  uint8_t reprobe_attempts = 0;
+  bool probe_fail = false;
+#endif
 
 // Extruder offset
 #if EXTRUDERS > 1
@@ -700,6 +706,18 @@ void loop()
   lcd_update();
 }
 
+void clear_buffer() {
+  for(uint8_t i=0; i < BUFSIZE; i++)
+    for(uint8_t j=0; j < MAX_CMD_SIZE; j++)
+      cmdbuffer[i][j] = NULL;
+  MYSERIAL.flush();
+  serial_count = 0;
+  buflen = 1;
+  bufindr = BUFSIZE-1;
+  bufindw = 0;
+//SERIAL_ECHOLN(buflen);
+}
+
 void get_command()
 {
   while( MYSERIAL.available() > 0  && buflen < BUFSIZE) {
@@ -793,7 +811,29 @@ void get_command()
         //If command was e-stop process now
         if(strcmp(cmdbuffer[bufindw], "M112") == 0)
           kill();
-        
+        #ifdef PROBE_FAIL_PANIC
+          if(probe_fail && strcmp(cmdbuffer[bufindw], "G26") == 0)
+          {
+          //SERIAL_ECHOLN("probe_fail set false");
+            LCD_MESSAGEPGM(WELCOME_MSG);
+            probe_fail = false;
+          }
+          else if(probe_fail && (strchr(cmdbuffer[bufindr], 'G') != NULL || strchr(cmdbuffer[bufindr], 'M') != NULL) && strstr(cmdbuffer[bufindw], "M105") == NULL)
+          {
+          //SERIAL_ECHOPGM("clearing command: ");
+          //SERIAL_ECHOLN(cmdbuffer[bufindr]);
+            for(uint8_t j=0; j < MAX_CMD_SIZE; j++)
+              cmdbuffer[bufindr][j] = 0;
+            if(buflen)
+            {
+              buflen -= 1;
+              bufindr = (bufindr + 1)%BUFSIZE;
+            }
+            serial_count = 0;
+            return;
+          }
+        #endif
+
         bufindw = (bufindw + 1)%BUFSIZE;
         buflen += 1;
         rxbuf_filled = false;
@@ -1077,18 +1117,60 @@ static void set_bed_level_equation_3pts(float z_at_pt_1, float z_at_pt_2, float 
 
 #endif // AUTO_BED_LEVELING_GRID
 
+static void do_blocking_move_to(float x, float y, float z);
+
+#ifdef REPROBE
+  void probing_failed() {
+      if(reprobe_attempts < NUM_ATTEMPTS-1)
+      {
+        #ifndef REWIPE
+          SERIAL_ERRORLNPGM(MSG_REPROBE);
+          LCD_MESSAGEPGM(MSG_REPROBE);
+        #endif
+        do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], Z_RETRY_PT);
+        #ifdef REWIPE
+          SERIAL_ERRORLNPGM(MSG_REWIPE);
+          LCD_MESSAGEPGM(MSG_REWIPE);
+          // can't do diagonal move due to endstop bug (fixed in MarlinDev)
+          do_blocking_move_to(X_REWIPE_FIRST_PT, Y_REWIPE_FIRST_PT, current_position[Z_AXIS]);
+          do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], Z_REWIPE_PT);
+          for(uint8_t i=0; i<NUM_REWIPES; i++)
+          {
+            do_blocking_move_to(X_REWIPE_SECOND_PT, Y_REWIPE_SECOND_PT, current_position[Z_AXIS]);
+            do_blocking_move_to(X_REWIPE_FIRST_PT, Y_REWIPE_FIRST_PT, current_position[Z_AXIS]);
+          }
+        #endif
+        do_blocking_move_to(LEFT_PROBE_BED_POSITION, current_position[Y_AXIS], Z_RETRY_PT);
+        do_blocking_move_to(current_position[X_AXIS], FRONT_PROBE_BED_POSITION, current_position[Z_AXIS]);
+        reprobe_attempts++;
+      }
+      else
+      {
+        do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], Z_RETRY_PT);
+        reprobe_attempts++;
+      }
+  }
+#endif
+
 static void run_z_probe() {
     plan_bed_level_matrix.set_to_identity();
     feedrate = homing_feedrate[Z_AXIS];
 
     // move down until you find the bed
-    float zPosition = -10;
+    float zPosition = MIN_PROBE_PT; // lowest position to move to
     plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS], feedrate/60, active_extruder);
     st_synchronize();
 
         // we have to let the planner know where we are right now as it is not where we said to go.
     zPosition = st_get_position_mm(Z_AXIS);
     plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], zPosition, current_position[E_AXIS]);
+    #ifdef REPROBE
+      if(zPosition == MIN_PROBE_PT && !digitalRead(Z_MIN_PIN)^Z_MIN_ENDSTOP_INVERTING)
+      {
+        probing_failed();
+        return;
+      }
+    #endif
 
     // move up the retract distance
     zPosition += home_retract_mm(Z_AXIS);
@@ -1191,6 +1273,10 @@ static float probe_pt(float x, float y, float z_before) {
 #endif // Z_PROBE_SLED
   run_z_probe();
   float measured_z = current_position[Z_AXIS];
+  #ifdef REPROBE
+    if(measured_z == Z_RETRY_PT)
+      return MIN_PROBE_PT;
+  #endif
 #ifndef Z_PROBE_SLED
   retract_z_probe();
 #endif // Z_PROBE_SLED
@@ -1462,6 +1548,13 @@ void process_commands()
        #endif 
       break;
       #endif //FWRETRACT
+
+    #ifdef PROBE_FAIL_PANIC
+      case 26:
+        probe_fail = false;
+        break;
+    #endif
+
     case 28: //G28 Home all Axis one at a time
 #ifdef ENABLE_AUTO_BED_LEVELING
       plan_bed_level_matrix.set_to_identity();  //Reset the plane ("erase" all leveling data)
@@ -1759,6 +1852,10 @@ void process_commands()
             for (int yProbe=FRONT_PROBE_BED_POSITION; yProbe <= BACK_PROBE_BED_POSITION; yProbe += yGridSpacing)
             {
               int xProbe, xInc;
+              #ifdef REPROBE
+                if(reprobe_attempts == NUM_ATTEMPTS && probePointCounter == -1)
+                  break;
+              #endif
               if (zig)
               {
                 xProbe = LEFT_PROBE_BED_POSITION;
@@ -1780,6 +1877,7 @@ void process_commands()
                 {
                   // raise before probing
                   z_before = Z_RAISE_BEFORE_PROBING;
+                  LCD_MESSAGEPGM(MSG_AUTO_LEVEL);
                 } else
                 {
                   // raise extruder
@@ -1787,6 +1885,23 @@ void process_commands()
                 }
 
                 float measured_z = probe_pt(xProbe, yProbe, z_before);
+                #ifdef REPROBE
+                  if(reprobe_attempts == NUM_ATTEMPTS && measured_z == MIN_PROBE_PT)
+                  {
+                    probePointCounter = -1;
+                    break;
+                  }
+                #endif
+
+                #ifdef REPROBE
+                 if(reprobe_attempts > 0 && measured_z == MIN_PROBE_PT)
+                  {
+                    probePointCounter = 0;
+                    zig = true;
+                    yProbe = FRONT_PROBE_BED_POSITION - yGridSpacing;
+                    break;
+                  }
+                #endif
 
                 eqnBVector[probePointCounter] = measured_z;
 
@@ -1797,6 +1912,46 @@ void process_commands()
                 xProbe += xInc;
               }
             }
+            #ifdef PROBE_FAIL_PANIC
+              if(reprobe_attempts == NUM_ATTEMPTS && probePointCounter == -1)
+              {
+                if(!IS_SD_PRINTING)
+                  probe_fail = true;
+                disable_heater();
+                #ifdef THERMAL_RUNAWAY_PROTECTION_PERIOD
+                  for(int i=0; i<EXTRUDERS; i++) target_temp_reached[i] = false;
+                #endif
+                #ifdef ULTIPANEL
+                  card.closefile();
+                  card.sdprinting = false;
+                #endif
+                clear_buffer();
+                reprobe_attempts = 0;
+                do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], 10.0);
+                plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 0.0, feedrate/60, active_extruder);
+                st_synchronize();
+                plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+                acceleration = DEFAULT_ACCELERATION;
+                #ifdef ULTIPANEL
+                  tone(BEEPER, 1750);
+                  delay(750);
+                  noTone(BEEPER);
+                #endif
+                SERIAL_ERROR_START;
+                SERIAL_ERRORLNPGM(MSG_LEVEL_FAIL);
+                LCD_MESSAGEPGM(MSG_LEVEL_FAIL);
+                break;
+              }
+            #else
+              #ifdef REPROBE
+                SERIAL_ERROR_START;
+                SERIAL_ERRORLNPGM(MSG_LEVEL_QUIT);
+                LCD_MESSAGEPGM(MSG_LEVEL_QUIT);
+                reprobe_attempts = 0;
+                break;
+              #endif
+            #endif
+
             clean_up_after_endstop_move();
 
             // solve lsq problem
@@ -1853,6 +2008,9 @@ void process_commands()
 #ifdef Z_PROBE_SLED
             dock_sled(true, -SLED_DOCKING_OFFSET); // correct for over travel.
 #endif // Z_PROBE_SLED
+            #ifdef REPROBE
+              reprobe_attempts = 0;
+            #endif
         }
         break;
 #ifndef Z_PROBE_SLED
