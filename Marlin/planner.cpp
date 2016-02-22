@@ -952,7 +952,20 @@ Having the real displacement of the head, we can calculate the total movement le
     delta_mm[Y_AXIS] = ((target[X_AXIS]-position[X_AXIS]) - (target[Y_AXIS]-position[Y_AXIS]))/axis_steps_per_unit[Y_AXIS];
   #endif
   delta_mm[Z_AXIS] = (target[Z_AXIS]-position[Z_AXIS])/axis_steps_per_unit[Z_AXIS];
-  delta_mm[E_AXIS] = ((target[E_AXIS]-position[E_AXIS])/axis_steps_per_unit[E_AXIS])*volumetric_multiplier[active_extruder]*extrudemultiply/100.0;
+  if(active_extruder==0)
+    delta_mm[E_AXIS] = ((target[E_AXIS]-position[E_AXIS])/axis_steps_per_unit[E_AXIS])*volumetric_multiplier[active_extruder]*extrudemultiply/100.0;
+  #if EXTRUDERS > 1
+    else if(active_extruder==1)
+      delta_mm[E_AXIS] = ((target[E_AXIS]-position[E_AXIS])/axis_steps_per_unit[E_AXIS+1])*volumetric_multiplier[active_extruder]*extrudemultiply/100.0;
+    #if EXTRUDERS > 2
+      else if(active_extruder==2)
+        delta_mm[E_AXIS] = ((target[E_AXIS]-position[E_AXIS])/axis_steps_per_unit[E_AXIS+2])*volumetric_multiplier[active_extruder]*extrudemultiply/100.0;
+      #if EXTRUDERS > 3
+        else if(active_extruder==3)
+          delta_mm[E_AXIS] = ((target[E_AXIS]-position[E_AXIS])/axis_steps_per_unit[E_AXIS+3])*volumetric_multiplier[active_extruder]*extrudemultiply/100.0;
+      #endif
+    #endif
+  #endif
   if ( block->steps_x <=dropsegments && block->steps_y <=dropsegments && block->steps_z <=dropsegments )
   {
     block->millimeters = fabs(delta_mm[E_AXIS]);
@@ -1279,8 +1292,21 @@ void plan_set_position(const float &x, const float &y, const float &z, const flo
 
   position[X_AXIS] = lround(x*axis_steps_per_unit[X_AXIS]);
   position[Y_AXIS] = lround(y*axis_steps_per_unit[Y_AXIS]);
-  position[Z_AXIS] = lround(z*axis_steps_per_unit[Z_AXIS]);     
-  position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS]);  
+  position[Z_AXIS] = lround(z*axis_steps_per_unit[Z_AXIS]);  
+  if(active_extruder==0)
+    position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS]);
+  #if EXTRUDERS > 1
+    else if(active_extruder==1)
+      position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS+1]);
+    #if EXTRUDERS > 2
+      else if(active_extruder==2)
+        position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS+2]);
+      #if EXTRUDERS > 3
+        else if(active_extruder==3)
+          position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS+3]);
+      #endif
+    #endif
+  #endif
   st_set_position(position[X_AXIS], position[Y_AXIS], position[Z_AXIS], position[E_AXIS]);
   previous_nominal_speed = 0.0; // Resets planner junction speeds. Assumes start from rest.
   previous_speed[0] = 0.0;
@@ -1297,7 +1323,20 @@ void plan_set_z_position(const float &z)
 
 void plan_set_e_position(const float &e)
 {
-  position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS]);  
+  if(active_extruder==0)
+    position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS]);
+  #if EXTRUDERS > 1
+    else if(active_extruder==1)
+      position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS+1]);
+    #if EXTRUDERS > 2
+      else if(active_extruder==2)
+        position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS+2]);
+      #if EXTRUDERS > 3
+        else if(active_extruder==3)
+          position[E_AXIS] = lround(e*axis_steps_per_unit[E_AXIS+3]);
+      #endif
+    #endif
+  #endif
   st_set_e_position(position[E_AXIS]);
 }
 
