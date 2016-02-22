@@ -69,6 +69,7 @@ volatile long endstops_stepsTotal,endstops_stepsDone;
 static volatile bool endstop_x_hit=false;
 static volatile bool endstop_y_hit=false;
 static volatile bool endstop_z_hit=false;
+static volatile bool endstop_zprobe_hit=false;
 #ifdef ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED
 bool abort_on_endstop_hit = false;
 #endif
@@ -77,12 +78,13 @@ bool abort_on_endstop_hit = false;
 #endif
 
 unsigned int endstop_trig_period = STD_ENDSTOP_PERIOD;	// time in ms
-static unsigned int x_min,y_min,z_min,x_max,y_max,z_max = 0;
+static unsigned int x_min,y_min,z_min,z_probe,x_max,y_max,z_max = 0;
 static bool old_x_min_endstop=false;
 static bool old_x_max_endstop=false;
 static bool old_y_min_endstop=false;
 static bool old_y_max_endstop=false;
 static bool old_z_min_endstop=false;
+static bool old_zprobe_min_endstop=false;
 static bool old_z_max_endstop=false;
 
 static bool check_endstops = true;
@@ -193,6 +195,7 @@ void checkHitEndstops()
    endstop_x_hit=false;
    endstop_y_hit=false;
    endstop_z_hit=false;
+   endstop_zprobe_hit=false;
 #if defined(ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED) && defined(SDSUPPORT)
    if (abort_on_endstop_hit)
    {
@@ -212,6 +215,7 @@ void endstops_hit_on_purpose()
   endstop_x_hit=false;
   endstop_y_hit=false;
   endstop_z_hit=false;
+  endstop_zprobe_hit=false;
 }
 
 void enable_endstops(bool check)
@@ -429,6 +433,11 @@ ISR(TIMER1_COMPA_vect)
 					if((current_block->steps_x > 0) && (x_min > endstop_trig_period)) {
 						//SERIAL_ECHOLN("X_MIN triggered!");
 						endstops_trigsteps[X_AXIS] = count_position[X_AXIS];
+                                            if(!probing)
+                                            {
+                                               current_position[X_AXIS] = X_MIN_POS;
+                                               plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+                                            }
 					    endstop_x_hit=true;
 					    step_events_completed = current_block->step_event_count;
 					}
@@ -470,6 +479,11 @@ ISR(TIMER1_COMPA_vect)
 					if((current_block->steps_x > 0) && (x_max > endstop_trig_period)){
 					  //SERIAL_ECHOLN("X_MAX triggered!");
 					  endstops_trigsteps[X_AXIS] = count_position[X_AXIS];
+                                          if(!probing)
+                                          {
+                                             current_position[X_AXIS] = (float)endstops_trigsteps[X_AXIS]/axis_steps_per_unit[X_AXIS];
+                                             plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+                                          }
 					  endstop_x_hit=true;
 					  step_events_completed = current_block->step_event_count;
 					}
@@ -510,6 +524,11 @@ ISR(TIMER1_COMPA_vect)
 				  if((current_block->steps_y > 0) && (y_min > endstop_trig_period)) {
 					//SERIAL_ECHOLN("Y_MIN triggered!");
 					endstops_trigsteps[Y_AXIS] = count_position[Y_AXIS];
+                                        if(!probing)
+                                        {
+                                           current_position[Y_AXIS] = Y_MIN_POS;
+                                           plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+                                        }
 					endstop_y_hit=true;
 					step_events_completed = current_block->step_event_count;
 				  }
@@ -544,6 +563,11 @@ ISR(TIMER1_COMPA_vect)
 				  if((current_block->steps_y > 0) && (y_max > endstop_trig_period)){
 					//SERIAL_ECHOLN("Y_MAX triggered!");
 					endstops_trigsteps[Y_AXIS] = count_position[Y_AXIS];
+                                        if(!probing)
+                                        {
+                                           current_position[Y_AXIS] = (float)endstops_trigsteps[Y_AXIS]/axis_steps_per_unit[Y_AXIS];
+                                           plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+                                        }
 					endstop_y_hit=true;
 					step_events_completed = current_block->step_event_count;
 				  }
@@ -627,6 +651,11 @@ ISR(TIMER1_COMPA_vect)
 				  if((current_block->steps_z > 0) && (z_max > endstop_trig_period)) {
 				    //SERIAL_ECHOLN("Z_MAX triggered!");
 					endstops_trigsteps[Z_AXIS] = count_position[Z_AXIS];
+                                        if(!probing)
+                                        {
+                                           current_position[Z_AXIS] = (float)endstops_trigsteps[Z_AXIS]/axis_steps_per_unit[Z_AXIS];
+                                           plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+                                        }
 					endstop_z_hit=true;
 					step_events_completed = current_block->step_event_count;
 				  }

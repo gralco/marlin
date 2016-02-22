@@ -249,6 +249,8 @@ float zprobe_zoffset;
   bool probe_fail = false;
 #endif
 
+bool probing = false;
+
 // Extruder offset
 #if EXTRUDERS > 1
 #ifndef DUAL_X_CARRIAGE
@@ -1153,6 +1155,7 @@ static void do_blocking_move_to(float x, float y, float z);
 #endif
 
 static void run_z_probe() {
+    probing = true;
     plan_bed_level_matrix.set_to_identity();
     feedrate = homing_feedrate[Z_AXIS];
 
@@ -1186,6 +1189,7 @@ static void run_z_probe() {
     current_position[Z_AXIS] = st_get_position_mm(Z_AXIS);
     // make sure the planner knows where we are as it may be a bit different than we last said to move to
     plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+    probing = false;
 }
 
 static void do_blocking_move_to(float x, float y, float z) {
@@ -1265,8 +1269,10 @@ static void retract_z_probe() {
 /// Probe bed height at position (x,y), returns the measured z value
 static float probe_pt(float x, float y, float z_before) {
   // move to right place
+  probing = true;
   do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], z_before);
   do_blocking_move_to(x - X_PROBE_OFFSET_FROM_EXTRUDER, y - Y_PROBE_OFFSET_FROM_EXTRUDER, current_position[Z_AXIS]);
+  probing = false;
 
 #ifndef Z_PROBE_SLED
   engage_z_probe();   // Engage Z Servo endstop if available
@@ -1559,6 +1565,8 @@ void process_commands()
 #ifdef ENABLE_AUTO_BED_LEVELING
       plan_bed_level_matrix.set_to_identity();  //Reset the plane ("erase" all leveling data)
 #endif //ENABLE_AUTO_BED_LEVELING
+
+      probing = false;
 
       //set endstop switch trigger period to less
       endstop_trig_period = HOME_PROBE_ENDSTOP_PERIOD;
@@ -4165,7 +4173,16 @@ void get_coordinates()
   for(int8_t i=0; i < NUM_AXIS; i++) {
     if(code_seen(axis_codes[i]))
     {
-      destination[i] = (float)code_value() + (axis_relative_modes[i] || relative_mode)*current_position[i];
+      float check_destination = (float)code_value() + (axis_relative_modes[i] || relative_mode)*current_position[i];
+      if(    (i == E_AXIS)
+          || (home_dir(i) == -1 && check_destination <= current_position[i])
+          || (home_dir(i) == 1 && check_destination >= current_position[i])
+          || (home_dir(i) == -1 && !digitalRead(axis_max_pin[i])^axis_max_endstop_inverting[i])
+          || (home_dir(i) == 1 && !digitalRead(axis_min_pin[i])^axis_min_endstop_inverting[i])
+        /*|| probing*/ )
+        destination[i] = check_destination;
+      else
+        destination[i] = current_position[i];
       seen[i]=true;
     }
     else destination[i] = current_position[i]; //Are these else lines really needed?
@@ -4206,7 +4223,9 @@ void clamp_to_software_endstops(float target[3])
   if (min_software_endstops) {
     if (target[X_AXIS] < min_pos[X_AXIS]) target[X_AXIS] = min_pos[X_AXIS];
     if (target[Y_AXIS] < min_pos[Y_AXIS]) target[Y_AXIS] = min_pos[Y_AXIS];
-    
+    if (target[Z_AXIS] < min_pos[Z_AXIS]) target[Z_AXIS] = min_pos[Z_AXIS];
+
+    /*
     float negative_z_offset = 0;
     #ifdef ENABLE_AUTO_BED_LEVELING
       if (Z_PROBE_OFFSET_FROM_EXTRUDER < 0) negative_z_offset = negative_z_offset + Z_PROBE_OFFSET_FROM_EXTRUDER;
@@ -4214,6 +4233,7 @@ void clamp_to_software_endstops(float target[3])
     #endif
     
     if (target[Z_AXIS] < min_pos[Z_AXIS]+negative_z_offset) target[Z_AXIS] = min_pos[Z_AXIS]+negative_z_offset;
+    */
   }
 
   if (max_software_endstops) {
