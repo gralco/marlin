@@ -171,6 +171,7 @@
 // M503 - print the current settings (from memory not from EEPROM)
 // M540 - Use S[0|1] to enable or disable the stop SD card print on endstop hit (requires ABORT_ON_ENDSTOP_HIT_FEATURE_ENABLED)
 // M600 - Pause for filament change X[pos] Y[pos] Z[relative lift] E[initial retract] L[later retract distance for removal]
+// M601 - Resume the print from filament change
 // M665 - set delta configurations
 // M666 - set delta endstop adjustment
 // M605 - Set dual x-carriage movement mode: S<mode> [ X<duplication x-offset> R<duplication temp offset> ]
@@ -353,6 +354,8 @@ const char echomagic[] PROGMEM = "echo:";
 //===========================================================================
 //=============================Private Variables=============================
 //===========================================================================
+bool change_filament = false;
+
 #if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
   #ifdef TEMP_SENSOR_BED
     bool target_temp_reached[EXTRUDERS+1] = { false };
@@ -814,6 +817,9 @@ void get_command()
         //If command was e-stop process now
         if(strcmp(cmdbuffer[bufindw], "M112") == 0)
           kill();
+        //If command was M601 stop change filament mode
+        if(strcmp(cmdbuffer[bufindw], "M601") == 0)
+          change_filament = false;
         #ifdef PROBE_FAIL_PANIC
           if(probe_fail && strcmp(cmdbuffer[bufindw], "G26") == 0)
           {
@@ -3789,6 +3795,7 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
     #ifdef FILAMENTCHANGEENABLE
     case 600: //Pause for filament change X[pos] Y[pos] Z[relative lift] E[initial retract] L[later retract distance for removal]
     {
+        change_filament = true;
         float target[4];
         float lastpos[4];
         target[X_AXIS]=current_position[X_AXIS];
@@ -3869,14 +3876,20 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
         disable_e1();
         disable_e2();
         delay(100);
-        LCD_ALERTMESSAGEPGM(MSG_FILAMENTCHANGE);
-        uint8_t cnt=0;
-        while(!lcd_clicked()){
-          cnt++;
+        LCD_MESSAGEPGM(MSG_PRESSTORESUME);
+      //uint8_t cnt=0;
+        while(
+        #ifdef ULTIPANEL
+          !lcd_clicked() &&
+        #endif
+        change_filament){
+        //cnt++;
           manage_heater();
           manage_inactivity(true);
-          lcd_update();
-          if(cnt==0)
+          #ifdef ULTIPANEL
+            lcd_update();
+          #endif
+        /*if(cnt==0)
           {
           #if BEEPER > 0
             SET_OUTPUT(BEEPER);
@@ -3892,8 +3905,9 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
 			  lcd_buzz(LCD_FEEDBACK_FREQUENCY_DURATION_MS,LCD_FEEDBACK_FREQUENCY_HZ);
 			#endif
           #endif
-          }
+          }*/
         }
+        LCD_MESSAGEPGM(MSG_DWELL);
 
         //return to normal
         if(code_seen('L'))
@@ -3914,6 +3928,9 @@ case 404:  //M404 Enter the nominal filament width (3mm, 1.75mm ) N<3.0> or disp
         plan_buffer_line(lastpos[X_AXIS], lastpos[Y_AXIS], lastpos[Z_AXIS], lastpos[E_AXIS], feedrate/60, active_extruder); //final untretract
     }
     break;
+    case 601:
+      change_filament = false;
+      break;
     #endif //FILAMENTCHANGEENABLE
     #ifdef DUAL_X_CARRIAGE
     case 605: // Set dual x-carriage movement mode:
