@@ -75,7 +75,6 @@ float max_z_jerk;
 float max_e_jerk;
 float mintravelfeedrate;
 unsigned long axis_steps_per_sqr_second[NUM_AXIS];
-bool jumpstart_fan = true;
 
 #ifdef ENABLE_AUTO_BED_LEVELING
 // this holds the required transform to compensate for bed level
@@ -492,7 +491,7 @@ void check_axes_activity()
 #if defined(FAN_PIN) && FAN_PIN > -1
   #ifdef FAN_KICKSTART_TIME
     static unsigned long fan_kick_end;
-    if (tail_fan_speed) {
+    if (tail_fan_speed >= 70) {
       if (fan_kick_end == 0) {
         // Just starting up fan - run at full power.
         fan_kick_end = millis() + FAN_KICKSTART_TIME;
@@ -507,28 +506,12 @@ void check_axes_activity()
   #ifdef FAN_SOFT_PWM
   fanSpeedSoftPwm = tail_fan_speed;
   #else
-  if(tail_fan_speed == 0)
-  {
+  if(tail_fan_speed < 70)
     digitalWrite(FAN_PIN, LOW);
-    jumpstart_fan = true;
-  }
-  else if(tail_fan_speed == 255)
-    digitalWrite(FAN_PIN, HIGH);
   else
   {
-    static unsigned long jumpstart_time = 0;
-    if(jumpstart_fan)
-    {
-      jumpstart_fan = false;
-      jumpstart_time = millis();
-    }
-
-    //analogWrite(FAN_PIN,tail_fan_speed);
     sbi(TCCR4A, COM4C1);
-    if((tail_fan_speed*208 + 12495) < 25000 && (millis() - jumpstart_time) < 250)
-      OCR4C = 32768;
-    else
-      OCR4C = (tail_fan_speed*208 + 12495); // set pwm duty, (2^8-1) is the top of the counter
+    OCR4C = ((tail_fan_speed-55)*208 + 12495); // set pwm duty, (2^8-1) is the top of the counter
   }
   #endif//!FAN_SOFT_PWM
 #endif//FAN_PIN > -1
