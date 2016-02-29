@@ -7080,7 +7080,7 @@ void plan_arc(
       }
 
       // Fan off if no steppers have been enabled for CONTROLLERFAN_SECS seconds
-      uint8_t speed = (lastMotorOn == 0 || ms >= lastMotorOn + (CONTROLLERFAN_SECS) * 1000UL) ? 0 : CONTROLLERFAN_SPEED;
+      unsigned speed = (lastMotorOn == 0 || ms >= lastMotorOn + (CONTROLLERFAN_SECS) * 1000UL) ? 0 : CONTROLLERFAN_SPEED;
 
       // allows digital or PWM fan output to be used (see M42 handling)
       digitalWrite(CONTROLLERFAN_PIN, speed);
@@ -7497,8 +7497,23 @@ void kill(const char* lcd_msg) {
         case TIMER4B:
         case TIMER4C:
           TCCR4B &= ~(_BV(CS40) | _BV(CS41) | _BV(CS42));
-          TCCR4B |= val;
-          break;
+          TCCR4A &= ~(_BV(WGM41) | _BV(WGM40));
+          TCCR4B &= ~(_BV(WGM42) | _BV(WGM43));
+
+          TCCR4B |= val; //CS42:0 Clock Select - Table 17-6
+
+                          //10
+          TCCR4A |=   B00000000;
+          TCCR4A &= ~(B00000011);
+                       //32
+          TCCR4B |=   B00010000;
+          TCCR4B &= ~(B00001000);
+
+        //WGM3:0 == B1000 == 8 <- Mode 8 PWM phase and frequency correct
+                               //check atmega2560 datasheet page 145 table 17-2
+
+         ICR4 = 65535; // (2^8-1) is the top of the counter
+         break;
       #endif
       #if defined(TCCR5A)
         case TIMER5A:

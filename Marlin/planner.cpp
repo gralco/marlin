@@ -424,8 +424,8 @@ void plan_init() {
 #endif //AUTOTEMP
 
 void check_axes_activity() {
-  unsigned char axis_active[NUM_AXIS] = { 0 },
-                tail_fan_speed[FAN_COUNT];
+  unsigned char axis_active[NUM_AXIS] = { 0 };
+  unsigned int tail_fan_speed[FAN_COUNT];
 
   #if FAN_COUNT > 0
     for (uint8_t i = 0; i < FAN_COUNT; i++) tail_fan_speed[i] = fanSpeeds[i];
@@ -479,7 +479,7 @@ void check_axes_activity() {
   #if FAN_COUNT > 0
 
     #if defined(FAN_MIN_PWM)
-      #define CALC_FAN_SPEED(f) (tail_fan_speed[f] ? ( FAN_MIN_PWM + (tail_fan_speed[f] * (255 - FAN_MIN_PWM)) / 255 ) : 0)
+      #define CALC_FAN_SPEED(f) (tail_fan_speed[f] >= FAN_MIN_PWM ? (tail_fan_speed[f]*208 + 12495 ) : 0)
     #else
       #define CALC_FAN_SPEED(f) tail_fan_speed[f]
     #endif
@@ -489,7 +489,7 @@ void check_axes_activity() {
       static millis_t fan_kick_end[FAN_COUNT] = { 0 };
 
       #define KICKSTART_FAN(f) \
-        if (tail_fan_speed[f]) { \
+        if (tail_fan_speed[f] >= FAN_MIN_PWM) { \
           millis_t ms = millis(); \
           if (fan_kick_end[f] == 0) { \
             fan_kick_end[f] = ms + FAN_KICKSTART_TIME; \
