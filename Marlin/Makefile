@@ -38,7 +38,7 @@ coresdir = ${hardwdir}/rambo/cores/arduino
 avrdir = ${hardwdir}/tools/avr/bin
 
 DEST ?= ${basedir}
-MACHINE = Gladiola
+MACHINE = $(shell git rev-parse --abbrev-ref HEAD)
 NOW = $(shell date +"%b_%d_%y")
 VERSION = v$(shell grep -oP "\"1.*.*\"" ${basedir}/Default_Version.h | cut -d \" -f 2)
 HASH = $(shell git rev-parse --verify HEAD --short)
@@ -239,9 +239,14 @@ all:
 	if test ! -f ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH).hex; \
 		then $(OBJCOPY) -O ihex -R .eeprom ${objdir}/Marlin.cpp.elf ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH).hex; \
 	elif test ! -f ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH)-2.hex; \
-		then $(OBJCOPY) -O ihex -R .eeprom ${objdir}/Marlin.cpp.elf ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH)-2.hex; \
+		then mv ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH).hex ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH)-2.hex \
+		&& $(OBJCOPY) -O ihex -R .eeprom ${objdir}/Marlin.cpp.elf ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH).hex; \
 	else \
-		$(OBJCOPY) -O ihex -R .eeprom ${objdir}/Marlin.cpp.elf ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH)-$(words $(wildcard ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH)-*.hex) + 2).hex; \
+		for number in $$(seq 1 $(words $(wildcard ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH)-*.hex))); \
+			do mv ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH)-$$(($(words $(wildcard ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH)-*.hex)) - $$number + 2)).hex ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH)-$$(($(words $(wildcard ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH)-*.hex)) - $$number + 3)).hex; \
+		done \
+		&& mv ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH).hex ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH)-2.hex \
+		&& $(OBJCOPY) -O ihex -R .eeprom ${objdir}/Marlin.cpp.elf ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH).hex; \
 	fi
 
 clean:
