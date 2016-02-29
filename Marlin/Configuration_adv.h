@@ -63,17 +63,17 @@
 //and turn off after the set amount of seconds from last driver being disabled again
 #define CONTROLLERFAN_PIN FAN2_PIN //Pin used for the fan to cool controller (-1 to disable)
 #define CONTROLLERFAN_SECS 60 //How many seconds, after all motors were disabled, the fan should run
-#define CONTROLLERFAN_SPEED_START 255 //Startup fan speed
-#define CONTROLLERFAN_SPEED_FULL 130  // == full speed
-#define CONTROLLERFAN_SPEED_IDLE 60 //Idle speed when motors are inactive
-#define CONTROLLERFAN_SPEED_MAX 255 // Max limit for fan 
+#define CONTROLLERFAN_SPEED_START 65535 //Startup fan speed
+#define CONTROLLERFAN_SPEED_FULL 33410  // == full speed
+#define CONTROLLERFAN_SPEED_IDLE 15420 //Idle speed when motors are inactive
+#define CONTROLLERFAN_SPEED_MAX 65535 // Max limit for fan 
 #define CONTROLLERFAN_SPEED_MIN 0  //Minimum that fan will start without push
 
 
 // When first starting the main fan, run it at full speed for the
 // given number of milliseconds.  This gets the fan spinning reliably
 // before setting a PWM value. (Does not work with software PWM for fan on Sanguinololu)
-#define FAN_KICKSTART_TIME 1000
+#define FAN_KICKSTART_TIME 250
 
 // Extruder cooling fans
 // Configure fan pin outputs to automatically turn on/off when the associated
