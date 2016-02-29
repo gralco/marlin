@@ -75,6 +75,7 @@ float max_z_jerk;
 float max_e_jerk;
 float mintravelfeedrate;
 unsigned long axis_steps_per_sqr_second[NUM_AXIS];
+bool jumpstart_fan = true;
 
 #ifdef ENABLE_AUTO_BED_LEVELING
 // this holds the required transform to compensate for bed level
@@ -454,7 +455,7 @@ void check_axes_activity()
   unsigned char y_active = 0;  
   unsigned char z_active = 0;
   unsigned char e_active = 0;
-  unsigned char tail_fan_speed = fanSpeed;
+  unsigned int tail_fan_speed = fanSpeed;
   #ifdef BARICUDA
   unsigned char tail_valve_pressure = ValvePressure;
   unsigned char tail_e_to_p_pressure = EtoPPressure;
@@ -506,7 +507,29 @@ void check_axes_activity()
   #ifdef FAN_SOFT_PWM
   fanSpeedSoftPwm = tail_fan_speed;
   #else
-  analogWrite(FAN_PIN,tail_fan_speed);
+  if(tail_fan_speed == 0)
+  {
+    digitalWrite(FAN_PIN, LOW);
+    jumpstart_fan = true;
+  }
+  else if(tail_fan_speed == 255)
+    digitalWrite(FAN_PIN, HIGH);
+  else
+  {
+    static unsigned long jumpstart_time = 0;
+    if(jumpstart_fan)
+    {
+      jumpstart_fan = false;
+      jumpstart_time = millis();
+    }
+
+    //analogWrite(FAN_PIN,tail_fan_speed);
+    sbi(TCCR4A, COM4C1);
+    if((tail_fan_speed*208 + 12495) < 25000 && (millis() - jumpstart_time) < 250)
+      OCR4C = 32768;
+    else
+      OCR4C = (tail_fan_speed*208 + 12495); // set pwm duty, (2^8-1) is the top of the counter
+  }
   #endif//!FAN_SOFT_PWM
 #endif//FAN_PIN > -1
 #ifdef AUTOTEMP
