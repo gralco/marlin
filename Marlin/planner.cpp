@@ -514,7 +514,7 @@ void check_axes_activity()
   /*if((tail_fan_speed*208 + 12495) < 25000 && (millis() - jumpstart_time) < 250)
       OCR4C = 32768;
     else*/
-      OCR4C = ((tail_fan_speed-60)*208 + 12495); // set pwm duty, (2^8-1) is the top of the counter
+      OCR4C = ((tail_fan_speed-55)*208 + 12495); // set pwm duty, (2^8-1) is the top of the counter
   }
   #endif//!FAN_SOFT_PWM
 #endif//FAN_PIN > -1
