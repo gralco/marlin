@@ -427,10 +427,10 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
 // default settings
 
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {100.5,100.5,1600,830} // default steps per unit for TAZ {X,Y,Z,E}
-#define DEFAULT_E1_STEPS_PER_UNIT     925                    // default steps per unit for second extruder
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {100.5,100.5,1600,830}  // default steps per unit for TAZ {X,Y,Z,E}
+#define DEFAULT_E1_STEPS_PER_UNIT     830                    // default steps per unit for second extruder
 #define DEFAULT_MAX_FEEDRATE          {800, 800, 3, 50}      // (mm/sec)
-#define DEFAULT_MAX_ACCELERATION      {9000,9000,100,100}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
+#define DEFAULT_MAX_ACCELERATION      {9000,9000,100,100}  // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
 
 #define DEFAULT_ACCELERATION          300    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  3000   // X, Y, Z and E max acceleration in mm/s^2 for retracts
@@ -463,28 +463,28 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
 // Preheat Constants
 #define PLA_PREHEAT_HOTEND_TEMP 205
-#define PLA_PREHEAT_HPB_TEMP 60   //Not used in dual firmware
+#define PLA_PREHEAT_HPB_TEMP 50   
 #define PLA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define HIPS_PREHEAT_HOTEND_TEMP 230
-#define HIPS_PREHEAT_HPB_TEMP 110  //Not used in dual firmware
+#define HIPS_PREHEAT_HOTEND_TEMP 240
+#define HIPS_PREHEAT_HPB_TEMP 110  
 #define HIPS_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define ABS_PREHEAT_HOTEND_TEMP 230
-#define ABS_PREHEAT_HPB_TEMP 110  //Not used in dual firmware
+#define ABS_PREHEAT_HOTEND_TEMP 240
+#define ABS_PREHEAT_HPB_TEMP 110  //Also changes Abs_Hips menu item in lcd
 #define ABS_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
 #define PVA_PREHEAT_HOTEND_TEMP 190
-#define PVA_PREHEAT_HPB_TEMP 60
+#define PVA_PREHEAT_HPB_TEMP 50   //Also changes Pva_Pla menu item in lcd
 #define PVA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define NINJA_PREHEAT_HOTEND_TEMP 220
-#define NINJA_PREHEAT_HPB_TEMP 110
-#define NINJA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
-
-#define SEMI_PREHEAT_HOTEND_TEMP 220
-#define SEMI_PREHEAT_HPB_TEMP 110
-#define SEMI_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+//~ #define NINJA_PREHEAT_HOTEND_TEMP 210
+//~ #define NINJA_PREHEAT_HPB_TEMP 100
+//~ #define NINJA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+//~ 
+//~ #define SEMI_PREHEAT_HOTEND_TEMP 210
+//~ #define SEMI_PREHEAT_HPB_TEMP 100
+//~ #define SEMI_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
 
 //LCD and SD support

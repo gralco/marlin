@@ -51,13 +51,13 @@
   extern int pvaPreheatHPBTemp;
   extern int pvaPreheatFanSpeed;
   
-  extern int ninjaPreheatHotendTemp;
-  extern int ninjaPreheatHPBTemp;
-  extern int ninjaPreheatFanSpeed;
-  
-  extern int semiPreheatHotendTemp;
-  extern int semiPreheatHPBTemp;
-  extern int semiPreheatFanSpeed;
+  //~ extern int ninjaPreheatHotendTemp;
+  //~ extern int ninjaPreheatHPBTemp;
+  //~ extern int ninjaPreheatFanSpeed;
+  //~ 
+  //~ extern int semiPreheatHotendTemp;
+  //~ extern int semiPreheatHPBTemp;
+  //~ extern int semiPreheatFanSpeed;
   
     
   void lcd_buzz(long duration,uint16_t freq);
