@@ -448,8 +448,8 @@ void check_axes_activity()
   unsigned char y_active = 0;  
   unsigned char z_active = 0;
   unsigned char e_active = 0;
-  unsigned char tail_fan_speed = fanSpeed;
-  unsigned char tail_fan_speed1 = fanSpeed1;
+  unsigned int tail_fan_speed = fanSpeed;
+  unsigned int tail_fan_speed1 = fanSpeed1;
   #ifdef BARICUDA
   unsigned char tail_valve_pressure = ValvePressure;
   unsigned char tail_e_to_p_pressure = EtoPPressure;
@@ -518,8 +518,8 @@ void check_axes_activity()
 			}
 		#endif 
 		#if EXTRUDER_FAN_SETUP == 3                           // EXTRUDER_FAN_SETUP = 3
-			analogWrite(EX_FAN_0,tail_fan_speed);
-			analogWrite(EX_FAN_1,tail_fan_speed1);
+                        sbi(TCCR4A, COM4A1);
+                        OCR4A = (tail_fan_speed*208 + 12495); // set pwm duty, (2^16-1) is the top of the counter
 	    #endif 
 	 #endif  // EXTRUDER_FAN_SETUP
   #endif //!FAN_SOFT_PWM
