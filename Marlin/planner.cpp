@@ -448,8 +448,8 @@ void check_axes_activity()
   unsigned char y_active = 0;  
   unsigned char z_active = 0;
   unsigned char e_active = 0;
-  unsigned char tail_fan_speed = fanSpeed;
-  unsigned char tail_fan_speed1 = fanSpeed1;
+  unsigned int tail_fan_speed = fanSpeed;
+  unsigned int tail_fan_speed1 = fanSpeed1;
   #ifdef BARICUDA
   unsigned char tail_valve_pressure = ValvePressure;
   unsigned char tail_e_to_p_pressure = EtoPPressure;
@@ -487,7 +487,7 @@ void check_axes_activity()
 #if defined(FAN_PIN) && FAN_PIN > -1
   #ifdef FAN_KICKSTART_TIME
     static unsigned long fan_kick_end;
-    if (tail_fan_speed) {
+    if (tail_fan_speed >= 70) {
       if (fan_kick_end == 0) {
         // Just starting up fan - run at full power.
         fan_kick_end = millis() + FAN_KICKSTART_TIME;
@@ -518,8 +518,13 @@ void check_axes_activity()
 			}
 		#endif 
 		#if EXTRUDER_FAN_SETUP == 3                           // EXTRUDER_FAN_SETUP = 3
-			analogWrite(EX_FAN_0,tail_fan_speed);
-			analogWrite(EX_FAN_1,tail_fan_speed1);
+                        if(tail_fan_speed < 70)
+                          digitalWrite(EX_FAN_0, LOW);
+                        else
+                        {
+                          sbi(TCCR4A, COM4C1);
+                            OCR4C = ((tail_fan_speed-55)*208 + 12495); // set pwm duty, (2^16-1) is the top of the counter
+                        }
 	    #endif 
 	 #endif  // EXTRUDER_FAN_SETUP
   #endif //!FAN_SOFT_PWM

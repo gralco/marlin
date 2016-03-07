@@ -1996,55 +1996,18 @@ void process_commands()
 
     #if defined(FAN_PIN) && FAN_PIN > -1
       case 106: //M106 Fan On
-		#if defined(EXTRUDER_FAN_SETUP) && EXTRUDER_FAN_SETUP == 1  //If EXTRUDER_FAN_SETUP = 2 then P0 will control fan0 and P1 will switch to fan1
-		   	if (code_seen('S')){    //Setting the fan speed from 0 to 255
-				fanSpeed=constrain(code_value(),0,255);
-			}
-			else {
-				fanSpeed=255;
-			}
-		#endif 
-		#if defined(EXTRUDER_FAN_SETUP) && EXTRUDER_FAN_SETUP == 2  //If EXTRUDER_FAN_SETUP = 2 then P0 will control fan0 and P1 will switch to fan1
-			if (code_seen('P')){ 
-				active_FAN=constrain(code_value(),0,1);
-			}
-			if (code_seen('S')){    //Setting the fan speed from 0 to 255
-				fanSpeed=constrain(code_value(),0,255);
-			}
-			else {
-				fanSpeed=255;
-			}
-		#endif   
-		#if defined(EXTRUDER_FAN_SETUP) && EXTRUDER_FAN_SETUP == 3  //If EXTRUDER_FAN_SETUP = 2 then P0 will control fan0 and P1 will switch to fan1
-			active_FAN = 0;
-			if (code_seen('P')){ 
-				active_FAN=constrain(code_value(),0,1);
-			}
-			if (active_FAN == 0){
-				if (code_seen('S')){    //Setting the fan speed from 0 to 255
-					fanSpeed=constrain(code_value(),0,255);
-				}
-				else {
-					fanSpeed=255;
-				}
-			}
-			else if (active_FAN == 1){
-				if (code_seen('S')){    //Setting the fan speed from 0 to 255
-					fanSpeed1=constrain(code_value(),0,255);
-				}
-				else {
-					fanSpeed1=255;
-				}
-			}
-		#endif 
-		#if defined(EXTRUDER_FAN_SETUP) && EXTRUDER_FAN_SETUP == 4
-			if (code_seen('S')){    //Setting the fan speed from 0 to 255
-				fanSpeed=constrain(code_value(),0,255);
-			}
-			else {
-				fanSpeed=255;
-			}
-		#endif
+        if (code_seen('T')){
+          ICR4 = /*constrain(*/code_value()/*,0,65535)*/;
+          if (code_seen('S')){
+            fanSpeed=/*constrain(*/code_value()/*,0,65535)*/;
+          }
+        }
+        else if (code_seen('S')){
+          fanSpeed=constrain(code_value(),0,255);
+        }
+        else {
+          fanSpeed=255;
+        }
         break;
       case 107: //M107 Fan Off
 		active_FAN = 0;
@@ -3541,7 +3504,22 @@ void setPwmFrequency(uint8_t pin, int val)
     case TIMER4B:
     case TIMER4C:
          TCCR4B &= ~(_BV(CS40) | _BV(CS41) | _BV(CS42));
-         TCCR4B |= val;
+         TCCR4A &= ~(_BV(WGM41) | _BV(WGM40));
+         TCCR4B &= ~(_BV(WGM42) | _BV(WGM43));
+
+         TCCR4B |= val; //CS42:0 Clock Select - Table 17-6
+
+                          //10
+         TCCR4A |=   B00000000;
+         TCCR4A &= ~(B00000011);
+                       //32
+         TCCR4B |=   B00010000;
+         TCCR4B &= ~(B00001000);
+
+       //WGM3:0 == B1000 == 8 <- Mode 8 PWM phase and frequency correct
+                               //check atmega2560 datasheet page 145 table 17-2
+
+         ICR4 = 65535; // (2^8-1) is the top of the counter
          break;
    #endif
 
