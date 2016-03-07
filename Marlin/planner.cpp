@@ -494,10 +494,10 @@ void check_axes_activity()
       if (fan_kick_end == 0) {
         // Just starting up fan - run at full power.
         fan_kick_end = millis() + FAN_KICKSTART_TIME;
-        tail_fan_speed = 196;
+        tail_fan_speed = 255;
       } else if (fan_kick_end > millis())
         // Fan still spinning up.
-        tail_fan_speed = 196;
+        tail_fan_speed = 255;
     } else {
       fan_kick_end = 0;
     }
@@ -509,12 +509,8 @@ void check_axes_activity()
     digitalWrite(FAN_PIN, LOW);
   else
   {
-    //analogWrite(FAN_PIN,tail_fan_speed);
     sbi(TCCR4A, COM4C1);
-  /*if((tail_fan_speed*208 + 12495) < 25000 && (millis() - jumpstart_time) < 250)
-      OCR4C = 32768;
-    else*/
-      OCR4C = ((tail_fan_speed-55)*208 + 12495); // set pwm duty, (2^8-1) is the top of the counter
+    OCR4C = ((tail_fan_speed-55)*208 + 12495); // set pwm duty, (2^16-1) is the top of the counter
   }
   #endif//!FAN_SOFT_PWM
 #endif//FAN_PIN > -1
