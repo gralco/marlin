@@ -74,14 +74,14 @@
 #endif
 
 // Define this to set a custom name for your generic Mendel,
-#define CUSTOM_PRINTER_NAME "DualMetalTAZ"
+#define CUSTOM_PRINTER_NAME "TAZ"
 
 // Define this to set a unique identifier for this printer, (Used by some programs to differentiate between machines)
 // You can use an online service to generate a random UUID. (eg http://www.uuidgenerator.net/version4)
 // #define MACHINE_UUID "00000000-0000-0000-0000-000000000000"
 
 // This defines the number of extruders
-#define EXTRUDERS 2
+#define EXTRUDERS 1
 
 //// The following define selects which power supply you have. Please choose the one that matches your setup
 // 1 = ATX
@@ -122,8 +122,8 @@
 // 55 is 100k thermistor - ATC Semitec 104GT-2 (Used in ParCan & J-Head) (1k pullup)
 
 #define TEMP_SENSOR_0 5
-#define TEMP_SENSOR_1 5
-#define TEMP_SENSOR_2 0
+//~ #define TEMP_SENSOR_1 5
+//~ #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_BED 7
 
 // This makes temp sensor 1 a redundant sensor for sensor 0. If the temperatures difference between these sensors is to high the print will be aborted.
@@ -340,7 +340,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 // Travel limits after homing
 #define X_MAX_POS 298
 #define X_MIN_POS 0
-#define Y_MAX_POS 325
+#define Y_MAX_POS 275
 #define Y_MIN_POS 0
 #define Z_MAX_POS 250
 #define Z_MIN_POS 0
@@ -427,19 +427,19 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
 // default settings
 
-#define DEFAULT_AXIS_STEPS_PER_UNIT   {100.5,100.5,1600,830} // default steps per unit for TAZ {X,Y,Z,E}
-#define DEFAULT_E1_STEPS_PER_UNIT     925                    // default steps per unit for second extruder
-#define DEFAULT_MAX_FEEDRATE          {800, 800, 3, 50}      // (mm/sec)
-#define DEFAULT_MAX_ACCELERATION      {9000,9000,100,100}    // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
+#define DEFAULT_AXIS_STEPS_PER_UNIT   {100.5,100.5,1600,833}  // default steps per unit for TAZ {X,Y,Z,E}
+#define DEFAULT_E1_STEPS_PER_UNIT     800                    // default steps per unit for second extruder
+#define DEFAULT_MAX_FEEDRATE          {800, 800, 8, 40}      // (mm/sec)
+#define DEFAULT_MAX_ACCELERATION      {9000,9000,100,10000}  // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
 
-#define DEFAULT_ACCELERATION          300    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
+#define DEFAULT_ACCELERATION          500    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  3000   // X, Y, Z and E max acceleration in mm/s^2 for retracts
 
 // Offset of the extruders (uncomment if using more than one and relying on firmware to position when changing).
 // The offset has to be X=0, Y=0 for the extruder 0 hotend (default extruder).
 // For the other hotends it is their distance from the extruder 0 hotend.
 #define EXTRUDER_OFFSET_X {0.0, 0.00} // (in mm) for each extruder, offset of the hotend on the X axis
-#define EXTRUDER_OFFSET_Y {0.0, 0.00}  // (in mm) for each extruder, offset of the hotend on the Y axis
+#define EXTRUDER_OFFSET_Y {0.0, -52.00}  // (in mm) for each extruder, offset of the hotend on the Y axis
 
 // The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
 #define DEFAULT_XYJERK                8.0    // (mm/sec)
@@ -463,28 +463,52 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
 // Preheat Constants
 #define PLA_PREHEAT_HOTEND_TEMP 205
-#define PLA_PREHEAT_HPB_TEMP 60   //Not used in dual firmware
+#define PLA_PREHEAT_HPB_TEMP 60
 #define PLA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define HIPS_PREHEAT_HOTEND_TEMP 230
-#define HIPS_PREHEAT_HPB_TEMP 110  //Not used in dual firmware
+#define HIPS_PREHEAT_HOTEND_TEMP 240
+#define HIPS_PREHEAT_HPB_TEMP 110
 #define HIPS_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define ABS_PREHEAT_HOTEND_TEMP 230
-#define ABS_PREHEAT_HPB_TEMP 110  //Not used in dual firmware
+#define ABS_PREHEAT_HOTEND_TEMP 240
+#define ABS_PREHEAT_HPB_TEMP 110
 #define ABS_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define PVA_PREHEAT_HOTEND_TEMP 190
-#define PVA_PREHEAT_HPB_TEMP 60
-#define PVA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+#define BRIDGE_PREHEAT_HOTEND_TEMP 240
+#define BRIDGE_PREHEAT_HPB_TEMP 100
+#define BRIDGE_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define NINJA_PREHEAT_HOTEND_TEMP 220
-#define NINJA_PREHEAT_HPB_TEMP 110
-#define NINJA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+#define PCTPE_PREHEAT_HOTEND_TEMP 235
+#define PCTPE_PREHEAT_HPB_TEMP 100
+#define PCTPE_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define SEMI_PREHEAT_HOTEND_TEMP 220
-#define SEMI_PREHEAT_HPB_TEMP 110
-#define SEMI_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+#define ALLOY_910_PREHEAT_HOTEND_TEMP 240
+#define ALLOY_910_PREHEAT_HPB_TEMP 100
+#define ALLOY_910_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+
+//~ #define BAMBOO_PREHEAT_HOTEND_TEMP 190
+//~ #define BAMBOO_PREHEAT_HPB_TEMP 60
+//~ #define BAMBOO_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+
+#define N_VENT_PREHEAT_HOTEND_TEMP 235
+#define N_VENT_PREHEAT_HPB_TEMP 60
+#define N_VENT_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+
+#define LAYBRICK_PREHEAT_HOTEND_TEMP 190
+#define LAYBRICK_PREHEAT_HPB_TEMP 60
+#define LAYBRICK_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+
+#define LAYWOOD_PREHEAT_HOTEND_TEMP 190
+#define LAYWOOD_PREHEAT_HPB_TEMP 60
+#define LAYWOOD_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+
+#define POLYCARBONATE_PREHEAT_HOTEND_TEMP 290
+#define POLYCARBONATE_PREHEAT_HPB_TEMP 110
+#define POLYCARBONATE_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+
+#define TGLASE_PREHEAT_HOTEND_TEMP 245
+#define TGLASE_PREHEAT_HPB_TEMP 60
+#define TGLASE_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
 
 //LCD and SD support
@@ -713,3 +737,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #include "thermistortables.h"
 
 #endif //__CONFIGURATION_H
+
+
+
+

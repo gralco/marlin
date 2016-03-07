@@ -37,7 +37,7 @@ void _EEPROM_readData(int &pos, uint8_t* value, uint8_t size)
 // the default values are used whenever there is a change to the data, to prevent
 // wrong data being written to the variables.
 // ALSO:  always make sure the variables in the Store and retrieve sections are in the same order.
-#define EEPROM_VERSION "V21"
+#define EEPROM_VERSION "V19"
 
 #ifdef EEPROM_SETTINGS
 void Config_StoreSettings() 
@@ -66,9 +66,15 @@ void Config_StoreSettings()
   int plaPreheatHotendTemp = PLA_PREHEAT_HOTEND_TEMP, plaPreheatHPBTemp = PLA_PREHEAT_HPB_TEMP, plaPreheatFanSpeed = PLA_PREHEAT_FAN_SPEED;
   int hipsPreheatHotendTemp = HIPS_PREHEAT_HOTEND_TEMP, hipsPreheatHPBTemp = HIPS_PREHEAT_HPB_TEMP, hipsPreheatFanSpeed = HIPS_PREHEAT_FAN_SPEED;
   int absPreheatHotendTemp = ABS_PREHEAT_HOTEND_TEMP, absPreheatHPBTemp = ABS_PREHEAT_HPB_TEMP, absPreheatFanSpeed = ABS_PREHEAT_FAN_SPEED;
-  int pvaPreheatHotendTemp = PVA_PREHEAT_HOTEND_TEMP, pvaPreheatHPBTemp = PVA_PREHEAT_HPB_TEMP, pvaPreheatFanSpeed = PVA_PREHEAT_FAN_SPEED;
-  int ninjaPreheatHotendTemp = NINJA_PREHEAT_HOTEND_TEMP, ninjaPreheatHPBTemp = NINJA_PREHEAT_HPB_TEMP, ninjaPreheatFanSpeed = NINJA_PREHEAT_FAN_SPEED;
-  int semiPreheatHotendTemp = SEMI_PREHEAT_HOTEND_TEMP, semiPreheatHPBTemp = SEMI_PREHEAT_HPB_TEMP, semiPreheatFanSpeed = SEMI_PREHEAT_FAN_SPEED;
+  int bridgePreheatHotendTemp = BRIDGE_PREHEAT_HOTEND_TEMP, bridgePreheatHPBTemp = BRIDGE_PREHEAT_HPB_TEMP, bridgePreheatFanSpeed = BRIDGE_PREHEAT_FAN_SPEED;
+  int pctpePreheatHotendTemp = PCTPE_PREHEAT_HOTEND_TEMP, pctpePreheatHPBTemp = PCTPE_PREHEAT_HPB_TEMP, pctpePreheatFanSpeed = PCTPE_PREHEAT_FAN_SPEED;
+  int alloy_910PreheatHotendTemp = ALLOY_910_PREHEAT_HOTEND_TEMP, alloy_910PreheatHPBTemp = ALLOY_910_PREHEAT_HPB_TEMP, alloy_910PreheatFanSpeed = ALLOY_910_PREHEAT_FAN_SPEED;
+  //~ int bambooPreheatHotendTemp = BAMBOO_PREHEAT_HOTEND_TEMP, bambooPreheatHPBTemp = BAMBO_PREHEAT_HPB_TEMP, bambooPreheatFanSpeed = BAMBOO_PREHEAT_FAN_SPEED;
+  int n_ventPreheatHotendTemp = N_VENT_PREHEAT_HOTEND_TEMP, n_ventPreheatHPBTemp = N_VENT_PREHEAT_HPB_TEMP, n_ventPreheatFanSpeed = N_VENT_PREHEAT_FAN_SPEED;
+  int laybrickPreheatHotendTemp = LAYBRICK_PREHEAT_HOTEND_TEMP, laybrickPreheatHPBTemp = LAYBRICK_PREHEAT_HPB_TEMP, laybrickPreheatFanSpeed = LAYBRICK_PREHEAT_FAN_SPEED;
+  int laywoodPreheatHotendTemp = LAYWOOD_PREHEAT_HOTEND_TEMP, laywoodPreheatHPBTemp = LAYWOOD_PREHEAT_HPB_TEMP, laywoodPreheatFanSpeed = LAYWOOD_PREHEAT_FAN_SPEED;
+  int polycarbonatePreheatHotendTemp = POLYCARBONATE_PREHEAT_HOTEND_TEMP, polycarbonatePreheatHPBTemp = POLYCARBONATE_PREHEAT_HPB_TEMP, polycarbonatePreheatFanSpeed = POLYCARBONATE_PREHEAT_FAN_SPEED;
+  int tglasePreheatHotendTemp = TGLASE_PREHEAT_HOTEND_TEMP, tglasePreheatHPBTemp = TGLASE_PREHEAT_HPB_TEMP, tglasePreheatFanSpeed = TGLASE_PREHEAT_FAN_SPEED;
   
   #endif
   EEPROM_WRITE_VAR(i,plaPreheatHotendTemp);
@@ -80,15 +86,33 @@ void Config_StoreSettings()
   EEPROM_WRITE_VAR(i,absPreheatHotendTemp);
   EEPROM_WRITE_VAR(i,absPreheatHPBTemp);
   EEPROM_WRITE_VAR(i,absPreheatFanSpeed);
-  EEPROM_WRITE_VAR(i,pvaPreheatHotendTemp);
-  EEPROM_WRITE_VAR(i,pvaPreheatHPBTemp);
-  EEPROM_WRITE_VAR(i,pvaPreheatFanSpeed);
-  EEPROM_WRITE_VAR(i,ninjaPreheatHotendTemp);
-  EEPROM_WRITE_VAR(i,ninjaPreheatHPBTemp);
-  EEPROM_WRITE_VAR(i,ninjaPreheatFanSpeed);
-  EEPROM_WRITE_VAR(i,semiPreheatHotendTemp);
-  EEPROM_WRITE_VAR(i,semiPreheatHPBTemp);
-  EEPROM_WRITE_VAR(i,semiPreheatFanSpeed);
+  EEPROM_WRITE_VAR(i,bridgePreheatHotendTemp);
+  EEPROM_WRITE_VAR(i,bridgePreheatHPBTemp);
+  EEPROM_WRITE_VAR(i,bridgePreheatFanSpeed);
+  EEPROM_WRITE_VAR(i,pctpePreheatHotendTemp);
+  EEPROM_WRITE_VAR(i,pctpePreheatHPBTemp);
+  EEPROM_WRITE_VAR(i,pctpePreheatFanSpeed);
+  EEPROM_WRITE_VAR(i,alloy_910PreheatHotendTemp);
+  EEPROM_WRITE_VAR(i,alloy_910PreheatHPBTemp);
+  EEPROM_WRITE_VAR(i,alloy_910PreheatFanSpeed);
+  //~ EEPROM_WRITE_VAR(i,bambooPreheatHotendTemp);
+  //~ EEPROM_WRITE_VAR(i,bambooPreheatHPBTemp);
+  //~ EEPROM_WRITE_VAR(i,bambooPreheatFanSpeed);
+  EEPROM_WRITE_VAR(i,n_ventPreheatHotendTemp);
+  EEPROM_WRITE_VAR(i,n_ventPreheatHPBTemp);
+  EEPROM_WRITE_VAR(i,n_ventPreheatFanSpeed);
+  EEPROM_WRITE_VAR(i,laybrickPreheatHotendTemp);
+  EEPROM_WRITE_VAR(i,laybrickPreheatHPBTemp);
+  EEPROM_WRITE_VAR(i,laybrickPreheatFanSpeed);
+  EEPROM_WRITE_VAR(i,laywoodPreheatHotendTemp);
+  EEPROM_WRITE_VAR(i,laywoodPreheatHPBTemp);
+  EEPROM_WRITE_VAR(i,laywoodPreheatFanSpeed);
+  EEPROM_WRITE_VAR(i,polycarbonatePreheatHotendTemp);
+  EEPROM_WRITE_VAR(i,polycarbonatePreheatHPBTemp);
+  EEPROM_WRITE_VAR(i,polycarbonatePreheatFanSpeed);
+  EEPROM_WRITE_VAR(i,tglasePreheatHotendTemp);
+  EEPROM_WRITE_VAR(i,tglasePreheatHPBTemp);
+  EEPROM_WRITE_VAR(i,tglasePreheatFanSpeed);
   EEPROM_WRITE_VAR(i,zprobe_zoffset);
   #ifdef PIDTEMP
     EEPROM_WRITE_VAR(i,Kp);
@@ -227,9 +251,15 @@ void Config_RetrieveSettings()
         int plaPreheatHotendTemp, plaPreheatHPBTemp, plaPreheatFanSpeed;
         int hipsPreheatHotendTemp, hipsPreheatHPBTemp, hipsPreheatFanSpeed;
         int absPreheatHotendTemp, absPreheatHPBTemp, absPreheatFanSpeed;
-        int pvaPreheatHotendTemp, pvaPreheatHPBTemp, pvaPreheatFanSpeed;
-        int ninjaPreheatHotendTemp, ninjaPreheatHPBTemp, ninjaPreheatFanSpeed;
-        int semiPreheatHotendTemp, semiPreheatHPBTemp, semiPreheatFanSpeed;
+        int bridgePreheatHotendTemp, bridgePreheatHPBTemp, bridgePreheatFanSpeed;
+        int pctpePreheatHotendTemp, pctpePreheatHPBTemp, pctpePreheatFanSpeed;
+        int alloy_910PreheatHotendTemp, alloy_910PreheatHPBTemp, alloy_910PreheatFanSpeed;
+        //~ int bambooPreheatHotendTemp, bambooPreheatHPBTemp, bambooPreheatFanSpeed;
+        int n_ventPreheatHotendTemp, n_ventPreheatHPBTemp, n_ventPreheatFanSpeed;
+        int laybrickPreheatHotendTemp, laybrickPreheatHPBTemp, laybrickPreheatFanSpeed;
+        int laywoodPreheatHotendTemp, laywoodPreheatHPBTemp, laywoodPreheatFanSpeed;
+        int polycarbonatePreheatHotendTemp, polycarbonatePreheatHPBTemp, polycarbonatePreheatFanSpeed;
+        int tglasePreheatHotendTemp, tglasePreheatHPBTemp, tglasePreheatFanSpeed;
         #endif
         EEPROM_READ_VAR(i,plaPreheatHotendTemp);
         EEPROM_READ_VAR(i,plaPreheatHPBTemp);
@@ -240,15 +270,33 @@ void Config_RetrieveSettings()
         EEPROM_READ_VAR(i,absPreheatHotendTemp);
         EEPROM_READ_VAR(i,absPreheatHPBTemp);
         EEPROM_READ_VAR(i,absPreheatFanSpeed);
-        EEPROM_READ_VAR(i,pvaPreheatHotendTemp);
-        EEPROM_READ_VAR(i,pvaPreheatHPBTemp);
-        EEPROM_READ_VAR(i,pvaPreheatFanSpeed);
-        EEPROM_READ_VAR(i,ninjaPreheatHotendTemp);
-        EEPROM_READ_VAR(i,ninjaPreheatHPBTemp);
-        EEPROM_READ_VAR(i,ninjaPreheatFanSpeed);
-        EEPROM_READ_VAR(i,semiPreheatHotendTemp);
-        EEPROM_READ_VAR(i,semiPreheatHPBTemp);
-        EEPROM_READ_VAR(i,semiPreheatFanSpeed);
+        EEPROM_READ_VAR(i,bridgePreheatHotendTemp);
+        EEPROM_READ_VAR(i,bridgePreheatHPBTemp);
+        EEPROM_READ_VAR(i,bridgePreheatFanSpeed);
+        EEPROM_READ_VAR(i,pctpePreheatHotendTemp);
+        EEPROM_READ_VAR(i,pctpePreheatHPBTemp);
+        EEPROM_READ_VAR(i,pctpePreheatFanSpeed);
+        EEPROM_READ_VAR(i,alloy_910PreheatHotendTemp);
+        EEPROM_READ_VAR(i,alloy_910PreheatHPBTemp);
+        EEPROM_READ_VAR(i,alloy_910PreheatFanSpeed);
+        //~ EEPROM_READ_VAR(i,bambooPreheatHotendTemp);
+        //~ EEPROM_READ_VAR(i,bambooPreheatHPBTemp);
+        //~ EEPROM_READ_VAR(i,bambooPreheatFanSpeed);
+        EEPROM_READ_VAR(i,n_ventPreheatHotendTemp);
+        EEPROM_READ_VAR(i,n_ventPreheatHPBTemp);
+        EEPROM_READ_VAR(i,n_ventPreheatFanSpeed);
+        EEPROM_READ_VAR(i,laybrickPreheatHotendTemp);
+        EEPROM_READ_VAR(i,laybrickPreheatHPBTemp);
+        EEPROM_READ_VAR(i,laybrickPreheatFanSpeed);
+        EEPROM_READ_VAR(i,laywoodPreheatHotendTemp);
+        EEPROM_READ_VAR(i,laywoodPreheatHPBTemp);
+        EEPROM_READ_VAR(i,laywoodPreheatFanSpeed);
+        EEPROM_READ_VAR(i,polycarbonatePreheatHotendTemp);
+        EEPROM_READ_VAR(i,polycarbonatePreheatHPBTemp);
+        EEPROM_READ_VAR(i,polycarbonatePreheatFanSpeed);
+        EEPROM_READ_VAR(i,tglasePreheatHotendTemp);
+        EEPROM_READ_VAR(i,tglasePreheatHPBTemp);
+        EEPROM_READ_VAR(i,tglasePreheatFanSpeed);
         EEPROM_READ_VAR(i,zprobe_zoffset);
         #ifndef PIDTEMP
         float Kp,Ki,Kd;
@@ -329,15 +377,33 @@ void Config_ResetDefault()
     absPreheatHotendTemp = ABS_PREHEAT_HOTEND_TEMP;
     absPreheatHPBTemp = ABS_PREHEAT_HPB_TEMP;
     absPreheatFanSpeed = ABS_PREHEAT_FAN_SPEED;
-    pvaPreheatHotendTemp = PVA_PREHEAT_HOTEND_TEMP;
-    pvaPreheatHPBTemp = PVA_PREHEAT_HPB_TEMP;
-    pvaPreheatFanSpeed = PVA_PREHEAT_FAN_SPEED;
-    ninjaPreheatHotendTemp = NINJA_PREHEAT_HOTEND_TEMP;
-    ninjaPreheatHPBTemp = NINJA_PREHEAT_HPB_TEMP;
-    ninjaPreheatFanSpeed = NINJA_PREHEAT_FAN_SPEED;
-    semiPreheatHotendTemp = SEMI_PREHEAT_HOTEND_TEMP;
-    semiPreheatHPBTemp = SEMI_PREHEAT_HPB_TEMP;
-    semiPreheatFanSpeed = SEMI_PREHEAT_FAN_SPEED;
+    bridgePreheatHotendTemp = BRIDGE_PREHEAT_HOTEND_TEMP;
+    bridgePreheatHPBTemp = BRIDGE_PREHEAT_HPB_TEMP;
+    bridgePreheatFanSpeed = BRIDGE_PREHEAT_FAN_SPEED;
+    pctpePreheatHotendTemp = PCTPE_PREHEAT_HOTEND_TEMP;
+    pctpePreheatHPBTemp = PCTPE_PREHEAT_HPB_TEMP;
+    pctpePreheatFanSpeed = PCTPE_PREHEAT_FAN_SPEED;
+    alloy_910PreheatHotendTemp = ALLOY_910_PREHEAT_HOTEND_TEMP;
+    alloy_910PreheatHPBTemp = ALLOY_910_PREHEAT_HPB_TEMP;
+    alloy_910PreheatFanSpeed = ALLOY_910_PREHEAT_FAN_SPEED;
+    //~ bambooPreheatHotendTemp = BAMBOO_PREHEAT_HOTEND_TEMP;
+    //~ bambooPreheatHPBTemp = BAMBOO_PREHEAT_HPB_TEMP;
+    //~ bambooPreheatFanSpeed = BAMBOO_PREHEAT_FAN_SPEED;
+    n_ventPreheatHotendTemp = N_VENT_PREHEAT_HOTEND_TEMP;
+    n_ventPreheatHPBTemp = N_VENT_PREHEAT_HPB_TEMP;
+    n_ventPreheatFanSpeed = N_VENT_PREHEAT_FAN_SPEED;
+    laybrickPreheatHotendTemp = LAYBRICK_PREHEAT_HOTEND_TEMP;
+    laybrickPreheatHPBTemp = LAYBRICK_PREHEAT_HPB_TEMP;
+    laybrickPreheatFanSpeed = LAYBRICK_PREHEAT_FAN_SPEED;
+    laywoodPreheatHotendTemp = LAYWOOD_PREHEAT_HOTEND_TEMP;
+    laywoodPreheatHPBTemp = LAYWOOD_PREHEAT_HPB_TEMP;
+    laywoodPreheatFanSpeed = LAYWOOD_PREHEAT_FAN_SPEED;
+    polycarbonatePreheatHotendTemp = POLYCARBONATE_PREHEAT_HOTEND_TEMP;
+    polycarbonatePreheatHPBTemp = POLYCARBONATE_PREHEAT_HPB_TEMP;
+    polycarbonatePreheatFanSpeed = POLYCARBONATE_PREHEAT_FAN_SPEED;
+    tglasePreheatHotendTemp = TGLASE_PREHEAT_HOTEND_TEMP;
+    tglasePreheatHPBTemp = TGLASE_PREHEAT_HPB_TEMP;
+    tglasePreheatFanSpeed = TGLASE_PREHEAT_FAN_SPEED;
     
 #endif
 #ifdef ENABLE_AUTO_BED_LEVELING
@@ -363,3 +429,4 @@ SERIAL_ECHO_START;
 SERIAL_ECHOLNPGM("Hardcoded Default Settings Loaded");
 
 }
+

@@ -23,17 +23,41 @@ int absPreheatHotendTemp;
 int absPreheatHPBTemp;
 int absPreheatFanSpeed;
 
-int pvaPreheatHotendTemp;
-int pvaPreheatHPBTemp;
-int pvaPreheatFanSpeed;
+int bridgePreheatHotendTemp;
+int bridgePreheatHPBTemp;
+int bridgePreheatFanSpeed;
 
-int ninjaPreheatHotendTemp;
-int ninjaPreheatHPBTemp;
-int ninjaPreheatFanSpeed;
+int pctpePreheatHotendTemp;
+int pctpePreheatHPBTemp;
+int pctpePreheatFanSpeed;
 
-int semiPreheatHotendTemp;
-int semiPreheatHPBTemp;
-int semiPreheatFanSpeed;
+int alloy_910PreheatHotendTemp;
+int alloy_910PreheatHPBTemp;
+int alloy_910PreheatFanSpeed;
+
+//~ int bambooPreheatHotendTemp;
+//~ int bambooPreheatHPBTemp;
+//~ int bambooPreheatFanSpeed;
+
+int n_ventPreheatHotendTemp;
+int n_ventPreheatHPBTemp;
+int n_ventPreheatFanSpeed;
+
+int laybrickPreheatHotendTemp;
+int laybrickPreheatHPBTemp;
+int laybrickPreheatFanSpeed;
+
+int laywoodPreheatHotendTemp;
+int laywoodPreheatHPBTemp;
+int laywoodPreheatFanSpeed;
+
+int polycarbonatePreheatHotendTemp;
+int polycarbonatePreheatHPBTemp;
+int polycarbonatePreheatFanSpeed;
+
+int tglasePreheatHotendTemp;
+int tglasePreheatHPBTemp;
+int tglasePreheatFanSpeed;
 
 #ifdef ULTIPANEL
 static float manual_feedrate[] = MANUAL_FEEDRATE;
@@ -72,9 +96,15 @@ static void lcd_control_temperature_menu();
 static void lcd_control_temperature_preheat_pla_settings_menu();
 static void lcd_control_temperature_preheat_hips_settings_menu();
 static void lcd_control_temperature_preheat_abs_settings_menu();
-static void lcd_control_temperature_preheat_pva_settings_menu();
-static void lcd_control_temperature_preheat_ninja_settings_menu();
-static void lcd_control_temperature_preheat_semi_settings_menu();
+static void lcd_control_temperature_preheat_bridge_settings_menu();
+static void lcd_control_temperature_preheat_pctpe_settings_menu();
+static void lcd_control_temperature_preheat_alloy_910_settings_menu();
+//~ static void lcd_control_temperature_preheat_bamboo_settings_menu();
+static void lcd_control_temperature_preheat_n_vent_settings_menu();
+static void lcd_control_temperature_preheat_laybrick_settings_menu();
+static void lcd_control_temperature_preheat_laywood_settings_menu();
+static void lcd_control_temperature_preheat_polycarbonate_settings_menu();
+static void lcd_control_temperature_preheat_tglase_settings_menu();
 static void lcd_advanced_menu();
 #ifdef DOGLCD
 static void lcd_set_contrast();
@@ -323,58 +353,127 @@ static void lcd_autostart_sd()
 }
 #endif
 
-void lcd_preheat_abs_ninja()
-{
-    setTargetHotend0(absPreheatHotendTemp);
-    setTargetHotend1(ninjaPreheatHotendTemp);
-    setTargetHotend2(ninjaPreheatHotendTemp);
-    setTargetBed(ninjaPreheatHPBTemp);
-    fanSpeed = absPreheatFanSpeed;
-    lcd_return_to_status();
-    setWatch(); // heater sanity check timer
-}
-
-void lcd_preheat_hips_ninja()
-{
-    setTargetHotend0(hipsPreheatHotendTemp);
-    setTargetHotend1(ninjaPreheatHotendTemp);
-    setTargetHotend2(ninjaPreheatHotendTemp);
-    setTargetBed(ninjaPreheatHPBTemp);
-    fanSpeed = hipsPreheatFanSpeed;
-    lcd_return_to_status();
-    setWatch(); // heater sanity check timer
-}
-void lcd_preheat_abs_semi()
-{
-    setTargetHotend0(absPreheatHotendTemp);
-    setTargetHotend1(semiPreheatHotendTemp);
-    setTargetHotend2(semiPreheatHotendTemp);
-    setTargetBed(semiPreheatHPBTemp);
-    fanSpeed = absPreheatFanSpeed;
-    lcd_return_to_status();
-    setWatch(); // heater sanity check timer
-}
-void lcd_preheat_hips_semi()
-{
-    setTargetHotend0(hipsPreheatHotendTemp);
-    setTargetHotend1(semiPreheatHotendTemp);
-    setTargetHotend2(semiPreheatHotendTemp);
-    setTargetBed(semiPreheatHPBTemp);
-    fanSpeed = hipsPreheatFanSpeed;
-    lcd_return_to_status();
-    setWatch(); // heater sanity check timer
-}
-void lcd_preheat_pla_pva()
+void lcd_preheat_pla()
 {
     setTargetHotend0(plaPreheatHotendTemp);
-    setTargetHotend1(pvaPreheatHotendTemp);
-    setTargetHotend2(pvaPreheatHotendTemp);
-    setTargetBed(pvaPreheatHPBTemp);
+    setTargetHotend1(plaPreheatHotendTemp);
+    setTargetHotend2(plaPreheatHotendTemp);
+    setTargetBed(plaPreheatHPBTemp);
     fanSpeed = plaPreheatFanSpeed;
     lcd_return_to_status();
     setWatch(); // heater sanity check timer
 }
 
+void lcd_preheat_hips()
+{
+    setTargetHotend0(hipsPreheatHotendTemp);
+    setTargetHotend1(hipsPreheatHotendTemp);
+    setTargetHotend2(hipsPreheatHotendTemp);
+    setTargetBed(hipsPreheatHPBTemp);
+    fanSpeed = hipsPreheatFanSpeed;
+    lcd_return_to_status();
+    setWatch(); // heater sanity check timer
+}
+void lcd_preheat_abs()
+{
+    setTargetHotend0(absPreheatHotendTemp);
+    setTargetHotend1(absPreheatHotendTemp);
+    setTargetHotend2(absPreheatHotendTemp);
+    setTargetBed(absPreheatHPBTemp);
+    fanSpeed = absPreheatFanSpeed;
+    lcd_return_to_status();
+    setWatch(); // heater sanity check timer
+}
+void lcd_preheat_bridge()
+{
+    setTargetHotend0(bridgePreheatHotendTemp);
+    setTargetHotend1(bridgePreheatHotendTemp);
+    setTargetHotend2(bridgePreheatHotendTemp);
+    setTargetBed(bridgePreheatHPBTemp);
+    fanSpeed = bridgePreheatFanSpeed;
+    lcd_return_to_status();
+    setWatch(); // heater sanity check timer
+}
+void lcd_preheat_pctpe()
+{
+    setTargetHotend0(pctpePreheatHotendTemp);
+    setTargetHotend1(pctpePreheatHotendTemp);
+    setTargetHotend2(pctpePreheatHotendTemp);
+    setTargetBed(pctpePreheatHPBTemp);
+    fanSpeed = pctpePreheatFanSpeed;
+    lcd_return_to_status();
+    setWatch(); // heater sanity check timer
+}
+void lcd_preheat_alloy_910()
+{
+    setTargetHotend0(alloy_910PreheatHotendTemp);
+    setTargetHotend1(alloy_910PreheatHotendTemp);
+    setTargetHotend2(alloy_910PreheatHotendTemp);
+    setTargetBed(alloy_910PreheatHPBTemp);
+    fanSpeed = alloy_910PreheatFanSpeed;
+    lcd_return_to_status();
+    setWatch(); // heater sanity check timer
+}
+//~ void lcd_preheat_bamboo()
+//~ {
+    //~ setTargetHotend0(bambooPreheatHotendTemp);
+    //~ setTargetHotend1(bambooPreheatHotendTemp);
+    //~ setTargetHotend2(bambooPreheatHotendTemp);
+    //~ setTargetBed(bambooPreheatHPBTemp);
+    //~ fanSpeed = bambooPreheatFanSpeed;
+    //~ lcd_return_to_status();
+    //~ setWatch(); // heater sanity check timer
+//~ }
+void lcd_preheat_n_vent()
+{
+    setTargetHotend0(n_ventPreheatHotendTemp);
+    setTargetHotend1(n_ventPreheatHotendTemp);
+    setTargetHotend2(n_ventPreheatHotendTemp);
+    setTargetBed(n_ventPreheatHPBTemp);
+    fanSpeed = n_ventPreheatFanSpeed;
+    lcd_return_to_status();
+    setWatch(); // heater sanity check timer
+}
+void lcd_preheat_laybrick()
+{
+    setTargetHotend0(laybrickPreheatHotendTemp);
+    setTargetHotend1(laybrickPreheatHotendTemp);
+    setTargetHotend2(laybrickPreheatHotendTemp);
+    setTargetBed(laybrickPreheatHPBTemp);
+    fanSpeed = laybrickPreheatFanSpeed;
+    lcd_return_to_status();
+    setWatch(); // heater sanity check timer
+}
+void lcd_preheat_laywood()
+{
+    setTargetHotend0(laywoodPreheatHotendTemp);
+    setTargetHotend1(laywoodPreheatHotendTemp);
+    setTargetHotend2(laywoodPreheatHotendTemp);
+    setTargetBed(laywoodPreheatHPBTemp);
+    fanSpeed = laywoodPreheatFanSpeed;
+    lcd_return_to_status();
+    setWatch(); // heater sanity check timer
+}
+void lcd_preheat_polycarbonate()
+{
+    setTargetHotend0(polycarbonatePreheatHotendTemp);
+    setTargetHotend1(polycarbonatePreheatHotendTemp);
+    setTargetHotend2(polycarbonatePreheatHotendTemp);
+    setTargetBed(polycarbonatePreheatHPBTemp);
+    fanSpeed = polycarbonatePreheatFanSpeed;
+    lcd_return_to_status();
+    setWatch(); // heater sanity check timer
+}
+void lcd_preheat_tglase()
+{
+    setTargetHotend0(tglasePreheatHotendTemp);
+    setTargetHotend1(tglasePreheatHotendTemp);
+    setTargetHotend2(tglasePreheatHotendTemp);
+    setTargetBed(tglasePreheatHPBTemp);
+    fanSpeed = tglasePreheatFanSpeed;
+    lcd_return_to_status();
+    setWatch(); // heater sanity check timer
+}
 static void lcd_cooldown()
 {
     setTargetHotend0(0);
@@ -506,11 +605,18 @@ static void lcd_temperature_menu()
     START_MENU();
     MENU_ITEM(back, MSG_MAIN, lcd_main_menu);
     MENU_ITEM(submenu, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM(function, MSG_PREHEAT_ABS_NINJA, lcd_preheat_abs_ninja);
-    MENU_ITEM(function, MSG_PREHEAT_HIPS_NINJA, lcd_preheat_hips_ninja);
-    MENU_ITEM(function, MSG_PREHEAT_ABS_SEMI, lcd_preheat_abs_semi);
-    MENU_ITEM(function, MSG_PREHEAT_HIPS_SEMI, lcd_preheat_hips_semi);
-    MENU_ITEM(function, MSG_PREHEAT_PLA_PVA, lcd_preheat_pla_pva);
+    MENU_ITEM(function, MSG_PREHEAT_PLA, lcd_preheat_pla);
+    MENU_ITEM(function, MSG_PREHEAT_HIPS, lcd_preheat_hips);
+    MENU_ITEM(function, MSG_PREHEAT_ABS, lcd_preheat_abs);
+    MENU_ITEM(function, MSG_PREHEAT_BRIDGE, lcd_preheat_bridge);
+    MENU_ITEM(function, MSG_PREHEAT_PCTPE, lcd_preheat_pctpe);
+    MENU_ITEM(function, MSG_PREHEAT_ALLOY_910, lcd_preheat_alloy_910);
+    //~ MENU_ITEM(function, MSG_PREHEAT_BAMBOO, lcd_preheat_bamboo);
+    MENU_ITEM(function, MSG_PREHEAT_N_VENT, lcd_preheat_n_vent);
+    MENU_ITEM(function, MSG_PREHEAT_LAYBRICK, lcd_preheat_laybrick);
+    MENU_ITEM(function, MSG_PREHEAT_LAYWOOD, lcd_preheat_laywood);
+    MENU_ITEM(function, MSG_PREHEAT_POLYCARBONATE, lcd_preheat_polycarbonate);
+    MENU_ITEM(function, MSG_PREHEAT_TGLASE, lcd_preheat_tglase);
     MENU_ITEM(function, MSG_COOLDOWN, lcd_cooldown);
     END_MENU();
 }
@@ -731,9 +837,14 @@ static void lcd_control_temperature_menu()
     MENU_ITEM(submenu, MSG_PREHEAT_PLA_SETTINGS, lcd_control_temperature_preheat_pla_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_HIPS_SETTINGS, lcd_control_temperature_preheat_hips_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_ABS_SETTINGS, lcd_control_temperature_preheat_abs_settings_menu);
-    MENU_ITEM(submenu, MSG_PREHEAT_PVA_SETTINGS, lcd_control_temperature_preheat_pva_settings_menu);
-    MENU_ITEM(submenu, MSG_PREHEAT_NINJA_SETTINGS, lcd_control_temperature_preheat_ninja_settings_menu);
-    MENU_ITEM(submenu, MSG_PREHEAT_SEMI_SETTINGS, lcd_control_temperature_preheat_semi_settings_menu);
+    MENU_ITEM(submenu, MSG_PREHEAT_BRIDGE_SETTINGS, lcd_control_temperature_preheat_bridge_settings_menu);
+    MENU_ITEM(submenu, MSG_PREHEAT_PCTPE_SETTINGS, lcd_control_temperature_preheat_pctpe_settings_menu);
+    MENU_ITEM(submenu, MSG_PREHEAT_ALLOY_910_SETTINGS, lcd_control_temperature_preheat_alloy_910_settings_menu);
+    //~ MENU_ITEM(submenu, MSG_PREHEAT_BAMBOO_SETTINGS, lcd_control_temperature_preheat_bamboo_settings_menu);
+    MENU_ITEM(submenu, MSG_PREHEAT_N_VENT_SETTINGS, lcd_control_temperature_preheat_n_vent_settings_menu);
+    MENU_ITEM(submenu, MSG_PREHEAT_LAYBRICK_SETTINGS, lcd_control_temperature_preheat_laybrick_settings_menu);
+    MENU_ITEM(submenu, MSG_PREHEAT_POLYCARBONATE_SETTINGS, lcd_control_temperature_preheat_polycarbonate_settings_menu);
+    MENU_ITEM(submenu, MSG_PREHEAT_TGLASE_SETTINGS, lcd_control_temperature_preheat_tglase_settings_menu);
     END_MENU();
 }
 
@@ -743,9 +854,9 @@ static void lcd_control_temperature_preheat_pla_settings_menu()
     MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
     MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &plaPreheatFanSpeed, 0, 255);
     MENU_ITEM_EDIT(int3, MSG_NOZZLE, &plaPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
-//~ #if TEMP_SENSOR_BED != 0
-    //~ MENU_ITEM_EDIT(int3, MSG_BED, &plaPreheatHPBTemp, 0, BED_MAXTEMP - 15);
-//~ #endif
+#if TEMP_SENSOR_BED != 0
+    MENU_ITEM_EDIT(int3, MSG_BED, &plaPreheatHPBTemp, 0, BED_MAXTEMP - 15);
+#endif
 #ifdef EEPROM_SETTINGS
     MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
 #endif
@@ -758,9 +869,9 @@ static void lcd_control_temperature_preheat_hips_settings_menu()
     MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
     MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &hipsPreheatFanSpeed, 0, 255);
     MENU_ITEM_EDIT(int3, MSG_NOZZLE, &hipsPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
-//~ #if TEMP_SENSOR_BED != 0
-    //~ MENU_ITEM_EDIT(int3, MSG_BED, &hipsPreheatHPBTemp, 0, BED_MAXTEMP - 15);
-//~ #endif
+#if TEMP_SENSOR_BED != 0
+    MENU_ITEM_EDIT(int3, MSG_BED, &hipsPreheatHPBTemp, 0, BED_MAXTEMP - 15);
+#endif
 #ifdef EEPROM_SETTINGS
     MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
 #endif
@@ -773,57 +884,140 @@ static void lcd_control_temperature_preheat_abs_settings_menu()
     MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
     MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &absPreheatFanSpeed, 0, 255);
     MENU_ITEM_EDIT(int3, MSG_NOZZLE, &absPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+#if TEMP_SENSOR_BED != 0
+    MENU_ITEM_EDIT(int3, MSG_BED, &absPreheatHPBTemp, 0, BED_MAXTEMP - 15);
+#endif
+#ifdef EEPROM_SETTINGS
+    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
+#endif
+    END_MENU();
+}
+static void lcd_control_temperature_preheat_bridge_settings_menu()
+{
+    START_MENU();
+    MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &bridgePreheatFanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &bridgePreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+#if TEMP_SENSOR_BED != 0
+    MENU_ITEM_EDIT(int3, MSG_BED, &bridgePreheatHPBTemp, 0, BED_MAXTEMP - 15);
+#endif
+#ifdef EEPROM_SETTINGS
+    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
+#endif
+    END_MENU();
+}
+static void lcd_control_temperature_preheat_pctpe_settings_menu()
+{
+    START_MENU();
+    MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &pctpePreheatFanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &pctpePreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+#if TEMP_SENSOR_BED != 0
+    MENU_ITEM_EDIT(int3, MSG_BED, &pctpePreheatHPBTemp, 0, BED_MAXTEMP - 15);
+#endif
+#ifdef EEPROM_SETTINGS
+    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
+#endif
+    END_MENU();
+}
+static void lcd_control_temperature_preheat_alloy_910_settings_menu()
+{
+    START_MENU();
+    MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &alloy_910PreheatFanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &alloy_910PreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+#if TEMP_SENSOR_BED != 0
+    MENU_ITEM_EDIT(int3, MSG_BED, &alloy_910PreheatHPBTemp, 0, BED_MAXTEMP - 15);
+#endif
+#ifdef EEPROM_SETTINGS
+    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
+#endif
+    END_MENU();
+}
+//~ static void lcd_control_temperature_preheat_bamboo_settings_menu()
+//~ {
+    //~ START_MENU();
+    //~ MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
+    //~ MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &bambooPreheatFanSpeed, 0, 255);
+    //~ MENU_ITEM_EDIT(int3, MSG_NOZZLE, &bambooPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
 //~ #if TEMP_SENSOR_BED != 0
-    //~ MENU_ITEM_EDIT(int3, MSG_BED, &absPreheatHPBTemp, 0, BED_MAXTEMP - 15);
+    //~ MENU_ITEM_EDIT(int3, MSG_BED, &bambooPreheatHPBTemp, 0, BED_MAXTEMP - 15);
 //~ #endif
-#ifdef EEPROM_SETTINGS
-    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
-#endif
-    END_MENU();
-}
-static void lcd_control_temperature_preheat_pva_settings_menu()
+//~ #ifdef EEPROM_SETTINGS
+    //~ MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
+//~ #endif
+    //~ END_MENU();
+//~ }
+static void lcd_control_temperature_preheat_n_vent_settings_menu()
 {
     START_MENU();
     MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &pvaPreheatFanSpeed, 0, 255);
-    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &pvaPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &n_ventPreheatFanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &n_ventPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
 #if TEMP_SENSOR_BED != 0
-    MENU_ITEM_EDIT(int3, MSG_BED, &pvaPreheatHPBTemp, 0, BED_MAXTEMP - 15);
+    MENU_ITEM_EDIT(int3, MSG_BED, &n_ventPreheatHPBTemp, 0, BED_MAXTEMP - 15);
 #endif
 #ifdef EEPROM_SETTINGS
     MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
 #endif
     END_MENU();
 }
-static void lcd_control_temperature_preheat_ninja_settings_menu()
+static void lcd_control_temperature_preheat_laybrick_settings_menu()
 {
     START_MENU();
     MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &ninjaPreheatFanSpeed, 0, 255);
-    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &ninjaPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &laybrickPreheatFanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &laybrickPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
 #if TEMP_SENSOR_BED != 0
-    MENU_ITEM_EDIT(int3, MSG_BED, &ninjaPreheatHPBTemp, 0, BED_MAXTEMP - 15);
+    MENU_ITEM_EDIT(int3, MSG_BED, &laybrickPreheatHPBTemp, 0, BED_MAXTEMP - 15);
 #endif
 #ifdef EEPROM_SETTINGS
     MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
 #endif
     END_MENU();
 }
-static void lcd_control_temperature_preheat_semi_settings_menu()
+static void lcd_control_temperature_preheat_laywood_settings_menu()
 {
     START_MENU();
     MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &semiPreheatFanSpeed, 0, 255);
-    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &semiPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &laywoodPreheatFanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &laywoodPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
 #if TEMP_SENSOR_BED != 0
-    MENU_ITEM_EDIT(int3, MSG_BED, &semiPreheatHPBTemp, 0, BED_MAXTEMP - 15);
+    MENU_ITEM_EDIT(int3, MSG_BED, &laywoodPreheatHPBTemp, 0, BED_MAXTEMP - 15);
 #endif
 #ifdef EEPROM_SETTINGS
     MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
 #endif
     END_MENU();
 }
-
+static void lcd_control_temperature_preheat_polycarbonate_settings_menu()
+{
+    START_MENU();
+    MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &polycarbonatePreheatFanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &polycarbonatePreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+#if TEMP_SENSOR_BED != 0
+    MENU_ITEM_EDIT(int3, MSG_BED, &polycarbonatePreheatHPBTemp, 0, BED_MAXTEMP - 15);
+#endif
+#ifdef EEPROM_SETTINGS
+    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
+#endif
+    END_MENU();
+}
+static void lcd_control_temperature_preheat_tglase_settings_menu()
+{
+    START_MENU();
+    MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &tglasePreheatFanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &tglasePreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+#if TEMP_SENSOR_BED != 0
+    MENU_ITEM_EDIT(int3, MSG_BED, &tglasePreheatHPBTemp, 0, BED_MAXTEMP - 15);
+#endif
+#ifdef EEPROM_SETTINGS
+    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
+#endif
+    END_MENU();
+}
 static void lcd_advanced_menu()
 {
     START_MENU();
@@ -1610,3 +1804,4 @@ void copy_and_scalePID_d()
 }
 
 #endif //ULTRA_LCD
+

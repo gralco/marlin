@@ -131,16 +131,16 @@ static void lcd_implementation_init()
 			u8g.drawBitmapP(0,0,LULZBOT_BMPBYTEWIDTH,LULZBOT_BMPHEIGHT,lulzbot_bmp);
 			// Welcome message
 			u8g.setFont(u8g_font_6x10_marlin);
-			u8g.drawStr(58,17,"TAZ");
+			u8g.drawStr(61,17,"TAZ");
 			u8g.setFont(u8g_font_6x10_marlin);
-			u8g.drawStr(80,17," ");
+			u8g.drawStr(85,17,"v5");
+			u8g.setFont(u8g_font_6x10_marlin);
+			u8g.drawStr(63,29,"3D Printer");
 			u8g.setFont(u8g_font_5x8);
-			u8g.drawStr(58,29,"FlexyDually V2");
+			u8g.drawStr(63,41,"LulzBot.com");
 			u8g.setFont(u8g_font_5x8);
-			u8g.drawStr(58,41,"LulzBot.com");
-			u8g.setFont(u8g_font_5x8);
-			u8g.drawStr(58,53,"Firmware:");
-			u8g.drawStr(58,62,"Marlin 2015Q3");
+			u8g.drawStr(63,53,"Firmware:");
+			u8g.drawStr(63,62,"Marlin 2015Q3");
 	   } while( u8g.nextPage() );
 delay(3000);
 }
@@ -605,5 +605,6 @@ static void lcd_implementation_quick_feedback()
 #endif
 }
 #endif//ULTRA_LCD_IMPLEMENTATION_DOGM_H
+
 
 

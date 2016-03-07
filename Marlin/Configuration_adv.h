@@ -73,7 +73,7 @@
 // When first starting the main fan, run it at full speed for the
 // given number of milliseconds.  This gets the fan spinning reliably
 // before setting a PWM value. (Does not work with software PWM for fan on Sanguinololu)
-#define FAN_KICKSTART_TIME 100
+//#define FAN_KICKSTART_TIME 100
 
 
 // Extruder Fan Setup 
@@ -282,7 +282,7 @@
 #define MICROSTEP_MODES {16,16,16,16,16} // [1,2,4,8,16]
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
-#define DIGIPOT_MOTOR_CURRENT {175,175,240,160,160} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+#define DIGIPOT_MOTOR_CURRENT {175,175,240,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
 
 
 //===========================================================================
@@ -491,3 +491,4 @@ const unsigned int dropsegments=5; //everything with less than this number of st
 
 
 #endif //__CONFIGURATION_ADV_H
+

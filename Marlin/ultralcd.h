@@ -47,18 +47,41 @@
   extern int absPreheatHPBTemp;
   extern int absPreheatFanSpeed;
   
-  extern int pvaPreheatHotendTemp;
-  extern int pvaPreheatHPBTemp;
-  extern int pvaPreheatFanSpeed;
+  extern int bridgePreheatHotendTemp;
+  extern int bridgePreheatHPBTemp;
+  extern int bridgePreheatFanSpeed;
   
-  extern int ninjaPreheatHotendTemp;
-  extern int ninjaPreheatHPBTemp;
-  extern int ninjaPreheatFanSpeed;
+  extern int pctpePreheatHotendTemp;
+  extern int pctpePreheatHPBTemp;
+  extern int pctpePreheatFanSpeed;
   
-  extern int semiPreheatHotendTemp;
-  extern int semiPreheatHPBTemp;
-  extern int semiPreheatFanSpeed;
+  extern int alloy_910PreheatHotendTemp;
+  extern int alloy_910PreheatHPBTemp;
+  extern int alloy_910PreheatFanSpeed;
   
+  //~ extern int bambooPreheatHotendTemp;
+  //~ extern int bambooPreheatHPBTemp;
+  //~ extern int bambooPreheatFanSpeed;
+  
+  extern int n_ventPreheatHotendTemp;
+  extern int n_ventPreheatHPBTemp;
+  extern int n_ventPreheatFanSpeed;
+  
+  extern int laybrickPreheatHotendTemp;
+  extern int laybrickPreheatHPBTemp;
+  extern int laybrickPreheatFanSpeed;
+  
+  extern int laywoodPreheatHotendTemp;
+  extern int laywoodPreheatHPBTemp;
+  extern int laywoodPreheatFanSpeed;
+  
+  extern int polycarbonatePreheatHotendTemp;
+  extern int polycarbonatePreheatHPBTemp;
+  extern int polycarbonatePreheatFanSpeed;
+  
+  extern int tglasePreheatHotendTemp;
+  extern int tglasePreheatHPBTemp;
+  extern int tglasePreheatFanSpeed;
     
   void lcd_buzz(long duration,uint16_t freq);
   bool lcd_clicked();
@@ -129,3 +152,4 @@ char *ftostr51(const float &x);
 char *ftostr52(const float &x);
 
 #endif //ULTRALCD
+
