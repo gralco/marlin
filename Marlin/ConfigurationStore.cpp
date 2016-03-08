@@ -37,7 +37,7 @@ void _EEPROM_readData(int &pos, uint8_t* value, uint8_t size)
 // the default values are used whenever there is a change to the data, to prevent
 // wrong data being written to the variables.
 // ALSO:  always make sure the variables in the Store and retrieve sections are in the same order.
-#define EEPROM_VERSION "V21"
+#define EEPROM_VERSION "V20"
 
 #ifdef EEPROM_SETTINGS
 void Config_StoreSettings() 
@@ -63,26 +63,12 @@ void Config_StoreSettings()
   EEPROM_WRITE_VAR(i,endstop_adj);
   #endif
   #ifndef ULTIPANEL
-  int plaPreheatHotendTemp = PLA_PREHEAT_HOTEND_TEMP, plaPreheatHPBTemp = PLA_PREHEAT_HPB_TEMP, plaPreheatFanSpeed = PLA_PREHEAT_FAN_SPEED;
-  int hipsPreheatHotendTemp = HIPS_PREHEAT_HOTEND_TEMP, hipsPreheatHPBTemp = HIPS_PREHEAT_HPB_TEMP, hipsPreheatFanSpeed = HIPS_PREHEAT_FAN_SPEED;
-  int absPreheatHotendTemp = ABS_PREHEAT_HOTEND_TEMP, absPreheatHPBTemp = ABS_PREHEAT_HPB_TEMP, absPreheatFanSpeed = ABS_PREHEAT_FAN_SPEED;
-  int pvaPreheatHotendTemp = PVA_PREHEAT_HOTEND_TEMP, pvaPreheatHPBTemp = PVA_PREHEAT_HPB_TEMP, pvaPreheatFanSpeed = PVA_PREHEAT_FAN_SPEED;
+  
   int ninjaPreheatHotendTemp = NINJA_PREHEAT_HOTEND_TEMP, ninjaPreheatHPBTemp = NINJA_PREHEAT_HPB_TEMP, ninjaPreheatFanSpeed = NINJA_PREHEAT_FAN_SPEED;
   int semiPreheatHotendTemp = SEMI_PREHEAT_HOTEND_TEMP, semiPreheatHPBTemp = SEMI_PREHEAT_HPB_TEMP, semiPreheatFanSpeed = SEMI_PREHEAT_FAN_SPEED;
   
+  
   #endif
-  EEPROM_WRITE_VAR(i,plaPreheatHotendTemp);
-  EEPROM_WRITE_VAR(i,plaPreheatHPBTemp);
-  EEPROM_WRITE_VAR(i,plaPreheatFanSpeed);
-  EEPROM_WRITE_VAR(i,hipsPreheatHotendTemp);
-  EEPROM_WRITE_VAR(i,hipsPreheatHPBTemp);
-  EEPROM_WRITE_VAR(i,hipsPreheatFanSpeed);
-  EEPROM_WRITE_VAR(i,absPreheatHotendTemp);
-  EEPROM_WRITE_VAR(i,absPreheatHPBTemp);
-  EEPROM_WRITE_VAR(i,absPreheatFanSpeed);
-  EEPROM_WRITE_VAR(i,pvaPreheatHotendTemp);
-  EEPROM_WRITE_VAR(i,pvaPreheatHPBTemp);
-  EEPROM_WRITE_VAR(i,pvaPreheatFanSpeed);
   EEPROM_WRITE_VAR(i,ninjaPreheatHotendTemp);
   EEPROM_WRITE_VAR(i,ninjaPreheatHPBTemp);
   EEPROM_WRITE_VAR(i,ninjaPreheatFanSpeed);
@@ -224,25 +210,9 @@ void Config_RetrieveSettings()
         EEPROM_READ_VAR(i,endstop_adj);
         #endif
         #ifndef ULTIPANEL
-        int plaPreheatHotendTemp, plaPreheatHPBTemp, plaPreheatFanSpeed;
-        int hipsPreheatHotendTemp, hipsPreheatHPBTemp, hipsPreheatFanSpeed;
-        int absPreheatHotendTemp, absPreheatHPBTemp, absPreheatFanSpeed;
-        int pvaPreheatHotendTemp, pvaPreheatHPBTemp, pvaPreheatFanSpeed;
         int ninjaPreheatHotendTemp, ninjaPreheatHPBTemp, ninjaPreheatFanSpeed;
         int semiPreheatHotendTemp, semiPreheatHPBTemp, semiPreheatFanSpeed;
         #endif
-        EEPROM_READ_VAR(i,plaPreheatHotendTemp);
-        EEPROM_READ_VAR(i,plaPreheatHPBTemp);
-        EEPROM_READ_VAR(i,plaPreheatFanSpeed);
-        EEPROM_READ_VAR(i,hipsPreheatHotendTemp);
-        EEPROM_READ_VAR(i,hipsPreheatHPBTemp);
-        EEPROM_READ_VAR(i,hipsPreheatFanSpeed);
-        EEPROM_READ_VAR(i,absPreheatHotendTemp);
-        EEPROM_READ_VAR(i,absPreheatHPBTemp);
-        EEPROM_READ_VAR(i,absPreheatFanSpeed);
-        EEPROM_READ_VAR(i,pvaPreheatHotendTemp);
-        EEPROM_READ_VAR(i,pvaPreheatHPBTemp);
-        EEPROM_READ_VAR(i,pvaPreheatFanSpeed);
         EEPROM_READ_VAR(i,ninjaPreheatHotendTemp);
         EEPROM_READ_VAR(i,ninjaPreheatHPBTemp);
         EEPROM_READ_VAR(i,ninjaPreheatFanSpeed);
@@ -320,18 +290,6 @@ void Config_ResetDefault()
     endstop_adj[0] = endstop_adj[1] = endstop_adj[2] = 0;
 #endif
 #ifdef ULTIPANEL
-    plaPreheatHotendTemp = PLA_PREHEAT_HOTEND_TEMP;
-    plaPreheatHPBTemp = PLA_PREHEAT_HPB_TEMP;
-    plaPreheatFanSpeed = PLA_PREHEAT_FAN_SPEED;
-    hipsPreheatHotendTemp = HIPS_PREHEAT_HOTEND_TEMP;
-    hipsPreheatHPBTemp = HIPS_PREHEAT_HPB_TEMP;
-    hipsPreheatFanSpeed = HIPS_PREHEAT_FAN_SPEED;
-    absPreheatHotendTemp = ABS_PREHEAT_HOTEND_TEMP;
-    absPreheatHPBTemp = ABS_PREHEAT_HPB_TEMP;
-    absPreheatFanSpeed = ABS_PREHEAT_FAN_SPEED;
-    pvaPreheatHotendTemp = PVA_PREHEAT_HOTEND_TEMP;
-    pvaPreheatHPBTemp = PVA_PREHEAT_HPB_TEMP;
-    pvaPreheatFanSpeed = PVA_PREHEAT_FAN_SPEED;
     ninjaPreheatHotendTemp = NINJA_PREHEAT_HOTEND_TEMP;
     ninjaPreheatHPBTemp = NINJA_PREHEAT_HPB_TEMP;
     ninjaPreheatFanSpeed = NINJA_PREHEAT_FAN_SPEED;

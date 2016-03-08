@@ -11,21 +11,6 @@
 int8_t encoderDiff; /* encoderDiff is updated from interrupt context and added to encoderPosition every LCD update */
 
 /* Configuration settings */
-int plaPreheatHotendTemp;
-int plaPreheatHPBTemp;
-int plaPreheatFanSpeed;
-
-int hipsPreheatHotendTemp;
-int hipsPreheatHPBTemp;
-int hipsPreheatFanSpeed;
-
-int absPreheatHotendTemp;
-int absPreheatHPBTemp;
-int absPreheatFanSpeed;
-
-int pvaPreheatHotendTemp;
-int pvaPreheatHPBTemp;
-int pvaPreheatFanSpeed;
 
 int ninjaPreheatHotendTemp;
 int ninjaPreheatHPBTemp;
@@ -34,6 +19,7 @@ int ninjaPreheatFanSpeed;
 int semiPreheatHotendTemp;
 int semiPreheatHPBTemp;
 int semiPreheatFanSpeed;
+
 
 #ifdef ULTIPANEL
 static float manual_feedrate[] = MANUAL_FEEDRATE;
@@ -72,9 +58,15 @@ static void lcd_control_temperature_menu();
 static void lcd_control_temperature_preheat_pla_settings_menu();
 static void lcd_control_temperature_preheat_hips_settings_menu();
 static void lcd_control_temperature_preheat_abs_settings_menu();
-static void lcd_control_temperature_preheat_pva_settings_menu();
 static void lcd_control_temperature_preheat_ninja_settings_menu();
 static void lcd_control_temperature_preheat_semi_settings_menu();
+static void lcd_control_temperature_preheat_alloy_910_settings_menu();
+//~ static void lcd_control_temperature_preheat_bamboo_settings_menu();
+static void lcd_control_temperature_preheat_n_vent_settings_menu();
+static void lcd_control_temperature_preheat_laybrick_settings_menu();
+static void lcd_control_temperature_preheat_laywood_settings_menu();
+static void lcd_control_temperature_preheat_polycarbonate_settings_menu();
+static void lcd_control_temperature_preheat_tglase_settings_menu();
 static void lcd_advanced_menu();
 #ifdef DOGLCD
 static void lcd_set_contrast();
@@ -323,58 +315,27 @@ static void lcd_autostart_sd()
 }
 #endif
 
-void lcd_preheat_abs_ninja()
+
+void lcd_preheat_ninja()
 {
-    setTargetHotend0(absPreheatHotendTemp);
+    setTargetHotend0(ninjaPreheatHotendTemp);
     setTargetHotend1(ninjaPreheatHotendTemp);
     setTargetHotend2(ninjaPreheatHotendTemp);
     setTargetBed(ninjaPreheatHPBTemp);
-    fanSpeed = absPreheatFanSpeed;
+    fanSpeed = ninjaPreheatFanSpeed;
     lcd_return_to_status();
     setWatch(); // heater sanity check timer
 }
-
-void lcd_preheat_hips_ninja()
+void lcd_preheat_semi()
 {
-    setTargetHotend0(hipsPreheatHotendTemp);
-    setTargetHotend1(ninjaPreheatHotendTemp);
-    setTargetHotend2(ninjaPreheatHotendTemp);
-    setTargetBed(ninjaPreheatHPBTemp);
-    fanSpeed = hipsPreheatFanSpeed;
-    lcd_return_to_status();
-    setWatch(); // heater sanity check timer
-}
-void lcd_preheat_abs_semi()
-{
-    setTargetHotend0(absPreheatHotendTemp);
+    setTargetHotend0(semiPreheatHotendTemp);
     setTargetHotend1(semiPreheatHotendTemp);
     setTargetHotend2(semiPreheatHotendTemp);
     setTargetBed(semiPreheatHPBTemp);
-    fanSpeed = absPreheatFanSpeed;
+    fanSpeed = semiPreheatFanSpeed;
     lcd_return_to_status();
     setWatch(); // heater sanity check timer
 }
-void lcd_preheat_hips_semi()
-{
-    setTargetHotend0(hipsPreheatHotendTemp);
-    setTargetHotend1(semiPreheatHotendTemp);
-    setTargetHotend2(semiPreheatHotendTemp);
-    setTargetBed(semiPreheatHPBTemp);
-    fanSpeed = hipsPreheatFanSpeed;
-    lcd_return_to_status();
-    setWatch(); // heater sanity check timer
-}
-void lcd_preheat_pla_pva()
-{
-    setTargetHotend0(plaPreheatHotendTemp);
-    setTargetHotend1(pvaPreheatHotendTemp);
-    setTargetHotend2(pvaPreheatHotendTemp);
-    setTargetBed(pvaPreheatHPBTemp);
-    fanSpeed = plaPreheatFanSpeed;
-    lcd_return_to_status();
-    setWatch(); // heater sanity check timer
-}
-
 static void lcd_cooldown()
 {
     setTargetHotend0(0);
@@ -506,11 +467,8 @@ static void lcd_temperature_menu()
     START_MENU();
     MENU_ITEM(back, MSG_MAIN, lcd_main_menu);
     MENU_ITEM(submenu, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM(function, MSG_PREHEAT_ABS_NINJA, lcd_preheat_abs_ninja);
-    MENU_ITEM(function, MSG_PREHEAT_HIPS_NINJA, lcd_preheat_hips_ninja);
-    MENU_ITEM(function, MSG_PREHEAT_ABS_SEMI, lcd_preheat_abs_semi);
-    MENU_ITEM(function, MSG_PREHEAT_HIPS_SEMI, lcd_preheat_hips_semi);
-    MENU_ITEM(function, MSG_PREHEAT_PLA_PVA, lcd_preheat_pla_pva);
+    MENU_ITEM(function, MSG_PREHEAT_NINJA, lcd_preheat_ninja);
+    MENU_ITEM(function, MSG_PREHEAT_SEMI, lcd_preheat_semi);
     MENU_ITEM(function, MSG_COOLDOWN, lcd_cooldown);
     END_MENU();
 }
@@ -728,73 +686,12 @@ static void lcd_control_temperature_menu()
     MENU_ITEM_EDIT(float3, MSG_PID_C, &Kc, 1, 9990);
 # endif//PID_ADD_EXTRUSION_RATE
 #endif//PIDTEMP
-    MENU_ITEM(submenu, MSG_PREHEAT_PLA_SETTINGS, lcd_control_temperature_preheat_pla_settings_menu);
-    MENU_ITEM(submenu, MSG_PREHEAT_HIPS_SETTINGS, lcd_control_temperature_preheat_hips_settings_menu);
-    MENU_ITEM(submenu, MSG_PREHEAT_ABS_SETTINGS, lcd_control_temperature_preheat_abs_settings_menu);
-    MENU_ITEM(submenu, MSG_PREHEAT_PVA_SETTINGS, lcd_control_temperature_preheat_pva_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_NINJA_SETTINGS, lcd_control_temperature_preheat_ninja_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_SEMI_SETTINGS, lcd_control_temperature_preheat_semi_settings_menu);
     END_MENU();
 }
 
-static void lcd_control_temperature_preheat_pla_settings_menu()
-{
-    START_MENU();
-    MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &plaPreheatFanSpeed, 0, 255);
-    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &plaPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
-//~ #if TEMP_SENSOR_BED != 0
-    //~ MENU_ITEM_EDIT(int3, MSG_BED, &plaPreheatHPBTemp, 0, BED_MAXTEMP - 15);
-//~ #endif
-#ifdef EEPROM_SETTINGS
-    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
-#endif
-    END_MENU();
-}
 
-static void lcd_control_temperature_preheat_hips_settings_menu()
-{
-    START_MENU();
-    MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &hipsPreheatFanSpeed, 0, 255);
-    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &hipsPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
-//~ #if TEMP_SENSOR_BED != 0
-    //~ MENU_ITEM_EDIT(int3, MSG_BED, &hipsPreheatHPBTemp, 0, BED_MAXTEMP - 15);
-//~ #endif
-#ifdef EEPROM_SETTINGS
-    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
-#endif
-    END_MENU();
-}
-
-static void lcd_control_temperature_preheat_abs_settings_menu()
-{
-    START_MENU();
-    MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &absPreheatFanSpeed, 0, 255);
-    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &absPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
-//~ #if TEMP_SENSOR_BED != 0
-    //~ MENU_ITEM_EDIT(int3, MSG_BED, &absPreheatHPBTemp, 0, BED_MAXTEMP - 15);
-//~ #endif
-#ifdef EEPROM_SETTINGS
-    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
-#endif
-    END_MENU();
-}
-static void lcd_control_temperature_preheat_pva_settings_menu()
-{
-    START_MENU();
-    MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &pvaPreheatFanSpeed, 0, 255);
-    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &pvaPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
-#if TEMP_SENSOR_BED != 0
-    MENU_ITEM_EDIT(int3, MSG_BED, &pvaPreheatHPBTemp, 0, BED_MAXTEMP - 15);
-#endif
-#ifdef EEPROM_SETTINGS
-    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
-#endif
-    END_MENU();
-}
 static void lcd_control_temperature_preheat_ninja_settings_menu()
 {
     START_MENU();

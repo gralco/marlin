@@ -35,21 +35,6 @@
   FORCE_INLINE void lcd_buttons_update() {}
   #endif
 
-  extern int plaPreheatHotendTemp;
-  extern int plaPreheatHPBTemp;
-  extern int plaPreheatFanSpeed;
-  
-  extern int hipsPreheatHotendTemp;
-  extern int hipsPreheatHPBTemp;
-  extern int hipsPreheatFanSpeed;
-
-  extern int absPreheatHotendTemp;
-  extern int absPreheatHPBTemp;
-  extern int absPreheatFanSpeed;
-  
-  extern int pvaPreheatHotendTemp;
-  extern int pvaPreheatHPBTemp;
-  extern int pvaPreheatFanSpeed;
   
   extern int ninjaPreheatHotendTemp;
   extern int ninjaPreheatHPBTemp;
@@ -58,6 +43,7 @@
   extern int semiPreheatHotendTemp;
   extern int semiPreheatHPBTemp;
   extern int semiPreheatFanSpeed;
+  
   
     
   void lcd_buzz(long duration,uint16_t freq);
