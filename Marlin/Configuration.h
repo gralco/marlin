@@ -463,34 +463,34 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 
 // Preheat Constants
 #define PLA_PREHEAT_HOTEND_TEMP 205
-#define PLA_PREHEAT_HPB_TEMP 60   //Not used in dual firmware
+#define PLA_PREHEAT_HPB_TEMP 60
 #define PLA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
 #define HIPS_PREHEAT_HOTEND_TEMP 230
-#define HIPS_PREHEAT_HPB_TEMP 110  //Not used in dual firmware
+#define HIPS_PREHEAT_HPB_TEMP 110  
 #define HIPS_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
 #define ABS_PREHEAT_HOTEND_TEMP 230
-#define ABS_PREHEAT_HPB_TEMP 110  //Not used in dual firmware
+#define ABS_PREHEAT_HPB_TEMP 110  
 #define ABS_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
 #define PVA_PREHEAT_HOTEND_TEMP 190
-#define PVA_PREHEAT_HPB_TEMP 60
+#define PVA_PREHEAT_HPB_TEMP 60   //Not used in dual firmware
 #define PVA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define NINJA_PREHEAT_HOTEND_TEMP 220
-#define NINJA_PREHEAT_HPB_TEMP 110
+#define NINJA_PREHEAT_HOTEND_TEMP 227
+#define NINJA_PREHEAT_HPB_TEMP 110   //Not used in dual firmware
 #define NINJA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
 #define SEMI_PREHEAT_HOTEND_TEMP 220
-#define SEMI_PREHEAT_HPB_TEMP 110
+#define SEMI_PREHEAT_HPB_TEMP 110   //Not used in dual firmware
 #define SEMI_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define NGEN_PREHEAT_HOTEND_TEMP 220
-#define NGEN_PREHEAT_HPB_TEMP 110
+#define NGEN_PREHEAT_HOTEND_TEMP 230
+#define NGEN_PREHEAT_HPB_TEMP 85
 #define NGEN_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define NYLON_PREHEAT_HOTEND_TEMP 220
+#define NYLON_PREHEAT_HOTEND_TEMP 235
 #define NYLON_PREHEAT_HPB_TEMP 110
 #define NYLON_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
