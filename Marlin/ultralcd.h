@@ -59,6 +59,14 @@
   extern int semiPreheatHPBTemp;
   extern int semiPreheatFanSpeed;
   
+  extern int ngenPreheatHotendTemp;
+  extern int ngenPreheatHPBTemp;
+  extern int ngenPreheatFanSpeed;
+  
+  extern int nylonPreheatHotendTemp;
+  extern int nylonPreheatHPBTemp;
+  extern int nylonPreheatFanSpeed;
+  
     
   void lcd_buzz(long duration,uint16_t freq);
   bool lcd_clicked();

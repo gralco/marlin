@@ -486,6 +486,14 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define SEMI_PREHEAT_HPB_TEMP 110
 #define SEMI_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
+#define NGEN_PREHEAT_HOTEND_TEMP 220
+#define NGEN_PREHEAT_HPB_TEMP 110
+#define NGEN_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+
+#define NYLON_PREHEAT_HOTEND_TEMP 220
+#define NYLON_PREHEAT_HPB_TEMP 110
+#define NYLON_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+
 
 //LCD and SD support
 //#define ULTRA_LCD  //general lcd support, also 16x2

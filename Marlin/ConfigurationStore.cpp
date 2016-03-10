@@ -69,6 +69,8 @@ void Config_StoreSettings()
   int pvaPreheatHotendTemp = PVA_PREHEAT_HOTEND_TEMP, pvaPreheatHPBTemp = PVA_PREHEAT_HPB_TEMP, pvaPreheatFanSpeed = PVA_PREHEAT_FAN_SPEED;
   int ninjaPreheatHotendTemp = NINJA_PREHEAT_HOTEND_TEMP, ninjaPreheatHPBTemp = NINJA_PREHEAT_HPB_TEMP, ninjaPreheatFanSpeed = NINJA_PREHEAT_FAN_SPEED;
   int semiPreheatHotendTemp = SEMI_PREHEAT_HOTEND_TEMP, semiPreheatHPBTemp = SEMI_PREHEAT_HPB_TEMP, semiPreheatFanSpeed = SEMI_PREHEAT_FAN_SPEED;
+  int ngenPreheatHotendTemp = NGEN_PREHEAT_HOTEND_TEMP, ngenPreheatHPBTemp = NGEN_PREHEAT_HPB_TEMP, ngenPreheatFanSpeed = NGEN_PREHEAT_FAN_SPEED;
+  int nylonPreheatHotendTemp = NYLON_PREHEAT_HOTEND_TEMP, nylonPreheatHPBTemp = NYLON_PREHEAT_HPB_TEMP, nylonPreheatFanSpeed = NYLON_PREHEAT_FAN_SPEED;
   
   #endif
   EEPROM_WRITE_VAR(i,plaPreheatHotendTemp);
@@ -89,6 +91,12 @@ void Config_StoreSettings()
   EEPROM_WRITE_VAR(i,semiPreheatHotendTemp);
   EEPROM_WRITE_VAR(i,semiPreheatHPBTemp);
   EEPROM_WRITE_VAR(i,semiPreheatFanSpeed);
+  EEPROM_WRITE_VAR(i,ngenPreheatHotendTemp);
+  EEPROM_WRITE_VAR(i,ngenPreheatHPBTemp);
+  EEPROM_WRITE_VAR(i,ngenPreheatFanSpeed);
+  EEPROM_WRITE_VAR(i,nylonPreheatHotendTemp);
+  EEPROM_WRITE_VAR(i,nylonPreheatHPBTemp);
+  EEPROM_WRITE_VAR(i,nylonPreheatFanSpeed);
   EEPROM_WRITE_VAR(i,zprobe_zoffset);
   #ifdef PIDTEMP
     EEPROM_WRITE_VAR(i,Kp);
@@ -230,6 +238,8 @@ void Config_RetrieveSettings()
         int pvaPreheatHotendTemp, pvaPreheatHPBTemp, pvaPreheatFanSpeed;
         int ninjaPreheatHotendTemp, ninjaPreheatHPBTemp, ninjaPreheatFanSpeed;
         int semiPreheatHotendTemp, semiPreheatHPBTemp, semiPreheatFanSpeed;
+        int ngenPreheatHotendTemp, ngenPreheatHPBTemp, ngenPreheatFanSpeed;
+        int nylonPreheatHotendTemp, nylonPreheatHPBTemp, nylonPreheatFanSpeed;
         #endif
         EEPROM_READ_VAR(i,plaPreheatHotendTemp);
         EEPROM_READ_VAR(i,plaPreheatHPBTemp);
@@ -249,6 +259,12 @@ void Config_RetrieveSettings()
         EEPROM_READ_VAR(i,semiPreheatHotendTemp);
         EEPROM_READ_VAR(i,semiPreheatHPBTemp);
         EEPROM_READ_VAR(i,semiPreheatFanSpeed);
+        EEPROM_READ_VAR(i,ngenPreheatHotendTemp);
+        EEPROM_READ_VAR(i,ngenPreheatHPBTemp);
+        EEPROM_READ_VAR(i,ngenPreheatFanSpeed);
+        EEPROM_READ_VAR(i,nylonPreheatHotendTemp);
+        EEPROM_READ_VAR(i,nylonPreheatHPBTemp);
+        EEPROM_READ_VAR(i,nylonPreheatFanSpeed);
         EEPROM_READ_VAR(i,zprobe_zoffset);
         #ifndef PIDTEMP
         float Kp,Ki,Kd;
@@ -338,6 +354,12 @@ void Config_ResetDefault()
     semiPreheatHotendTemp = SEMI_PREHEAT_HOTEND_TEMP;
     semiPreheatHPBTemp = SEMI_PREHEAT_HPB_TEMP;
     semiPreheatFanSpeed = SEMI_PREHEAT_FAN_SPEED;
+    ngenPreheatHotendTemp = NGEN_PREHEAT_HOTEND_TEMP;
+    ngenPreheatHPBTemp = NGEN_PREHEAT_HPB_TEMP;
+    ngenPreheatFanSpeed = NGEN_PREHEAT_FAN_SPEED;
+    nylonPreheatHotendTemp = NYLON_PREHEAT_HOTEND_TEMP;
+    nylonPreheatHPBTemp = NYLON_PREHEAT_HPB_TEMP;
+    nylonPreheatFanSpeed = NYLON_PREHEAT_FAN_SPEED;
     
 #endif
 #ifdef ENABLE_AUTO_BED_LEVELING
