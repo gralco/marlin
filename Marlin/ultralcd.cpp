@@ -777,8 +777,8 @@ static void lcd_control_temperature_menu()
     MENU_ITEM(submenu, MSG_PREHEAT_PVA_SETTINGS, lcd_control_temperature_preheat_pva_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_NINJA_SETTINGS, lcd_control_temperature_preheat_ninja_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_SEMI_SETTINGS, lcd_control_temperature_preheat_semi_settings_menu);
-    MENU_ITEM(submenu, MSG_PREHEAT_NGEN_SETTINGS, lcd_control_temperature_preheat_semi_settings_menu);
-    MENU_ITEM(submenu, MSG_PREHEAT_NYLON_SETTINGS, lcd_control_temperature_preheat_semi_settings_menu);  
+    MENU_ITEM(submenu, MSG_PREHEAT_NGEN_SETTINGS, lcd_control_temperature_preheat_ngen_settings_menu);
+    MENU_ITEM(submenu, MSG_PREHEAT_NYLON_SETTINGS, lcd_control_temperature_preheat_nylon_settings_menu);  
     END_MENU();
 }
 
