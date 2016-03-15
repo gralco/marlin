@@ -487,17 +487,15 @@ void check_axes_activity()
 #if defined(FAN_PIN) && FAN_PIN > -1
   #ifdef FAN_KICKSTART_TIME
     static unsigned long fan_kick_end;
-    if (tail_fan_speed) {
+    if (0 < tail_fan_speed && tail_fan_speed < 255) {
       if (fan_kick_end == 0) {
         // Just starting up fan - run at full power.
         fan_kick_end = millis() + FAN_KICKSTART_TIME;
         tail_fan_speed = 255;
-      } else if (fan_kick_end > millis())
+      } else if (fan_kick_end > millis()) {
         // Fan still spinning up.
         tail_fan_speed = 255;
-    } else {
-      fan_kick_end = 0;
-    }
+      }
   #endif//FAN_KICKSTART_TIME
   #ifdef FAN_SOFT_PWM
   fanSpeedSoftPwm = tail_fan_speed;
@@ -523,6 +521,13 @@ void check_axes_activity()
 	    #endif 
 	 #endif  // EXTRUDER_FAN_SETUP
   #endif //!FAN_SOFT_PWM
+      } else if(tail_fan_speed == 255) {
+        digitalWrite(FAN_PIN, HIGH);
+        fan_kick_end = 0;
+      } else {
+        digitalWrite(FAN_PIN, LOW);
+        fan_kick_end = 0;
+      }
 #endif//FAN_PIN > -1
 
 #ifdef AUTOTEMP
