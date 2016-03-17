@@ -39,7 +39,7 @@
 		#define MACHINE_NAME "RepRap"
 	#endif
 
-	#define FIRMWARE_URL "http://www.mendel-parts.com"
+	#define FIRMWARE_URL "https://code.alephobjects.com/diffusion/MARLIN/"
 #endif
 
 #ifndef MACHINE_UUID
