@@ -336,9 +336,9 @@ void Config_ResetDefault()
     endstop_adj[0] = endstop_adj[1] = endstop_adj[2] = 0;
 #endif
 #ifdef ULTIPANEL
-    plaPreheatHotendTemp = PLA_PREHEAT_HOTEND_TEMP;
-    plaPreheatHPBTemp = PLA_PREHEAT_HPB_TEMP;
-    plaPreheatFanSpeed = PLA_PREHEAT_FAN_SPEED;
+    //~ plaPreheatHotendTemp = PLA_PREHEAT_HOTEND_TEMP;
+    //~ plaPreheatHPBTemp = PLA_PREHEAT_HPB_TEMP;
+    //~ plaPreheatFanSpeed = PLA_PREHEAT_FAN_SPEED;
     //~ hipsPreheatHotendTemp = HIPS_PREHEAT_HOTEND_TEMP;
     //~ hipsPreheatHPBTemp = HIPS_PREHEAT_HPB_TEMP;
     //~ hipsPreheatFanSpeed = HIPS_PREHEAT_FAN_SPEED;
