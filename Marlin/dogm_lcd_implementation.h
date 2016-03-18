@@ -140,7 +140,7 @@ static void lcd_implementation_init()
 			u8g.drawStr(58,41,"LulzBot.com");
 			u8g.setFont(u8g_font_5x8);
 			u8g.drawStr(58,53,"Firmware:");
-			u8g.drawStr(58,62,"Marlin 2015Q3");
+			u8g.drawStr(58,62,"Marlin 1.0.0.1");
 	   } while( u8g.nextPage() );
 delay(3000);
 }
