@@ -51,9 +51,9 @@
   extern int pvaPreheatHPBTemp;
   extern int pvaPreheatFanSpeed;
   
-  //~ extern int ninjaPreheatHotendTemp;
-  //~ extern int ninjaPreheatHPBTemp;
-  //~ extern int ninjaPreheatFanSpeed;
+  extern int conductivePreheatHotendTemp;
+  extern int conductivePreheatHPBTemp;
+  extern int conductivePreheatFanSpeed;
   //~ 
   //~ extern int semiPreheatHotendTemp;
   //~ extern int semiPreheatHPBTemp;

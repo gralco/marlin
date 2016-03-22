@@ -27,9 +27,9 @@ int pvaPreheatHotendTemp;
 int pvaPreheatHPBTemp;
 int pvaPreheatFanSpeed;
 
-//~ int ninjaPreheatHotendTemp;
-//~ int ninjaPreheatHPBTemp;
-//~ int ninjaPreheatFanSpeed;
+int conductivePreheatHotendTemp;
+int conductivePreheatHPBTemp;
+int conductivePreheatFanSpeed;
 //~ 
 //~ int semiPreheatHotendTemp;
 //~ int semiPreheatHPBTemp;
@@ -73,7 +73,7 @@ static void lcd_control_temperature_preheat_pla_settings_menu();
 static void lcd_control_temperature_preheat_hips_settings_menu();
 static void lcd_control_temperature_preheat_abs_settings_menu();
 static void lcd_control_temperature_preheat_pva_settings_menu();
-//~ static void lcd_control_temperature_preheat_ninja_settings_menu();
+static void lcd_control_temperature_preheat_conductive_settings_menu();
 //~ static void lcd_control_temperature_preheat_semi_settings_menu();
 static void lcd_advanced_menu();
 #ifdef DOGLCD
@@ -364,17 +364,26 @@ void lcd_preheat_pla()
     lcd_return_to_status();
     setWatch(); // heater sanity check timer
 }
-void lcd_preheat_pva_pla()
+void lcd_preheat_pla_pva()
 {
-    setTargetHotend0(pvaPreheatHotendTemp);
-    setTargetHotend1(plaPreheatHotendTemp);
+    setTargetHotend0(plaPreheatHotendTemp);
+    setTargetHotend1(pvaPreheatHotendTemp);
     setTargetHotend2(pvaPreheatHotendTemp);
     setTargetBed(pvaPreheatHPBTemp);
     fanSpeed = plaPreheatFanSpeed;
     lcd_return_to_status();
     setWatch(); // heater sanity check timer
 }
-
+void lcd_preheat_pla_conductive()
+{
+    setTargetHotend0(plaPreheatHotendTemp);
+    setTargetHotend1(conductivePreheatHotendTemp);
+    setTargetHotend2(conductivePreheatHotendTemp);
+    setTargetBed(conductivePreheatHPBTemp);
+    fanSpeed = conductivePreheatFanSpeed;
+    lcd_return_to_status();
+    setWatch(); // heater sanity check timer
+}
 static void lcd_cooldown()
 {
     setTargetHotend0(0);
@@ -510,7 +519,8 @@ static void lcd_temperature_menu()
     MENU_ITEM(function, MSG_PREHEAT_ABS_HIPS, lcd_preheat_abs_hips);
     MENU_ITEM(function, MSG_PREHEAT_HIPS, lcd_preheat_hips);
     MENU_ITEM(function, MSG_PREHEAT_PLA, lcd_preheat_pla);
-    MENU_ITEM(function, MSG_PREHEAT_PVA_PLA, lcd_preheat_pva_pla);
+    MENU_ITEM(function, MSG_PREHEAT_PLA_PVA, lcd_preheat_pla_pva);
+    MENU_ITEM(function, MSG_PREHEAT_PLA_CONDUCTIVE, lcd_preheat_pla_conductive);
     MENU_ITEM(function, MSG_COOLDOWN, lcd_cooldown);
     END_MENU();
 }
@@ -732,7 +742,7 @@ static void lcd_control_temperature_menu()
     MENU_ITEM(submenu, MSG_PREHEAT_HIPS_SETTINGS, lcd_control_temperature_preheat_hips_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_ABS_SETTINGS, lcd_control_temperature_preheat_abs_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_PVA_SETTINGS, lcd_control_temperature_preheat_pva_settings_menu);
-    //~ MENU_ITEM(submenu, MSG_PREHEAT_NINJA_SETTINGS, lcd_control_temperature_preheat_ninja_settings_menu);
+    MENU_ITEM(submenu, MSG_PREHEAT_CONDUCTIVE_SETTINGS, lcd_control_temperature_preheat_conductive_settings_menu);
     //~ MENU_ITEM(submenu, MSG_PREHEAT_SEMI_SETTINGS, lcd_control_temperature_preheat_semi_settings_menu);
     END_MENU();
 }
@@ -795,20 +805,20 @@ static void lcd_control_temperature_preheat_pva_settings_menu()
 #endif
     END_MENU();
 }
-//~ static void lcd_control_temperature_preheat_ninja_settings_menu()
-//~ {
-    //~ START_MENU();
-    //~ MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    //~ MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &ninjaPreheatFanSpeed, 0, 255);
-    //~ MENU_ITEM_EDIT(int3, MSG_NOZZLE, &ninjaPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
-//~ #if TEMP_SENSOR_BED != 0
-    //~ MENU_ITEM_EDIT(int3, MSG_BED, &ninjaPreheatHPBTemp, 0, BED_MAXTEMP - 15);
-//~ #endif
-//~ #ifdef EEPROM_SETTINGS
-    //~ MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
-//~ #endif
-    //~ END_MENU();
-//~ }
+static void lcd_control_temperature_preheat_conductive_settings_menu()
+{
+    START_MENU();
+    MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &conductivePreheatFanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &conductivePreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+#if TEMP_SENSOR_BED != 0
+    MENU_ITEM_EDIT(int3, MSG_BED, &conductivePreheatHPBTemp, 0, BED_MAXTEMP - 15);
+#endif
+#ifdef EEPROM_SETTINGS
+    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
+#endif
+    END_MENU();
+}
 //~ static void lcd_control_temperature_preheat_semi_settings_menu()
 //~ {
     //~ START_MENU();

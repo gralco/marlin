@@ -478,9 +478,9 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define PVA_PREHEAT_HPB_TEMP 50   //Also changes Pva_Pla menu item in lcd
 #define PVA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-//~ #define NINJA_PREHEAT_HOTEND_TEMP 210
-//~ #define NINJA_PREHEAT_HPB_TEMP 100
-//~ #define NINJA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+#define CONDUCTIVE_PREHEAT_HOTEND_TEMP 215
+#define CONDUCTIVE_PREHEAT_HPB_TEMP 80   //Also changes Conductive_Pla menu item in lcd
+#define CONDUCTIVE_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 //~ 
 //~ #define SEMI_PREHEAT_HOTEND_TEMP 210
 //~ #define SEMI_PREHEAT_HPB_TEMP 100
