@@ -30,6 +30,12 @@
   #define LANGUAGE_INCLUDE GENERATE_LANGUAGE_INCLUDE(en)
 #endif
 
+//#if ENABLED(USE_AUTOMATIC_VERSIONING)
+  //#include "_Version.h"
+//#else
+  #include "Default_Version.h"
+//#endif
+
 #define PROTOCOL_VERSION "1.0"
 
 #if MB(ULTIMAKER)|| MB(ULTIMAKER_OLD)|| MB(ULTIMAIN_2)
@@ -49,7 +55,7 @@
   #define FIRMWARE_URL "https://github.com/fmalpartida/Marlin/tree/SAV-MkI-config"
 #elif MB(MINI_RAMBO)
   #define MACHINE_NAME "LulzBot Mini"
-  #define FIRMWARE_URL "https://code.alephobjects.com/diffusion/MARLIN/repository/Foxglove/"
+  #define FIRMWARE_URL "https://code.alephobjects.com/diffusion/MARLIN/"
 #else
   #ifdef CUSTOM_MENDEL_NAME
     #define MACHINE_NAME CUSTOM_MENDEL_NAME
@@ -62,8 +68,8 @@
 #endif
 
 
-#ifndef MACHINE_UUID
-   #define MACHINE_UUID "00000000-0000-0000-0000-000000000000"
+#ifndef UUID
+   #define UUID "00000000-0000-0000-0000-000000000000"
 #endif
 
 
@@ -77,6 +83,7 @@
 
 // Common serial messages
 #define MSG_MARLIN "Marlin"
+#define VERSION_STRING SHORT_BUILD_VERSION
 
 // Serial Console Messages (do not translate those!)
 
