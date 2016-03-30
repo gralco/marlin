@@ -71,7 +71,13 @@
 
 #define PROTOCOL_VERSION "1.0"
 
-#if MB(ULTIMAKER)|| MB(ULTIMAKER_OLD)|| MB(ULTIMAIN_2)
+#if MB(RAMBO)
+  #define DEFAULT_MACHINE_NAME "LulzBot TAZ 6"
+  #define DEFAULT_SOURCE_URL "https://code.alephobjects.com/diffusion/MARLIN/"
+#elif MB(MINIRAMBO)
+  #define DEFAULT_MACHINE_NAME "LulzBot Mini"
+  #define DEFAULT_SOURCE_URL "https://code.alephobjects.com/diffusion/MARLIN/"
+#elif MB(ULTIMAKER)|| MB(ULTIMAKER_OLD)|| MB(ULTIMAIN_2)
   #define DEFAULT_MACHINE_NAME "Ultimaker"
   #define DEFAULT_SOURCE_URL "https://github.com/Ultimaker/Marlin"
 #elif MB(RUMBA)
