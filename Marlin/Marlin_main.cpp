@@ -1414,6 +1414,9 @@ static void setup_for_endstop_move() {
 
       // move back down slowly to find bed
       set_homing_bump_feedrate(Z_AXIS);
+      
+      //adjust bump feed rate during second probe to increase accuracy
+      feedrate /= 10;
 
       zPosition -= home_bump_mm(Z_AXIS) * 2;
       line_to_z(zPosition);
@@ -3040,7 +3043,7 @@ inline void gcode_G28() {
       #endif // !DELTA
 
       int probePointCounter = 0;
-      bool zig = (auto_bed_leveling_grid_points & 1) ? true : false; //always end at [RIGHT_PROBE_BED_POSITION, BACK_PROBE_BED_POSITION]
+      bool zig = (auto_bed_leveling_grid_points & 1) ? true : true; //always end at [RIGHT_PROBE_BED_POSITION, BACK_PROBE_BED_POSITION]
 
       for (int yCount = 0; yCount < auto_bed_leveling_grid_points; yCount++) {
         double yProbe = front_probe_bed_position + yGridSpacing * yCount;
