@@ -20,20 +20,17 @@
  *
  */
 
-#include "mesh_bed_leveling.h"
+/**
+ *  Sainsmart 2-in-1 pin assignments
+ */
 
-#if ENABLED(MESH_BED_LEVELING)
+#include "pins_RAMPS_14_EFB.h"
 
-  mesh_bed_leveling mbl;
+#undef FAN_PIN
+#define FAN_PIN             7 // PART FAN in front of board next to Extruder heat
 
-  mesh_bed_leveling::mesh_bed_leveling() { reset(); }
+#undef HEATER_0_PIN
+#define HEATER_0_PIN        9   // EXTRUDER 1
 
-  void mesh_bed_leveling::reset() {
-    active = 0;
-    z_offset = 0;
-    for (int y = 0; y < MESH_NUM_Y_POINTS; y++)
-      for (int x = 0; x < MESH_NUM_X_POINTS; x++)
-        z_values[y][x] = 0;
-  }
-
-#endif  // MESH_BED_LEVELING
+#undef HEATER_1_PIN
+#define HEATER_1_PIN       10   // EXTRUDER 2

@@ -48,8 +48,6 @@
   #define ENCODER_DIRECTION_MENUS() ;
 #endif
 
-uint8_t blink = 0; // Variable for animation
-
 int8_t encoderDiff; // updated from interrupt context and added to encoderPosition every LCD update
 
 bool encoderRateMultiplierEnabled;
@@ -269,7 +267,7 @@ static void lcd_status_screen();
   uint8_t currentMenuViewOffset;              /* scroll offset in the current menu */
   millis_t next_button_update_ms;
   uint8_t lastEncoderBits;
-  uint32_t encoderPosition;
+  uint32_t encoderPosition, prevEncoderPosition;
   #if PIN_EXISTS(SD_DETECT)
     uint8_t lcd_sd_status;
   #endif
@@ -281,16 +279,15 @@ millis_t next_lcd_update_ms;
 uint8_t lcd_status_update_delay;
 bool ignore_click = false;
 bool wait_for_unclick;
+bool defer_return_to_status = false;
 uint8_t lcdDrawUpdate = 2;                  /* Set to none-zero when the LCD needs to draw, decreased after every draw. Set to 2 in LCD routines so the LCD gets at least 1 full redraw (first redraw is partial) */
 
-//prevMenu and prevEncoderPosition are used to store the previous menu location when editing settings.
-menuFunc_t prevMenu = NULL;
-uint16_t prevEncoderPosition;
-//Variables used when editing values.
+// Variables used when editing values.
 const char* editLabel;
 void* editValue;
 int32_t minEditValue, maxEditValue;
-menuFunc_t callbackFunc;
+menuFunc_t prevMenu = NULL;           // return here after editing (also prevEncoderPosition)
+menuFunc_t callbackFunc;              // call this after editing
 
 // place-holders for Ki and Kd edits
 float raw_Ki, raw_Kd;
@@ -301,6 +298,7 @@ float raw_Ki, raw_Kd;
 static void lcd_goto_menu(menuFunc_t menu, const bool feedback = false, const uint32_t encoder = 0) {
   if (currentMenu != menu) {
     currentMenu = menu;
+    lcdDrawUpdate = 2;
     #if ENABLED(NEWPANEL)
       encoderPosition = encoder;
       if (feedback) lcd_quick_feedback();
@@ -312,9 +310,20 @@ static void lcd_goto_menu(menuFunc_t menu, const bool feedback = false, const ui
   }
 }
 
-inline void lcd_save_previous_menu() { prevMenu = currentMenu; prevEncoderPosition = encoderPosition; }
+inline void lcd_save_previous_menu() {
+  prevMenu = currentMenu;
+  #if ENABLED(ULTIPANEL)
+    prevEncoderPosition = encoderPosition;
+  #endif
+}
 
-static void lcd_goto_previous_menu() { lcd_goto_menu(prevMenu, true, prevEncoderPosition); }
+static void lcd_goto_previous_menu() {
+  lcd_goto_menu(prevMenu, true
+    #if ENABLED(ULTIPANEL)
+      , prevEncoderPosition
+    #endif
+  );
+}
 
 /**
  *
@@ -422,7 +431,10 @@ static void lcd_status_screen() {
 
 #if ENABLED(ULTIPANEL)
 
-static void lcd_return_to_status() { lcd_goto_menu(lcd_status_screen); }
+static void lcd_return_to_status() {
+  defer_return_to_status = false;
+  lcd_goto_menu(lcd_status_screen);
+}
 
 #if ENABLED(SDSUPPORT)
 
@@ -538,7 +550,7 @@ void lcd_set_home_offsets() {
         babystepsTodo[axis] += distance;
       #endif
     }
-    if (lcdDrawUpdate) lcd_implementation_drawedit(msg, PSTR(""));
+    if (lcdDrawUpdate) lcd_implementation_drawedit(msg, NULL);
     if (LCD_CLICKED) lcd_goto_previous_menu();
   }
 
@@ -598,6 +610,11 @@ static void lcd_tune_menu() {
   // Speed:
   //
   MENU_ITEM_EDIT(int3, MSG_SPEED, &feedrate_multiplier, 10, 999);
+
+  // Manual bed leveling, Bed Z:
+  #if ENABLED(MANUAL_BED_LEVELING)
+    MENU_ITEM_EDIT(float43, MSG_BED_Z, &mbl.z_offset, -1, 1);
+  #endif
 
   //
   // Nozzle:
@@ -1089,7 +1106,7 @@ static void lcd_control_menu() {
  *
  */
 
-#if ENABLED(PIDTEMP) || ENABLED(PIDTEMPBED)
+#if ENABLED(PID_AUTOTUNE_MENU)
 
   #if ENABLED(PIDTEMP)
     int autotune_temp[EXTRUDERS] = { 150 };
@@ -1111,10 +1128,10 @@ static void lcd_control_menu() {
         autotune_temp[e]
       #endif
     );
-    enqueue_and_echo_command_now(cmd);
+    enqueue_and_echo_command(cmd);
   }
 
-#endif //PIDTEMP || PIDTEMPBED
+#endif //PID_AUTOTUNE_MENU
 
 #if ENABLED(PIDTEMP)
 
@@ -1128,10 +1145,17 @@ static void lcd_control_menu() {
     PID_PARAM(Kd, e) = scalePID_d(raw_Kd);
     updatePID();
   }
-  #define _PIDTEMP_FUNCTIONS(eindex) \
+  #define _PIDTEMP_BASE_FUNCTIONS(eindex) \
     void copy_and_scalePID_i_E ## eindex() { copy_and_scalePID_i(eindex); } \
-    void copy_and_scalePID_d_E ## eindex() { copy_and_scalePID_d(eindex); } \
-    void lcd_autotune_callback_E ## eindex() { _lcd_autotune(eindex); }
+    void copy_and_scalePID_d_E ## eindex() { copy_and_scalePID_d(eindex); }
+
+  #if ENABLED(PID_AUTOTUNE_MENU)
+    #define _PIDTEMP_FUNCTIONS(eindex) \
+      _PIDTEMP_BASE_FUNCTIONS(eindex); \
+      void lcd_autotune_callback_E ## eindex() { _lcd_autotune(eindex); }
+  #else
+    #define _PIDTEMP_FUNCTIONS(eindex) _PIDTEMP_BASE_FUNCTIONS(eindex)
+  #endif
 
   _PIDTEMP_FUNCTIONS(0);
   #if ENABLED(PID_PARAMS_PER_EXTRUDER)
@@ -1249,9 +1273,13 @@ static void lcd_control_temperature_menu() {
       #define _PID_MENU_ITEMS(ELABEL, eindex) _PID_BASE_MENU_ITEMS(ELABEL, eindex)
     #endif
 
-    #define PID_MENU_ITEMS(ELABEL, eindex) \
-      _PID_MENU_ITEMS(ELABEL, eindex); \
-      MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_PID_AUTOTUNE ELABEL, &autotune_temp[eindex], 150, heater_maxtemp[eindex] - 15, lcd_autotune_callback_E ## eindex)
+    #if ENABLED(PID_AUTOTUNE_MENU)
+      #define PID_MENU_ITEMS(ELABEL, eindex) \
+        _PID_MENU_ITEMS(ELABEL, eindex); \
+        MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_PID_AUTOTUNE ELABEL, &autotune_temp[eindex], 150, heater_maxtemp[eindex] - 15, lcd_autotune_callback_E ## eindex)
+    #else
+      #define PID_MENU_ITEMS(ELABEL, eindex) _PID_MENU_ITEMS(ELABEL, eindex)
+    #endif
 
     #if ENABLED(PID_PARAMS_PER_EXTRUDER) && EXTRUDERS > 1
       PID_MENU_ITEMS(MSG_E1, 0);
@@ -1332,6 +1360,10 @@ static void lcd_control_motion_menu() {
   MENU_ITEM(back, MSG_CONTROL, lcd_control_menu);
   #if ENABLED(AUTO_BED_LEVELING_FEATURE)
     MENU_ITEM_EDIT(float32, MSG_ZPROBE_ZOFFSET, &zprobe_zoffset, Z_PROBE_OFFSET_RANGE_MIN, Z_PROBE_OFFSET_RANGE_MAX);
+  #endif
+  // Manual bed leveling, Bed Z:
+  #if ENABLED(MANUAL_BED_LEVELING)
+    MENU_ITEM_EDIT(float43, MSG_BED_Z, &mbl.z_offset, -1, 1);
   #endif
   MENU_ITEM_EDIT(float5, MSG_ACC, &acceleration, 10, 99000);
   MENU_ITEM_EDIT(float3, MSG_VXY_JERK, &max_xy_jerk, 1, 990);
@@ -1705,17 +1737,17 @@ void lcd_init() {
   lcd_implementation_init();
 
   #if ENABLED(NEWPANEL)
-    #if BTN_EN1 > 0
+    #if BUTTON_EXISTS(EN1)
       SET_INPUT(BTN_EN1);
       WRITE(BTN_EN1, HIGH);
     #endif
 
-    #if BTN_EN2 > 0
+    #if BUTTON_EXISTS(EN2)
       SET_INPUT(BTN_EN2);
       WRITE(BTN_EN2, HIGH);
     #endif
 
-    #if BTN_ENC > 0
+    #if BUTTON_EXISTS(ENC)
       SET_INPUT(BTN_ENC);
       WRITE(BTN_ENC, HIGH);
     #endif
@@ -1785,6 +1817,17 @@ int lcd_strlen_P(const char* s) {
     s++;
   }
   return j;
+}
+
+bool lcd_blink() {
+  static uint8_t blink = 0;
+  static millis_t next_blink_ms = 0;
+  millis_t ms = millis();
+  if (ms >= next_blink_ms) {
+    blink ^= 0xFF;
+    next_blink_ms = ms + 1000 - LCD_UPDATE_INTERVAL / 2;
+  }
+  return blink != 0;
 }
 
 /**
@@ -1903,25 +1946,23 @@ void lcd_update() {
         lcd_status_update_delay--;
       }
     }
-    #if ENABLED(DOGLCD)  // Changes due to different driver architecture of the DOGM display
-        if (lcdDrawUpdate) {
-          blink++;     // Variable for animation and alive dot
-          u8g.firstPage();
-          do {
-            lcd_setFont(FONT_MENU);
-            u8g.setPrintPos(125, 0);
-            if (blink & 1) u8g.setColorIndex(1); else u8g.setColorIndex(0); // Set color for the alive dot
-            u8g.drawPixel(127, 63); // draw alive dot
-            u8g.setColorIndex(1); // black on white
-            (*currentMenu)();
-          } while (u8g.nextPage());
-        }
-    #else
-      if (lcdDrawUpdate) {
-        blink++;     // Variable for animation
+
+    if (lcdDrawUpdate) {
+      #if ENABLED(DOGLCD)  // Changes due to different driver architecture of the DOGM display
+        bool blink = lcd_blink();
+        u8g.firstPage();
+        do {
+          lcd_setFont(FONT_MENU);
+          u8g.setPrintPos(125, 0);
+          u8g.setColorIndex(blink ? 1 : 0); // Set color for the alive dot
+          u8g.drawPixel(127, 63); // draw alive dot
+          u8g.setColorIndex(1); // black on white
+          (*currentMenu)();
+        } while (u8g.nextPage());
+      #else
         (*currentMenu)();
-      }
-    #endif
+      #endif
+    }
 
     #if ENABLED(LCD_HAS_STATUS_INDICATORS)
       lcd_implementation_update_indicators();
@@ -1930,21 +1971,14 @@ void lcd_update() {
     #if ENABLED(ULTIPANEL)
 
       // Return to Status Screen after a timeout
-      if (currentMenu != lcd_status_screen &&
-        #if ENABLED(MANUAL_BED_LEVELING)
-          currentMenu != _lcd_level_bed &&
-          currentMenu != _lcd_level_bed_homing &&
-        #endif
-        millis() > return_to_status_ms
-      ) {
+      if (!defer_return_to_status && currentMenu != lcd_status_screen && millis() > return_to_status_ms) {
         lcd_return_to_status();
         lcdDrawUpdate = 2;
       }
 
     #endif // ULTIPANEL
 
-    if (lcdDrawUpdate == 2) lcd_implementation_clear();
-    if (lcdDrawUpdate) lcdDrawUpdate--;
+    if (lcdDrawUpdate && --lcdDrawUpdate) lcd_implementation_clear();
     next_lcd_update_ms = ms + LCD_UPDATE_INTERVAL;
   }
 }
@@ -2030,6 +2064,19 @@ void lcd_reset_alert_level() { lcd_status_message_level = 0; }
     #define encrot3 1
   #endif
 
+  #define GET_BUTTON_STATES(DST) \
+    uint8_t new_##DST = 0; \
+    WRITE(SHIFT_LD, LOW); \
+    WRITE(SHIFT_LD, HIGH); \
+    for (int8_t i = 0; i < 8; i++) { \
+      new_##DST >>= 1; \
+      if (READ(SHIFT_OUT)) SBI(new_##DST, 7); \
+      WRITE(SHIFT_CLK, HIGH); \
+      WRITE(SHIFT_CLK, LOW); \
+    } \
+    DST = ~new_##DST; //invert it, because a pressed switch produces a logical 0
+
+
   /**
    * Read encoder buttons from the hardware registers
    * Warning: This function is called from interrupt context!
@@ -2037,67 +2084,47 @@ void lcd_reset_alert_level() { lcd_status_message_level = 0; }
   void lcd_buttons_update() {
     #if ENABLED(NEWPANEL)
       uint8_t newbutton = 0;
-      #if BTN_EN1 > 0
-        if (READ(BTN_EN1) == 0) newbutton |= EN_A;
+      #if BUTTON_EXISTS(EN1)
+        if (BUTTON_PRESSED(EN1)) newbutton |= EN_A;
       #endif
-      #if BTN_EN2 > 0
-        if (READ(BTN_EN2) == 0) newbutton |= EN_B;
+      #if BUTTON_EXISTS(EN2)
+        if (BUTTON_PRESSED(EN2)) newbutton |= EN_B;
       #endif
-      #if ENABLED(RIGIDBOT_PANEL) || BTN_ENC > 0
+      #if ENABLED(RIGIDBOT_PANEL) || BUTTON_EXISTS(ENC)
         millis_t now = millis();
       #endif
       #if ENABLED(RIGIDBOT_PANEL)
         if (now > next_button_update_ms) {
-          if (READ(BTN_UP) == 0) {
+          if (BUTTON_PRESSED(UP)) {
             encoderDiff = -1 * (ENCODER_STEPS_PER_MENU_ITEM);
             next_button_update_ms = now + 300;
           }
-          else if (READ(BTN_DWN) == 0) {
+          else if (BUTTON_PRESSED(DWN)) {
             encoderDiff = ENCODER_STEPS_PER_MENU_ITEM;
             next_button_update_ms = now + 300;
           }
-          else if (READ(BTN_LFT) == 0) {
+          else if (BUTTON_PRESSED(LFT)) {
             encoderDiff = -1 * (ENCODER_PULSES_PER_STEP);
             next_button_update_ms = now + 300;
           }
-          else if (READ(BTN_RT) == 0) {
+          else if (BUTTON_PRESSED(RT)) {
             encoderDiff = ENCODER_PULSES_PER_STEP;
             next_button_update_ms = now + 300;
           }
         }
       #endif
-      #if BTN_ENC > 0
-        if (now > next_button_update_ms && READ(BTN_ENC) == 0) newbutton |= EN_C;
+      #if BUTTON_EXISTS(ENC)
+        if (now > next_button_update_ms && BUTTON_PRESSED(ENC)) newbutton |= EN_C;
       #endif
       buttons = newbutton;
       #if ENABLED(LCD_HAS_SLOW_BUTTONS)
         buttons |= slow_buttons;
       #endif
       #if ENABLED(REPRAPWORLD_KEYPAD)
-        // for the reprapworld_keypad
-        uint8_t newbutton_reprapworld_keypad = 0;
-        WRITE(SHIFT_LD, LOW);
-        WRITE(SHIFT_LD, HIGH);
-        for (int8_t i = 0; i < 8; i++) {
-          newbutton_reprapworld_keypad >>= 1;
-          if (READ(SHIFT_OUT)) SBI(newbutton_reprapworld_keypad, 7);
-          WRITE(SHIFT_CLK, HIGH);
-          WRITE(SHIFT_CLK, LOW);
-        }
-        buttons_reprapworld_keypad = ~newbutton_reprapworld_keypad; //invert it, because a pressed switch produces a logical 0
+        GET_BUTTON_STATES(buttons_reprapworld_keypad);
       #endif
-    #else   //read it from the shift register
-      uint8_t newbutton = 0;
-      WRITE(SHIFT_LD, LOW);
-      WRITE(SHIFT_LD, HIGH);
-      unsigned char tmp_buttons = 0;
-      for (int8_t i = 0; i < 8; i++) {
-        newbutton >>= 1;
-        if (READ(SHIFT_OUT)) SBI(newbutton, 7);
-        WRITE(SHIFT_CLK, HIGH);
-        WRITE(SHIFT_CLK, LOW);
-      }
-      buttons = ~newbutton; //invert it, because a pressed switch produces a logical 0
+    #else
+      GET_BUTTON_STATES(buttons);
     #endif //!NEWPANEL
 
     #if ENABLED(REVERSE_MENU_DIRECTION)
@@ -2148,7 +2175,7 @@ char *ftostr3(const float& x) { return itostr3((int)x); }
 // Convert float to rj string with _123, -123, _-12, or __-1 format
 char *ftostr4sign(const float& x) { return itostr4sign((int)x); }
 
-// Convert int to string with 12 format
+// Convert unsigned int to string with 12 format
 char* itostr2(const uint8_t& x) {
   //sprintf(conv,"%5.1f",x);
   int xx = x;
@@ -2158,7 +2185,7 @@ char* itostr2(const uint8_t& x) {
   return conv;
 }
 
-// Convert float to string with +123.4 format
+// Convert float to string with +123.4 / -123.4 format
 char* ftostr31(const float& x) {
   int xx = abs(x * 10);
   conv[0] = (x >= 0) ? '+' : '-';
@@ -2171,7 +2198,7 @@ char* ftostr31(const float& x) {
   return conv;
 }
 
-// Convert float to string with 123.4 format, dropping sign
+// Convert unsigned float to string with 123.4 format, dropping sign
 char* ftostr31ns(const float& x) {
   int xx = abs(x * 10);
   conv[0] = (xx / 1000) % 10 + '0';
@@ -2183,7 +2210,7 @@ char* ftostr31ns(const float& x) {
   return conv;
 }
 
-// Convert float to string with 123.45 format
+// Convert signed float to string with 023.45 / -23.45 format
 char *ftostr32(const float& x) {
   long xx = abs(x * 100);
   conv[0] = x >= 0 ? (xx / 10000) % 10 + '0' : '-';
@@ -2196,23 +2223,27 @@ char *ftostr32(const float& x) {
   return conv;
 }
 
-// Convert float to string with 1.234 format
+// Convert signed float to string (len 5 or 6) with 1.234 / -1.234 format
 char* ftostr43(const float& x) {
   long xx = x * 1000;
-  if (xx >= 0)
-    conv[0] = (xx / 1000) % 10 + '0';
-  else
+  char *conv_ptr = conv;
+  if (xx >= 0) {
+    conv_ptr++;
+  }
+  else {
+    xx = -xx;
     conv[0] = '-';
-  xx = abs(xx);
-  conv[1] = '.';
-  conv[2] = (xx / 100) % 10 + '0';
-  conv[3] = (xx / 10) % 10 + '0';
-  conv[4] = (xx) % 10 + '0';
-  conv[5] = 0;
-  return conv;
+  }
+  conv[1] = (xx / 1000) % 10 + '0';
+  conv[2] = '.';
+  conv[3] = (xx / 100) % 10 + '0';
+  conv[4] = (xx / 10) % 10 + '0';
+  conv[5] = (xx) % 10 + '0';
+  conv[6] = 0;
+  return conv_ptr;
 }
 
-// Convert float to string with 1.23 format
+// Convert unsigned float to string with 1.23 format
 char* ftostr12ns(const float& x) {
   long xx = x * 100;
   xx = abs(xx);
@@ -2224,11 +2255,12 @@ char* ftostr12ns(const float& x) {
   return conv;
 }
 
-// Convert float to space-padded string with -_23.4_ format
+// Convert signed float to space-padded string with -_23.4_ format
 char* ftostr32sp(const float& x) {
-  long xx = abs(x * 100);
+  long xx = x * 100;
   uint8_t dig;
-  if (x < 0) { // negative val = -_0
+  if (xx < 0) { // negative val = -_0
+    xx = -xx;
     conv[0] = '-';
     dig = (xx / 1000) % 10;
     conv[1] = dig ? '0' + dig : ' ';
@@ -2269,10 +2301,17 @@ char* ftostr32sp(const float& x) {
   return conv;
 }
 
-// Convert int to lj string with +123.0 format
+// Convert signed int to lj string with +012.0 / -012.0 format
 char* itostr31(const int& x) {
-  conv[0] = x >= 0 ? '+' : '-';
-  int xx = abs(x);
+  int xx;
+  if (x >= 0) {
+    conv[0] = '+';
+    xx = x;
+  }
+  else {
+    conv[0] = '-';
+    xx = -x;
+  }
   conv[1] = (xx / 100) % 10 + '0';
   conv[2] = (xx / 10) % 10 + '0';
   conv[3] = xx % 10 + '0';
@@ -2282,7 +2321,7 @@ char* itostr31(const int& x) {
   return conv;
 }
 
-// Convert int to rj string with 123 or -12 format
+// Convert signed int to rj string with 123 or -12 format
 char* itostr3(const int& x) {
   int xx = x;
   if (xx < 0) {
@@ -2298,37 +2337,37 @@ char* itostr3(const int& x) {
   return conv;
 }
 
-// Convert int to lj string with 123 format
-char* itostr3left(const int& xx) {
-  if (xx >= 100) {
-    conv[0] = (xx / 100) % 10 + '0';
-    conv[1] = (xx / 10) % 10 + '0';
-    conv[2] = xx % 10 + '0';
+// Convert unsigned int to lj string with 123 format
+char* itostr3left(const int& x) {
+  if (x >= 100) {
+    conv[0] = (x / 100) % 10 + '0';
+    conv[1] = (x / 10) % 10 + '0';
+    conv[2] = x % 10 + '0';
     conv[3] = 0;
   }
-  else if (xx >= 10) {
-    conv[0] = (xx / 10) % 10 + '0';
-    conv[1] = xx % 10 + '0';
+  else if (x >= 10) {
+    conv[0] = (x / 10) % 10 + '0';
+    conv[1] = x % 10 + '0';
     conv[2] = 0;
   }
   else {
-    conv[0] = xx % 10 + '0';
+    conv[0] = x % 10 + '0';
     conv[1] = 0;
   }
   return conv;
 }
 
-// Convert int to rj string with 1234 format
-char* itostr4(const int& xx) {
-  conv[0] = xx >= 1000 ? (xx / 1000) % 10 + '0' : ' ';
-  conv[1] = xx >= 100 ? (xx / 100) % 10 + '0' : ' ';
-  conv[2] = xx >= 10 ? (xx / 10) % 10 + '0' : ' ';
-  conv[3] = xx % 10 + '0';
+// Convert unsigned int to rj string with 1234 format
+char* itostr4(const int& x) {
+  conv[0] = x >= 1000 ? (x / 1000) % 10 + '0' : ' ';
+  conv[1] = x >= 100 ? (x / 100) % 10 + '0' : ' ';
+  conv[2] = x >= 10 ? (x / 10) % 10 + '0' : ' ';
+  conv[3] = x % 10 + '0';
   conv[4] = 0;
   return conv;
 }
 
-// Convert int to rj string with _123, -123, _-12, or __-1 format
+// Convert signed int to rj string with _123, -123, _-12, or __-1 format
 char *itostr4sign(const int& x) {
   int xx = abs(x);
   int sign = 0;
@@ -2352,7 +2391,7 @@ char *itostr4sign(const int& x) {
   return conv;
 }
 
-// Convert float to rj string with 12345 format
+// Convert unsigned float to rj string with 12345 format
 char* ftostr5(const float& x) {
   long xx = abs(x);
   conv[0] = xx >= 10000 ? (xx / 10000) % 10 + '0' : ' ';
@@ -2364,7 +2403,7 @@ char* ftostr5(const float& x) {
   return conv;
 }
 
-// Convert float to string with +1234.5 format
+// Convert signed float to string with +1234.5 format
 char* ftostr51(const float& x) {
   long xx = abs(x * 10);
   conv[0] = (x >= 0) ? '+' : '-';
@@ -2378,7 +2417,7 @@ char* ftostr51(const float& x) {
   return conv;
 }
 
-// Convert float to string with +123.45 format
+// Convert signed float to string with +123.45 format
 char* ftostr52(const float& x) {
   conv[0] = (x >= 0) ? '+' : '-';
   long xx = abs(x * 100);
@@ -2410,9 +2449,12 @@ char* ftostr52(const float& x) {
       if (max_software_endstops) NOMORE(current_position[Z_AXIS], Z_MAX_POS);
       encoderPosition = 0;
       line_to_current(Z_AXIS);
-      lcdDrawUpdate = 2;
+      lcdDrawUpdate = 1;
     }
-    if (lcdDrawUpdate) lcd_implementation_drawedit(PSTR("Z"), ftostr43(current_position[Z_AXIS]));
+    if (lcdDrawUpdate) {
+      float v = current_position[Z_AXIS] - MESH_HOME_SEARCH_Z;
+      lcd_implementation_drawedit(PSTR(MSG_MOVE_Z), ftostr43(v + (v < 0 ? -0.0001 : 0.0001)));
+    }
     static bool debounce_click = false;
     if (LCD_CLICKED) {
       if (!debounce_click) {
@@ -2425,6 +2467,7 @@ char* ftostr52(const float& x) {
         if (_lcd_level_bed_position == (MESH_NUM_X_POINTS) * (MESH_NUM_Y_POINTS)) {
           current_position[Z_AXIS] = MESH_HOME_SEARCH_Z;
           line_to_current(Z_AXIS);
+          st_synchronize();
           mbl.active = 1;
           enqueue_and_echo_commands_P(PSTR("G28"));
           lcd_return_to_status();
@@ -2438,7 +2481,7 @@ char* ftostr52(const float& x) {
           current_position[X_AXIS] = mbl.get_x(ix);
           current_position[Y_AXIS] = mbl.get_y(iy);
           line_to_current(manual_feedrate[X_AXIS] <= manual_feedrate[Y_AXIS] ? X_AXIS : Y_AXIS);
-          lcdDrawUpdate = 2;
+          lcdDrawUpdate = 1;
         }
       }
     }
@@ -2451,7 +2494,8 @@ char* ftostr52(const float& x) {
    * MBL Move to mesh starting point
    */
   static void _lcd_level_bed_homing() {
-    if (lcdDrawUpdate) lcd_implementation_drawedit(PSTR("XYZ"), PSTR(MSG_LEVEL_BED_HOMING));
+    if (lcdDrawUpdate) lcd_implementation_drawedit(PSTR(MSG_LEVEL_BED_HOMING), NULL);
+    lcdDrawUpdate = 1;
     if (axis_known_position[X_AXIS] && axis_known_position[Y_AXIS] && axis_known_position[Z_AXIS]) {
       current_position[Z_AXIS] = MESH_HOME_SEARCH_Z;
       plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
@@ -2461,17 +2505,16 @@ char* ftostr52(const float& x) {
       _lcd_level_bed_position = 0;
       lcd_goto_menu(_lcd_level_bed);
     }
-    lcdDrawUpdate = 2;
   }
 
   /**
    * MBL entry-point
    */
   static void lcd_level_bed() {
+    defer_return_to_status = true;
     axis_known_position[X_AXIS] = axis_known_position[Y_AXIS] = axis_known_position[Z_AXIS] = false;
     mbl.reset();
     enqueue_and_echo_commands_P(PSTR("G28"));
-    lcdDrawUpdate = 2;
     lcd_goto_menu(_lcd_level_bed_homing);
   }
 

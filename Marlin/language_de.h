@@ -42,7 +42,7 @@
 #define MSG_AUTOSTART                       "Autostart"
 #define MSG_DISABLE_STEPPERS                "Motoren Aus" // M84
 #define MSG_AUTO_HOME                       "Home" // G28
-#define MSG_LEVEL_BED_HOMING                "Homing"
+#define MSG_LEVEL_BED_HOMING                "Homing XYZ"
 #define MSG_SET_HOME_OFFSETS                "Setze Home hier"
 #define MSG_SET_ORIGIN                      "Setze Null hier" //"G92 X0 Y0 Z0" commented out in ultralcd.cpp
 #define MSG_PREHEAT_PLA                     "Vorwärmen PLA"
@@ -137,7 +137,7 @@
 #define MSG_INIT_SDCARD                     "SDKarte erkennen"// Manually initialize the SD-card via user interface
 #define MSG_CNG_SDCARD                      "SDKarte erkennen"// SD-card changed by user. For machines with no autocarddetect. Both send "M21"
 #define MSG_ZPROBE_OUT                      "Sensor ausserhalb"
-#define MSG_POSITION_UNKNOWN                "X/Y vor Z homen."
+#define MSG_YX_UNHOMED                      "X/Y vor Z homen."
 #define MSG_ZPROBE_ZOFFSET                  "Z Offset"
 #define MSG_BABYSTEP_X                      "Babystep X"
 #define MSG_BABYSTEP_Y                      "Babystep Y"

@@ -27,13 +27,22 @@
 
 #ifndef CONDITIONALS_H
 
+/**
+* Miscellaneous
+*/
 #ifndef M_PI
   #define M_PI 3.1415926536
 #endif
 
-#ifndef CONFIGURATION_LCD // Get the LCD defines which are needed first
+/**
+ * This value is used by M109 when tying to calculate a ballpark safe margin
+ * to prevent wait-forever situation.
+ */
+#ifndef EXTRUDE_MINTEMP
+ #define EXTRUDE_MINTEMP 170
+#endif
 
-  #define PIN_EXISTS(PN) (defined(PN##_PIN) && PN##_PIN >= 0)
+#ifndef CONFIGURATION_LCD // Get the LCD defines which are needed first
 
   #define CONFIGURATION_LCD
 
@@ -339,7 +348,7 @@
     #define MAX_PROBE_Y (min(Y_MAX_POS, Y_MAX_POS + Y_PROBE_OFFSET_FROM_EXTRUDER))
   #endif
 
-  #define SERVO_LEVELING (defined(AUTO_BED_LEVELING_FEATURE) && defined(Z_ENDSTOP_SERVO_NR))
+  #define SERVO_LEVELING (ENABLED(AUTO_BED_LEVELING_FEATURE) && defined(Z_ENDSTOP_SERVO_NR) && Z_ENDSTOP_SERVO_NR >= 0)
 
   /**
    * Sled Options
@@ -513,7 +522,7 @@
   #define HAS_SERVO_1 (PIN_EXISTS(SERVO1))
   #define HAS_SERVO_2 (PIN_EXISTS(SERVO2))
   #define HAS_SERVO_3 (PIN_EXISTS(SERVO3))
-  #define HAS_FILAMENT_SENSOR (ENABLED(FILAMENT_SENSOR) && PIN_EXISTS(FILWIDTH))
+  #define HAS_FILAMENT_WIDTH_SENSOR (PIN_EXISTS(FILWIDTH))
   #define HAS_FILRUNOUT (PIN_EXISTS(FILRUNOUT))
   #define HAS_HOME (PIN_EXISTS(HOME))
   #define HAS_KILL (PIN_EXISTS(KILL))
@@ -569,6 +578,8 @@
   #define HAS_E2_STEP (PIN_EXISTS(E2_STEP))
   #define HAS_E3_STEP (PIN_EXISTS(E3_STEP))
   #define HAS_E4_STEP (PIN_EXISTS(E4_STEP))
+
+  #define HAS_MOTOR_CURRENT_PWM (PIN_EXISTS(MOTOR_CURRENT_PWM_XY) || PIN_EXISTS(MOTOR_CURRENT_PWM_Z) || PIN_EXISTS(MOTOR_CURRENT_PWM_E))
 
   /**
    * Helper Macros for heaters and extruder fan

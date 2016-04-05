@@ -19,10 +19,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-// Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
-// License: GPL
-
 #ifndef MARLIN_H
 #define MARLIN_H
 
@@ -113,7 +109,6 @@ void serial_echopair_P(const char* s_P, float v);
 void serial_echopair_P(const char* s_P, double v);
 void serial_echopair_P(const char* s_P, unsigned long v);
 
-
 // Things to write to serial from Program memory. Saves 400 to 2k of RAM.
 FORCE_INLINE void serialprintPGM(const char* str) {
   char ch;
@@ -122,8 +117,6 @@ FORCE_INLINE void serialprintPGM(const char* str) {
     str++;
   }
 }
-
-void get_command();
 
 void idle(
   #if ENABLED(FILAMENTCHANGEENABLE)
@@ -236,6 +229,7 @@ void Stop();
  * Debug flags - not yet widely applied
  */
 enum DebugFlags {
+  DEBUG_NONE          = 0,
   DEBUG_ECHO          = _BV(0),
   DEBUG_INFO          = _BV(1),
   DEBUG_ERRORS        = _BV(2),
@@ -244,6 +238,7 @@ enum DebugFlags {
   DEBUG_LEVELING      = _BV(5)
 };
 extern uint8_t marlin_debug_flags;
+#define DEBUGGING(F) (marlin_debug_flags & (DEBUG_## F))
 
 extern bool Running;
 inline bool IsRunning() { return  Running; }
@@ -343,11 +338,11 @@ extern bool axis_homed[3]; // axis[n].is_homed
   extern int EtoPPressure;
 #endif
 
-#if ENABLED(FILAMENT_SENSOR)
+#if ENABLED(FILAMENT_WIDTH_SENSOR)
   extern float filament_width_nominal;  //holds the theoretical filament diameter i.e., 3.00 or 1.75
   extern bool filament_sensor;  //indicates that filament sensor readings should control extrusion
   extern float filament_width_meas; //holds the filament diameter as accurately measured
-  extern signed char measurement_delay[];  //ring buffer to delay measurement
+  extern int8_t measurement_delay[];  //ring buffer to delay measurement
   extern int delay_index1, delay_index2;  //ring buffer index. used by planner, temperature, and main code
   extern float delay_dist; //delay distance counter
   extern int meas_delay_cm; //delay distance

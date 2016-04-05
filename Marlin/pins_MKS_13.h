@@ -20,20 +20,16 @@
  *
  */
 
-#include "mesh_bed_leveling.h"
+/**
+ * Arduino Mega with RAMPS v1.4 adjusted pin assignments
+ *
+ *  MKS v1.3  (Extruder, Fan, Bed)
+ *  MKS v1.3  (Extruder, Extruder, Fan, Bed)
+ *  MKS v1.4  (Extruder, Fan, Bed)
+ *  MKS v1.4  (Extruder, Extruder, Fan, Bed)
+ */
 
-#if ENABLED(MESH_BED_LEVELING)
+#include "pins_RAMPS_14_EFB.h"
 
-  mesh_bed_leveling mbl;
-
-  mesh_bed_leveling::mesh_bed_leveling() { reset(); }
-
-  void mesh_bed_leveling::reset() {
-    active = 0;
-    z_offset = 0;
-    for (int y = 0; y < MESH_NUM_Y_POINTS; y++)
-      for (int x = 0; x < MESH_NUM_X_POINTS; x++)
-        z_values[y][x] = 0;
-  }
-
-#endif  // MESH_BED_LEVELING
+#undef HEATER_1_PIN
+#define HEATER_1_PIN        7 // EXTRUDER 2 (-1 on RAMPS 1.4)
