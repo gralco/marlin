@@ -8,6 +8,9 @@ _Version.h
 // rather than in a per-project file such as this
 
 *.o
+Marlin/obj
+Marlin/*.hex
+Marlin/Marlin.ino.cpp
 applet/
 *~
 *.orig
