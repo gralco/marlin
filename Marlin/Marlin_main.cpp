@@ -437,7 +437,6 @@ static bool send_ok[BUFSIZE];
 #endif
 
 #if ENABLED(HOST_KEEPALIVE_FEATURE)
-boolean comment_mode = false;
 
   // States for managing Marlin and host communication
   // Marlin sends messages if blocked or busy

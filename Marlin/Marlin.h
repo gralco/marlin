@@ -263,7 +263,6 @@ inline void refresh_cmd_timeout() { previous_cmd_ms = millis(); }
   #define CRITICAL_SECTION_END    SREG = _sreg;
 #endif
 
-extern boolean comment_mode;
 extern bool axis_relative_modes[];
 extern int feedrate_multiplier;
 extern bool volumetric_enabled;

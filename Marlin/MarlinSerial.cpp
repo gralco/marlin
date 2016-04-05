@@ -45,9 +45,9 @@ bool rxbuf_filled = false;
 FORCE_INLINE void store_char(unsigned char c)
 {
   static bool overflow = false;
-  if(overflow && !(c == '\n' || c == '\r' || (c == ':' && comment_mode == false)))
+  if(overflow && !(c == '\n' || c == '\r'))
     return;
-  else if(overflow && (c == '\n' || c == '\r' || (c == ':' && comment_mode == false)))
+  else if(overflow && (c == '\n' || c == '\r'))
   {
     overflow = false;
     return;
@@ -67,8 +67,7 @@ FORCE_INLINE void store_char(unsigned char c)
     overflow = true;
     i = (uint8_t)(rx_buffer.head - 1) % RX_BUFFER_SIZE;
     for(; !(rx_buffer.buffer[i] == '\n' ||
-            rx_buffer.buffer[i] == '\r' ||
-            (rx_buffer.buffer[i] == ':' && comment_mode != true)) &&
+            rx_buffer.buffer[i] == '\r') &&
             rx_buffer.head != rx_buffer.tail; rx_buffer.head = i)
       i = (uint8_t)(rx_buffer.head - 1) % RX_BUFFER_SIZE;
     rx_buffer.head = (uint8_t)(i + 1) % RX_BUFFER_SIZE;;
