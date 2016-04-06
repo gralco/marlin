@@ -103,6 +103,7 @@
  * G4  - Dwell S<seconds> or P<milliseconds>
  * G10 - retract filament according to settings of M207
  * G11 - retract recover filament according to settings of M208
+ * G26 - Allow G-codes to enter the buffer again after a PROBE_FAIL_PANIC occurs during a G29
  * G28 - Home one or more axes
  * G29 - Detailed Z probe, probes the bed at 3 or more points.  Will fail if you haven't homed yet.
  * G30 - Single Z probe, probes bed at current XY location.

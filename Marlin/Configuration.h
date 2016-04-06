@@ -576,7 +576,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
     #define REPROBE // Re-attempts probing
 
     #ifdef REPROBE
-      #define Z_RETRY_PT 10 // Z height to move the hotend after failed probe
+      #define Z_RETRY_PT 5 // Z height to move the hotend after failed probe
       #define NUM_ATTEMPTS 3 // Number of attempts to make before quiting
       #define PROBE_FAIL_PANIC // Completely give up printing if the final attempt fails (use G26 to get out of failed state)
       #define REWIPE // Re-attempts wiping
@@ -585,7 +585,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
         // Re-wipe line from REWIPE_FIRST_PT to REWIPE_SECOND_PT
         #define REWIPE_FIRST_PT {45, 173}
         #define REWIPE_SECOND_PT {115, 173}
-        #define Z_REWIPE_PT -1 // Depth to re-wipe at
+        #define Z_REWIPE_PT (Z_MIN_POS + 1) // Depth to re-wipe at
       #endif
     #endif
 
@@ -619,8 +619,8 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
   //    |           |
   //    O-- FRONT --+
   //  (0,0)
-  #define X_PROBE_OFFSET_FROM_EXTRUDER 0      // X offset: -left  +right  [of the nozzle]
-  #define Y_PROBE_OFFSET_FROM_EXTRUDER 0      // Y offset: -front +behind [the nozzle]
+  #define X_PROBE_OFFSET_FROM_EXTRUDER 0  // X offset: -left  +right  [of the nozzle]
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER 0  // Y offset: -front +behind [the nozzle]
   #define Z_PROBE_OFFSET_FROM_EXTRUDER -1.43   // Z offset: -below +above  [the nozzle]
 
   #define XY_TRAVEL_SPEED 8000         // X and Y axis travel speed between probes, in mm/min.
