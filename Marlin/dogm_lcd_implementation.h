@@ -306,10 +306,14 @@ static void lcd_implementation_status_screen() {
 
   bool blink = lcd_blink();
 
-  #if HAS_FAN0
-    // Symbols menu graphics, animated fan
-    u8g.drawBitmapP(9, 1, STATUS_SCREENBYTEWIDTH, STATUS_SCREENHEIGHT, blink && fanSpeeds[0] ? status_screen0_bmp : status_screen1_bmp);
-  #endif
+  // Symbols menu graphics, animated fan
+  u8g.drawBitmapP(9, 1, STATUS_SCREENBYTEWIDTH, STATUS_SCREENHEIGHT,
+    #if HAS_FAN0
+      blink && fanSpeeds[0] ? status_screen0_bmp : status_screen1_bmp
+    #else
+      status_screen0_bmp
+    #endif
+  );
 
   #if ENABLED(SDSUPPORT)
     // SD Card Symbol
@@ -330,9 +334,8 @@ static void lcd_implementation_status_screen() {
     }
 
     u8g.setPrintPos(80,48);
-    if (print_job_start_ms != 0) {
-      uint16_t time = (((print_job_stop_ms > print_job_start_ms)
-                       ? print_job_stop_ms : millis()) - print_job_start_ms) / 60000;
+    uint16_t time = print_job_timer.duration() / 60;
+    if (time != 0) {
       lcd_print(itostr2(time/60));
       lcd_print(':');
       lcd_print(itostr2(time%60));
@@ -456,7 +459,7 @@ static void lcd_implementation_status_screen() {
   #if DISABLED(FILAMENT_LCD_DISPLAY)
     lcd_print(lcd_status_message);
   #else
-    if (millis() < previous_lcd_status_ms + 5000) {  //Display both Status message line and Filament display on the last line
+    if (PENDING(millis(), previous_lcd_status_ms + 5000)) {  //Display both Status message line and Filament display on the last line
       lcd_print(lcd_status_message);
     }
     else {
@@ -595,7 +598,7 @@ void lcd_implementation_drawedit(const char* pstr, const char* value) {
 
 #endif //SDSUPPORT
 
-#define lcd_implementation_drawmenu_back(sel, row, pstr, data) lcd_implementation_drawmenu_generic(sel, row, pstr, LCD_STR_UPLEVEL[0], LCD_STR_UPLEVEL[0])
+#define lcd_implementation_drawmenu_back(sel, row, pstr) lcd_implementation_drawmenu_generic(sel, row, pstr, LCD_STR_UPLEVEL[0], LCD_STR_UPLEVEL[0])
 #define lcd_implementation_drawmenu_submenu(sel, row, pstr, data) lcd_implementation_drawmenu_generic(sel, row, pstr, '>', LCD_STR_ARROW_RIGHT[0])
 #define lcd_implementation_drawmenu_gcode(sel, row, pstr, gcode) lcd_implementation_drawmenu_generic(sel, row, pstr, '>', ' ')
 #define lcd_implementation_drawmenu_function(sel, row, pstr, data) lcd_implementation_drawmenu_generic(sel, row, pstr, '>', ' ')
