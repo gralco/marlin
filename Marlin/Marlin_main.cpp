@@ -890,7 +890,7 @@ void clear_buffer() {
       command_queue[i][j] = NULL;
   MYSERIAL.flush();
   serial_count = 0;
-  commands_in_queue = 0;
+  commands_in_queue = 1;
   cmd_queue_index_r = BUFSIZE-1;
   cmd_queue_index_w = 0;
 }
@@ -1002,13 +1002,13 @@ inline void get_serial_commands() {
           for(uint8_t j=0; j < MAX_CMD_SIZE; j++)
             command_queue[cmd_queue_index_r][j] = 0;
           if(commands_in_queue) {
-            commands_in_queue = 0;
+            commands_in_queue = 1;
             cmd_queue_index_r = (cmd_queue_index_r + 1) % BUFSIZE;
           }
           serial_count = 0;
           return;
         }
-        #endif
+      #endif
 
       #if defined(NO_TIMEOUTS) && NO_TIMEOUTS > 0
         last_command_time = ms;
