@@ -7678,17 +7678,6 @@ void plan_arc(
     SERIAL_EOL;
     */
   }
-
-  static bool reportrx_once = true;
-  if(rxbuf_filled && reportrx_once)
-  {
-    SERIAL_ERROR_START;
-    SERIAL_ERRORPGM(MSG_ERR_RXBUF_FULL);
-    reportrx_once = false;
-  }
-  else if(!rxbuf_filled)
-   reportrx_once = true;
-
 #endif // SCARA
 
 #if ENABLED(TEMP_STAT_LEDS)
@@ -7774,6 +7763,16 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) {
   #endif
 
   if (commands_in_queue < BUFSIZE) get_available_commands();
+
+  static bool reportrx_once = true;
+  if(rxbuf_filled && reportrx_once)
+  {
+    SERIAL_ERROR_START;
+    SERIAL_ERRORPGM(MSG_ERR_RXBUF_FULL);
+    reportrx_once = false;
+  }
+  else if(!rxbuf_filled)
+   reportrx_once = true;
 
   millis_t ms = millis();
 
