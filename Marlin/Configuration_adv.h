@@ -324,10 +324,10 @@
 #define MICROSTEP_MODES {16,16,16,16,16} // [1,2,4,8,16]
 
 // Motor Current setting (Only functional when motor driver current ref pins are connected to a digital trimpot on supported boards)
-#define DIGIPOT_MOTOR_CURRENT {175,175,220,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
+//#define DIGIPOT_MOTOR_CURRENT {175,175,220,135,135} // Values 0-255 (RAMBO 135 = ~0.75A, 185 = ~1A)
 
 // Motor Current controlled via PWM (Overridable on supported boards with PWM-driven motor driver current)
-//#define PWM_MOTOR_CURRENT {1300, 1300, 1250} // Values in milliamps
+#define PWM_MOTOR_CURRENT {1300, 1600, 1250} // Values in milliamps
 
 // uncomment to enable an I2C based DIGIPOT like on the Azteeg X3 Pro
 //#define DIGIPOT_I2C

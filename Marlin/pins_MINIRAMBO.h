@@ -100,7 +100,7 @@
 #define MOTOR_CURRENT_PWM_E_PIN  44
 //Motor current PWM conversion, PWM value = MotorCurrentSetting * 255 / range
 #define MOTOR_CURRENT_PWM_RANGE 2000
-#define DEFAULT_PWM_MOTOR_CURRENT  {1300, 1300, 1250}
+#define DEFAULT_PWM_MOTOR_CURRENT  {1300, 1600, 1250}
 #define SDPOWER             -1
 #define SDSS                53
 #define LED_PIN             13
