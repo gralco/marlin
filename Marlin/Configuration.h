@@ -586,7 +586,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
         #define X_REWIPE_SECOND_PT 115
         #define Y_REWIPE_FIRST_PT 173
         #define Y_REWIPE_SECOND_PT 173
-        #define Z_REWIPE_PT 3 // Depth to re-wipe at
+        #define Z_REWIPE_PT -1 // Depth to re-wipe at
       #endif
     #endif
 
