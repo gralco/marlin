@@ -240,7 +240,7 @@
   //#define PID_PARAMS_PER_EXTRUDER // Uses separate PID parameters for each extruder (useful for mismatched extruders)
                                     // Set/get with gcode: M301 E[extruder number, 0-2]
   #define PID_FUNCTIONAL_RANGE 10 // If the temperature difference between the target temperature and the actual temperature
-                                  // is more then PID_FUNCTIONAL_RANGE then the PID will be shut off and the heater will be set to min/max.
+                                  // is more than PID_FUNCTIONAL_RANGE then the PID will be shut off and the heater will be set to min/max.
   #define PID_INTEGRAL_DRIVE_MAX PID_MAX  //limit for the integral term
   #define K1 0.95 //smoothing factor within the PID
 
@@ -635,19 +635,24 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
                                                                              // Useful to retract a deployable Z probe.
 
   // Probes are sensors/switches that need to be activated before they can be used
-  // and deactivated after the use.
+  // and deactivated after their use.
   // Allen Key Probes, Servo Probes, Z-Sled Probes, FIX_MOUNTED_PROBE, ... . You have to activate one of these for the AUTO_BED_LEVELING_FEATURE
 
   // A fix mounted probe, like the normal inductive probe, must be deactivated to go below Z_PROBE_OFFSET_FROM_EXTRUDER
   // when the hardware endstops are active.
-  #define FIX_MOUNTED_PROBE
+  //#define FIX_MOUNTED_PROBE
 
   // A Servo Probe can be defined in the servo section below.
 
   // An Allen Key Probe is currently predefined only in the delta example configurations.
 
-  //#define Z_PROBE_SLED // Enable if you have a Z probe mounted on a sled like those designed by Charles Bell.
+  // Enable if you have a Z probe mounted on a sled like those designed by Charles Bell.
+  //#define Z_PROBE_SLED
   //#define SLED_DOCKING_OFFSET 5 // The extra distance the X axis must travel to pickup the sled. 0 should be fine but you can push it further if you'd like.
+
+  // A Mechanical Probe is any probe that either doesn't deploy or needs manual deployment
+  // For example any setup that uses the nozzle itself as a probe.
+  #define MECHANICAL_PROBE
 
   // If you've enabled AUTO_BED_LEVELING_FEATURE and are using the Z Probe for Z Homing,
   // it is highly recommended you leave Z_SAFE_HOMING enabled!
@@ -793,7 +798,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 //#define REVERSE_MENU_DIRECTION // When enabled CLOCKWISE moves UP in the LCD menu
 //#define ULTIMAKERCONTROLLER //as available from the Ultimaker online store.
 //#define ULTIPANEL  //the UltiPanel as on Thingiverse
-//#define SPEAKER // The sound device is a speaker - not a buzzer. A buzzer resonates with his own frequency.
+//#define SPEAKER // The sound device is a speaker - not a buzzer. A buzzer resonates with a fixed frequency.
 //#define LCD_FEEDBACK_FREQUENCY_DURATION_MS 100 // the duration the buzzer plays the UI feedback sound. ie Screen Click
 //#define LCD_FEEDBACK_FREQUENCY_HZ 1000         // this is the tone frequency the buzzer plays when on UI feedback. ie Screen Click
                                                  // 0 to disable buzzer feedback. Test with M300 S<frequency Hz> P<duration ms>
