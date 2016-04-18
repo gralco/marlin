@@ -1531,13 +1531,14 @@ static void setup_for_endstop_move() {
         #if ENABLED(REWIPE)
           SERIAL_ERRORLNPGM(MSG_REWIPE);
           LCD_MESSAGEPGM(MSG_REWIPE);
-          // can't do diagonal move due to endstop bug (fixed in MarlinDev)
-          do_blocking_move_to_xy(X_REWIPE_FIRST_PT, Y_REWIPE_FIRST_PT);
+          float rewipe_first_pt[2] = REWIPE_FIRST_PT;
+          float rewipe_second_pt[2] = REWIPE_SECOND_PT;
+          do_blocking_move_to_xy(rewipe_first_pt[X_AXIS], rewipe_first_pt[Y_AXIS]);
           do_blocking_move_to_z(Z_REWIPE_PT);
           for(uint8_t i=0; i<NUM_REWIPES; i++)
           {
-            do_blocking_move_to_xy(X_REWIPE_SECOND_PT, Y_REWIPE_SECOND_PT);
-            do_blocking_move_to_xy(X_REWIPE_FIRST_PT, Y_REWIPE_FIRST_PT);
+            do_blocking_move_to_xy(rewipe_second_pt[X_AXIS], rewipe_second_pt[Y_AXIS]);
+            do_blocking_move_to_xy(rewipe_first_pt[X_AXIS], rewipe_first_pt[Y_AXIS]);
           }
         #endif
         do_blocking_move_to_z(Z_RETRY_PT);
@@ -3418,6 +3419,7 @@ inline void gcode_G28() {
           clear_buffer();
           reprobe_attempts = 0;
           do_blocking_move_to_z(Z_RETRY_PT);
+          // Move E back to 0 after a failed probe
           plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 0.0, feedrate/60, active_extruder);
           st_synchronize();
           plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);

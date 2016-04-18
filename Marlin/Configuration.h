@@ -581,12 +581,10 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
       #define PROBE_FAIL_PANIC // Completely give up printing if the final attempt fails (use G26 to get out of failed state)
       #define REWIPE // Re-attempts wiping
       #ifdef REWIPE
-        #define NUM_REWIPES 6 // Number of (back-and-forth) re-wipe attemps to make 
-        // Re-wipe location
-        #define X_REWIPE_FIRST_PT 45
-        #define X_REWIPE_SECOND_PT 115
-        #define Y_REWIPE_FIRST_PT 173
-        #define Y_REWIPE_SECOND_PT 173
+        #define NUM_REWIPES 6 // Number of (back-and-forth) re-wipe attemps to make, e.g. 6 would produce 12 strokes
+        // Re-wipe line from REWIPE_FIRST_PT to REWIPE_SECOND_PT
+        #define REWIPE_FIRST_PT {45, 173}
+        #define REWIPE_SECOND_PT {115, 173}
         #define Z_REWIPE_PT -1 // Depth to re-wipe at
       #endif
     #endif
