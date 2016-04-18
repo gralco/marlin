@@ -893,10 +893,12 @@ void lcd_cooldown() {
   // Z position will be restored with the final action, a G28
   inline void _mbl_goto_xy(float x, float y) {
     mbl_wait_for_move = true;
-    #if MIN_Z_HEIGHT_FOR_HOMING > 0
-      current_position[Z_AXIS] += MIN_Z_HEIGHT_FOR_HOMING;
-      line_to_current(Z_AXIS);
-    #endif
+    current_position[Z_AXIS] = MESH_HOME_SEARCH_Z
+      #if MIN_Z_HEIGHT_FOR_HOMING > 0
+        + MIN_Z_HEIGHT_FOR_HOMING
+      #endif
+    ;
+    line_to_current(Z_AXIS);
     current_position[X_AXIS] = x + home_offset[X_AXIS];
     current_position[Y_AXIS] = y + home_offset[Y_AXIS];
     line_to_current(manual_feedrate[X_AXIS] <= manual_feedrate[Y_AXIS] ? X_AXIS : Y_AXIS);
@@ -953,12 +955,16 @@ void lcd_cooldown() {
         mbl.set_zigzag_z(_lcd_level_bed_position++, current_position[Z_AXIS]);
         if (_lcd_level_bed_position == (MESH_NUM_X_POINTS) * (MESH_NUM_Y_POINTS)) {
           lcd_return_to_status();
-          LCD_ALERTMESSAGEPGM(MSG_LEVEL_BED_DONE);
+          LCD_MESSAGEPGM(MSG_LEVEL_BED_DONE);
           #if HAS_BUZZER
             buzz(200, 659);
             buzz(200, 698);
           #endif
-          current_position[Z_AXIS] = MESH_HOME_SEARCH_Z;
+          current_position[Z_AXIS] = MESH_HOME_SEARCH_Z
+            #if MIN_Z_HEIGHT_FOR_HOMING > 0
+              + MIN_Z_HEIGHT_FOR_HOMING
+            #endif
+          ;
           line_to_current(Z_AXIS);
           st_synchronize();
           mbl.active = true;

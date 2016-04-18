@@ -1445,9 +1445,6 @@ static void setup_for_endstop_move() {
 
       static void set_bed_level_equation_lsq(double* plane_equation_coefficients) {
 
-        vector_3 planeNormal = vector_3(-plane_equation_coefficients[0], -plane_equation_coefficients[1], 1);
-        plan_bed_level_matrix = matrix_3x3::create_look_at(planeNormal);
-
         //plan_bed_level_matrix.debug("bed level before");
 
         #if ENABLED(DEBUG_LEVELING_FEATURE)
@@ -1459,14 +1456,16 @@ static void setup_for_endstop_move() {
           }
         #endif
 
+        vector_3 planeNormal = vector_3(-plane_equation_coefficients[0], -plane_equation_coefficients[1], 1);
+        plan_bed_level_matrix = matrix_3x3::create_look_at(planeNormal);
+
         vector_3 corrected_position = plan_get_position();
- 
         current_position[X_AXIS] = corrected_position.x;
         current_position[Y_AXIS] = corrected_position.y;
         current_position[Z_AXIS] = corrected_position.z;
 
         #if ENABLED(DEBUG_LEVELING_FEATURE)
-          if (DEBUGGING(LEVELING)) DEBUG_POS("<<< set_bed_level_equation_lsq", current_position);
+          if (DEBUGGING(LEVELING)) DEBUG_POS("<<< set_bed_level_equation_lsq", corrected_position);
         #endif
 
         sync_plan_position();
@@ -2931,10 +2930,12 @@ inline void gcode_G28() {
     saved_feedrate = feedrate;
     feedrate = homing_feedrate[X_AXIS];
 
-    #if MIN_Z_HEIGHT_FOR_HOMING > 0
-      current_position[Z_AXIS] = MESH_HOME_SEARCH_Z + MIN_Z_HEIGHT_FOR_HOMING;
-      line_to_current_position();
-    #endif
+    current_position[Z_AXIS] = MESH_HOME_SEARCH_Z
+      #if MIN_Z_HEIGHT_FOR_HOMING > 0
+        + MIN_Z_HEIGHT_FOR_HOMING
+      #endif
+    ;
+    line_to_current_position();
 
     current_position[X_AXIS] = x + home_offset[X_AXIS];
     current_position[Y_AXIS] = y + home_offset[Y_AXIS];
@@ -3034,7 +3035,11 @@ inline void gcode_G28() {
         }
         else {
           // One last "return to the bed" (as originally coded) at completion
-          current_position[Z_AXIS] = MESH_HOME_SEARCH_Z;
+          current_position[Z_AXIS] = MESH_HOME_SEARCH_Z
+            #if MIN_Z_HEIGHT_FOR_HOMING > 0
+              + MIN_Z_HEIGHT_FOR_HOMING
+            #endif
+          ;
           line_to_current_position();
           st_synchronize();
 
@@ -3553,9 +3558,18 @@ inline void gcode_G28() {
         p1 = ProbeDeploy, p2 = ProbeStay, p3 = ProbeStow;
 
       // Probe at 3 arbitrary points
-      float z_at_pt_1 = probe_pt(ABL_PROBE_PT_1_X, ABL_PROBE_PT_1_Y, Z_RAISE_BEFORE_PROBING, p1, verbose_level),
-            z_at_pt_2 = probe_pt(ABL_PROBE_PT_2_X, ABL_PROBE_PT_2_Y, current_position[Z_AXIS] + Z_RAISE_BETWEEN_PROBINGS, p2, verbose_level),
-            z_at_pt_3 = probe_pt(ABL_PROBE_PT_3_X, ABL_PROBE_PT_3_Y, current_position[Z_AXIS] + Z_RAISE_BETWEEN_PROBINGS, p3, verbose_level);
+      float z_at_pt_1 = probe_pt( ABL_PROBE_PT_1_X + home_offset[X_AXIS],
+                                  ABL_PROBE_PT_1_Y + home_offset[Y_AXIS],
+                                  Z_RAISE_BEFORE_PROBING + home_offset[Z_AXIS],
+                                  p1, verbose_level),
+            z_at_pt_2 = probe_pt( ABL_PROBE_PT_2_X + home_offset[X_AXIS],
+                                  ABL_PROBE_PT_2_Y + home_offset[Y_AXIS],
+                                  current_position[Z_AXIS] + Z_RAISE_BETWEEN_PROBINGS,
+                                  p2, verbose_level),
+            z_at_pt_3 = probe_pt( ABL_PROBE_PT_3_X + home_offset[X_AXIS],
+                                  ABL_PROBE_PT_3_Y + home_offset[Y_AXIS],
+                                  current_position[Z_AXIS] + Z_RAISE_BETWEEN_PROBINGS,
+                                  p3, verbose_level);
       clean_up_after_endstop_move();
       if (!dryrun) set_bed_level_equation_3pts(z_at_pt_1, z_at_pt_2, z_at_pt_3);
 
@@ -3734,13 +3748,14 @@ inline void gcode_G92() {
 
       current_position[i] = v;
 
-      position_shift[i] += v - p; // Offset the coordinate space
-      update_software_endstops((AxisEnum)i);
-
       if (i == E_AXIS)
         plan_set_e_position(v);
-      else
+      else {
+        position_shift[i] += v - p; // Offset the coordinate space
+        update_software_endstops((AxisEnum)i);
+		  
         didXYZ = true;
+	  }
     }
   }
   if (didXYZ) {
@@ -4147,7 +4162,7 @@ inline void gcode_M42() {
     if (Z_start_location < Z_RAISE_BEFORE_PROBING * 2.0)
       do_blocking_move_to_z(Z_start_location);
 
-    do_blocking_move_to_xy(X_probe_location - X_PROBE_OFFSET_FROM_EXTRUDER, Y_probe_location - Y_PROBE_OFFSET_FROM_EXTRUDER);
+    do_blocking_move_to_xy(X_probe_location - (X_PROBE_OFFSET_FROM_EXTRUDER), Y_probe_location - (Y_PROBE_OFFSET_FROM_EXTRUDER));
 
     /**
      * OK, do the initial probe to get us close to the bed.
@@ -4207,8 +4222,8 @@ inline void gcode_M42() {
           while (angle < 0.0)     // outside of this range.   It looks like they behave correctly with
             angle += 360.0;       // numbers outside of the range, but just to be safe we clamp them.
 
-          X_current = X_probe_location - X_PROBE_OFFSET_FROM_EXTRUDER + cos(RADIANS(angle)) * radius;
-          Y_current = Y_probe_location - Y_PROBE_OFFSET_FROM_EXTRUDER + sin(RADIANS(angle)) * radius;
+          X_current = X_probe_location - (X_PROBE_OFFSET_FROM_EXTRUDER) + cos(RADIANS(angle)) * radius;
+          Y_current = Y_probe_location - (Y_PROBE_OFFSET_FROM_EXTRUDER) + sin(RADIANS(angle)) * radius;
 
           #if DISABLED(DELTA)
             X_current = constrain(X_current, X_MIN_POS, X_MAX_POS);
@@ -4246,7 +4261,7 @@ inline void gcode_M42() {
        * height. This gets us back to the probe location at the same height that
        * we have been running around the circle at.
        */
-      do_blocking_move_to_xy(X_probe_location - X_PROBE_OFFSET_FROM_EXTRUDER, Y_probe_location - Y_PROBE_OFFSET_FROM_EXTRUDER);
+      do_blocking_move_to_xy(X_probe_location - (X_PROBE_OFFSET_FROM_EXTRUDER), Y_probe_location - (Y_PROBE_OFFSET_FROM_EXTRUDER));
       if (deploy_probe_for_each_reading)
         sample_set[n] = probe_pt(X_probe_location, Y_probe_location, Z_RAISE_BEFORE_PROBING, ProbeDeployAndStow, verbose_level);
       else {
@@ -4536,14 +4551,14 @@ inline void gcode_M109() {
   // Try to calculate a ballpark safe margin by halving EXTRUDE_MINTEMP
   if (wants_to_cool && degTargetHotend(target_extruder) < (EXTRUDE_MINTEMP)/2) return;
 
-  #ifdef TEMP_RESIDENCY_TIME
+  #if TEMP_RESIDENCY_TIME > 0
     millis_t residency_start_ms = 0;
     // Loop until the temperature has stabilized
     #define TEMP_CONDITIONS (!residency_start_ms || PENDING(now, residency_start_ms + (TEMP_RESIDENCY_TIME) * 1000UL))
   #else
     // Loop until the temperature is very close target
     #define TEMP_CONDITIONS (wants_to_cool ? isCoolingHotend(target_extruder) : isHeatingHotend(target_extruder))
-  #endif //TEMP_RESIDENCY_TIME
+  #endif //TEMP_RESIDENCY_TIME > 0
 
   cancel_heatup = false;
   millis_t now, next_temp_ms = 0;
@@ -4554,7 +4569,7 @@ inline void gcode_M109() {
       #if HAS_TEMP_HOTEND || HAS_TEMP_BED
         print_heaterstates();
       #endif
-      #ifdef TEMP_RESIDENCY_TIME
+      #if TEMP_RESIDENCY_TIME > 0
         SERIAL_PROTOCOLPGM(" W:");
         if (residency_start_ms) {
           long rem = (((TEMP_RESIDENCY_TIME) * 1000UL) - (now - residency_start_ms)) / 1000UL;
@@ -4571,7 +4586,7 @@ inline void gcode_M109() {
     idle();
     refresh_cmd_timeout(); // to prevent stepper_inactive_time from running out
 
-    #ifdef TEMP_RESIDENCY_TIME
+    #if TEMP_RESIDENCY_TIME > 0
 
       float temp_diff = fabs(degTargetHotend(target_extruder) - degHotend(target_extruder));
 
@@ -4584,7 +4599,7 @@ inline void gcode_M109() {
         residency_start_ms = millis();
       }
 
-    #endif //TEMP_RESIDENCY_TIME
+    #endif //TEMP_RESIDENCY_TIME > 0
 
   } while (!cancel_heatup && TEMP_CONDITIONS);
 
@@ -4609,14 +4624,14 @@ inline void gcode_M109() {
     // Exit if S<lower>, continue if S<higher>, R<lower>, or R<higher>
     if (no_wait_for_cooling && wants_to_cool) return;
 
-    #ifdef TEMP_BED_RESIDENCY_TIME
+    #if TEMP_BED_RESIDENCY_TIME > 0
       millis_t residency_start_ms = 0;
       // Loop until the temperature has stabilized
       #define TEMP_BED_CONDITIONS (!residency_start_ms || PENDING(now, residency_start_ms + (TEMP_BED_RESIDENCY_TIME) * 1000UL))
     #else
       // Loop until the temperature is very close target
       #define TEMP_BED_CONDITIONS (wants_to_cool ? isCoolingBed() : isHeatingBed())
-    #endif //TEMP_BED_RESIDENCY_TIME
+    #endif //TEMP_BED_RESIDENCY_TIME > 0
 
     cancel_heatup = false;
     millis_t now, next_temp_ms = 0;
@@ -4627,7 +4642,7 @@ inline void gcode_M109() {
       if (ELAPSED(now, next_temp_ms)) { //Print Temp Reading every 1 second while heating up.
         next_temp_ms = now + 1000UL;
         print_heaterstates();
-        #ifdef TEMP_BED_RESIDENCY_TIME
+        #if TEMP_BED_RESIDENCY_TIME > 0
           SERIAL_PROTOCOLPGM(" W:");
           if (residency_start_ms) {
             long rem = (((TEMP_BED_RESIDENCY_TIME) * 1000UL) - (now - residency_start_ms)) / 1000UL;
@@ -4644,7 +4659,7 @@ inline void gcode_M109() {
       idle();
       refresh_cmd_timeout(); // to prevent stepper_inactive_time from running out
 
-      #ifdef TEMP_BED_RESIDENCY_TIME
+      #if TEMP_BED_RESIDENCY_TIME > 0
 
         float temp_diff = fabs(degBed() - degTargetBed());
 
@@ -4657,7 +4672,7 @@ inline void gcode_M109() {
           residency_start_ms = millis();
         }
 
-      #endif //TEMP_BED_RESIDENCY_TIME
+      #endif //TEMP_BED_RESIDENCY_TIME > 0
 
     } while (!cancel_heatup && TEMP_BED_CONDITIONS);
     LCD_MESSAGEPGM(MSG_BED_DONE);
@@ -5988,7 +6003,7 @@ inline void gcode_M428() {
 
   if (!err) {
     sync_plan_position();
-    LCD_ALERTMESSAGEPGM(MSG_HOME_OFFSETS_APPLIED);
+    LCD_MESSAGEPGM(MSG_HOME_OFFSETS_APPLIED);
     #if HAS_BUZZER
       buzz(200, 659);
       buzz(200, 698);
@@ -7535,7 +7550,7 @@ void plan_arc(
 
   // Make a circle if the angular rotation is 0
   if (angular_travel == 0 && current_position[X_AXIS] == target[X_AXIS] && current_position[Y_AXIS] == target[Y_AXIS])
-    angular_travel == RADIANS(360);
+    angular_travel += RADIANS(360);
 
   float mm_of_travel = hypot(angular_travel * radius, fabs(linear_travel));
   if (mm_of_travel < 0.001) return;
@@ -7758,6 +7773,7 @@ void plan_arc(
     SERIAL_EOL;
     */
   }
+
 #endif // SCARA
 
 #if ENABLED(TEMP_STAT_LEDS)
