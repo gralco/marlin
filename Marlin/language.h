@@ -88,7 +88,7 @@
    * has a distinct Github fork— the Source Code URL should just be the main
    * Marlin repository.
    */
-  #define DEFAULT_SOURCE_URL "https://github.com/MarlinFirmware/Marlin"
+  #define DEFAULT_SOURCE_URL "https://code.alephobjects.com/diffusion/MARLIN/"
 #endif
 
 #ifndef SOURCE_CODE_URL
