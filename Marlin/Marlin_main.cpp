@@ -285,32 +285,51 @@ bool volumetric_enabled = false;
 float filament_size[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(DEFAULT_NOMINAL_FILAMENT_DIA);
 float volumetric_multiplier[EXTRUDERS] = ARRAY_BY_EXTRUDERS1(1.0);
 
+// The distance that XYZ has been offset by G92. Reset by G28.
 float position_shift[3] = { 0 };
+
+// This offset is added to the configured home position.
+// Set by M206, M428, or menu item. Saved to EEPROM.
 float home_offset[3] = { 0 };
-float min_pos[3] = { X_MIN_POS, Y_MIN_POS, Z_MIN_POS };
-float max_pos[3] = { X_MAX_POS, Y_MAX_POS, Z_MAX_POS };
+
+// Software Endstops. Default to configured limits.
+float sw_endstop_min[3] = { X_MIN_POS, Y_MIN_POS, Z_MIN_POS };
+float sw_endstop_max[3] = { X_MAX_POS, Y_MAX_POS, Z_MAX_POS };
 
 #if FAN_COUNT > 0
   int fanSpeeds[FAN_COUNT] = { 0 };
 #endif
 
+// The active extruder (tool). Set with T<extruder> command.
 uint8_t active_extruder = 0;
+
+// Relative Mode. Enable with G91, disable with G90.
+static bool relative_mode = false;
+
 bool cancel_heatup = false;
 
 const char errormagic[] PROGMEM = "Error:";
 const char echomagic[] PROGMEM = "echo:";
 const char axis_codes[NUM_AXIS] = {'X', 'Y', 'Z', 'E'};
 
-static bool relative_mode = false;  //Determines Absolute or Relative Coordinates
 static int serial_count = 0;
-static char* seen_pointer; ///< A pointer to find chars in the command string (X, Y, Z, E, etc.)
-const char* queued_commands_P = NULL; /* pointer to the current line in the active sequence of commands, or NULL when none */
+
+// GCode parameter pointer used by code_seen(), code_value(), etc.
+static char* seen_pointer;
+
+// Next Immediate GCode Command pointer. NULL if none.
+const char* queued_commands_P = NULL;
+
 const int sensitive_pins[] = SENSITIVE_PINS; ///< Sensitive pin list for M42
+
 // Inactivity shutdown
 millis_t previous_cmd_ms = 0;
 static millis_t max_inactive_time = 0;
 static millis_t stepper_inactive_time = (DEFAULT_STEPPER_DEACTIVE_TIME) * 1000UL;
+
+// Print Job Timer
 Stopwatch print_job_timer = Stopwatch();
+
 static uint8_t target_extruder;
 
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
@@ -349,8 +368,8 @@ static uint8_t target_extruder;
 #endif
 
 #if ENABLED(BARICUDA)
-  int ValvePressure = 0;
-  int EtoPPressure = 0;
+  int baricuda_valve_pressure = 0;
+  int baricuda_e_to_p_pressure = 0;
 #endif
 
 #if ENABLED(FWRETRACT)
@@ -432,7 +451,7 @@ static uint8_t target_extruder;
 #endif
 
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
-  static bool filrunoutEnqueued = false;
+  static bool filament_ran_out = false;
 #endif
 
 static bool send_ok[BUFSIZE];
@@ -477,12 +496,12 @@ static bool send_ok[BUFSIZE];
  * ***************************************************************************
  */
 
+void stop();
+
 void get_available_commands();
 void process_next_command();
 
 void plan_arc(float target[NUM_AXIS], float* offset, uint8_t clockwise);
-
-bool setTargetedHotend(int code);
 
 void serial_echopair_P(const char* s_P, int v)           { serialprintPGM(s_P); SERIAL_ECHO(v); }
 void serial_echopair_P(const char* s_P, long v)          { serialprintPGM(s_P); SERIAL_ECHO(v); }
@@ -1175,6 +1194,30 @@ bool code_seen(char code) {
   return (seen_pointer != NULL); // Return TRUE if the code-letter was found
 }
 
+/**
+ * Set target_extruder from the T parameter or the active_extruder
+ *
+ * Returns TRUE if the target is invalid
+ */
+bool get_target_extruder_from_command(int code) {
+  if (code_seen('T')) {
+    short t = code_value_short();
+    if (t >= EXTRUDERS) {
+      SERIAL_ECHO_START;
+      SERIAL_CHAR('M');
+      SERIAL_ECHO(code);
+      SERIAL_ECHOPAIR(" " MSG_INVALID_EXTRUDER " ", t);
+      SERIAL_EOL;
+      return true;
+    }
+    target_extruder = t;
+  }
+  else
+    target_extruder = active_extruder;
+
+  return false;
+}
+
 #define DEFINE_PGM_READ_ANY(type, reader)       \
   static inline type pgm_read_any(const type *p)  \
   { return pgm_read_##reader##_near(p); }
@@ -1245,24 +1288,32 @@ static void update_software_endstops(AxisEnum axis) {
     if (axis == X_AXIS) {
       float dual_max_x = max(extruder_offset[X_AXIS][1], X2_MAX_POS);
       if (active_extruder != 0) {
-        min_pos[X_AXIS] = X2_MIN_POS + offs;
-        max_pos[X_AXIS] = dual_max_x + offs;
+        sw_endstop_min[X_AXIS] = X2_MIN_POS + offs;
+        sw_endstop_max[X_AXIS] = dual_max_x + offs;
         return;
       }
       else if (dual_x_carriage_mode == DXC_DUPLICATION_MODE) {
-        min_pos[X_AXIS] = base_min_pos(X_AXIS) + offs;
-        max_pos[X_AXIS] = min(base_max_pos(X_AXIS), dual_max_x - duplicate_extruder_x_offset) + offs;
+        sw_endstop_min[X_AXIS] = base_min_pos(X_AXIS) + offs;
+        sw_endstop_max[X_AXIS] = min(base_max_pos(X_AXIS), dual_max_x - duplicate_extruder_x_offset) + offs;
         return;
       }
     }
     else
   #endif
   {
-    min_pos[axis] = base_min_pos(axis) + offs;
-    max_pos[axis] = base_max_pos(axis) + offs;
+    sw_endstop_min[axis] = base_min_pos(axis) + offs;
+    sw_endstop_max[axis] = base_max_pos(axis) + offs;
   }
 }
 
+/**
+ * Change the home offset for an axis, update the current
+ * position and the software endstops to retain the same
+ * relative distance to the new home.
+ *
+ * Since this changes the current_position, code should
+ * call sync_plan_position soon after this.
+ */
 static void set_home_offset(AxisEnum axis, float v) {
   current_position[axis] += v - home_offset[axis];
   home_offset[axis] = v;
@@ -1327,8 +1378,8 @@ static void set_axis_is_at_home(AxisEnum axis) {
        * SCARA home positions are based on configuration since the actual
        * limits are determined by the inverse kinematic transform.
        */
-      min_pos[axis] = base_min_pos(axis); // + (delta[axis] - base_home_pos(axis));
-      max_pos[axis] = base_max_pos(axis); // + (delta[axis] - base_home_pos(axis));
+      sw_endstop_min[axis] = base_min_pos(axis); // + (delta[axis] - base_home_pos(axis));
+      sw_endstop_max[axis] = base_max_pos(axis); // + (delta[axis] - base_home_pos(axis));
     }
     else
   #endif
@@ -1794,7 +1845,7 @@ static void setup_for_endstop_move() {
             SERIAL_ERRORLNPGM("Z-Probe failed to engage!");
             LCD_ALERTMESSAGEPGM("Err: ZPROBE");
           }
-          Stop();
+          stop();
         }
 
     #endif // Z_PROBE_ALLEN_KEY
@@ -1898,7 +1949,7 @@ static void setup_for_endstop_move() {
             SERIAL_ERRORLNPGM("Z-Probe failed to retract!");
             LCD_ALERTMESSAGEPGM("Err: ZPROBE");
           }
-          Stop();
+          stop();
         }
     #endif // Z_PROBE_ALLEN_KEY
 
@@ -4365,7 +4416,7 @@ inline void gcode_M77() {
  * M104: Set hot end temperature
  */
 inline void gcode_M104() {
-  if (setTargetedHotend(104)) return;
+  if (get_target_extruder_from_command(104)) return;
   if (DEBUGGING(DRYRUN)) return;
 
   if (code_seen('S')) {
@@ -4473,7 +4524,7 @@ inline void gcode_M104() {
  * M105: Read hot end and bed temperature
  */
 inline void gcode_M105() {
-  if (setTargetedHotend(105)) return;
+  if (get_target_extruder_from_command(105)) return;
 
   #if HAS_TEMP_HOTEND || HAS_TEMP_BED
     SERIAL_PROTOCOLPGM(MSG_OK);
@@ -4517,7 +4568,7 @@ inline void gcode_M105() {
  */
 inline void gcode_M109() {
 
-  if (setTargetedHotend(109)) return;
+  if (get_target_extruder_from_command(109)) return;
   if (DEBUGGING(DRYRUN)) return;
 
   bool no_wait_for_cooling = code_seen('S');
@@ -4771,22 +4822,22 @@ inline void gcode_M112() { kill(PSTR(MSG_KILLED)); }
     /**
      * M126: Heater 1 valve open
      */
-    inline void gcode_M126() { ValvePressure = code_seen('S') ? constrain(code_value(), 0, 255) : 255; }
+    inline void gcode_M126() { baricuda_valve_pressure = code_seen('S') ? constrain(code_value(), 0, 255) : 255; }
     /**
      * M127: Heater 1 valve close
      */
-    inline void gcode_M127() { ValvePressure = 0; }
+    inline void gcode_M127() { baricuda_valve_pressure = 0; }
   #endif
 
   #if HAS_HEATER_2
     /**
      * M128: Heater 2 valve open
      */
-    inline void gcode_M128() { EtoPPressure = code_seen('S') ? constrain(code_value(), 0, 255) : 255; }
+    inline void gcode_M128() { baricuda_e_to_p_pressure = code_seen('S') ? constrain(code_value(), 0, 255) : 255; }
     /**
      * M129: Heater 2 valve close
      */
-    inline void gcode_M129() { EtoPPressure = 0; }
+    inline void gcode_M129() { baricuda_e_to_p_pressure = 0; }
   #endif
 
 #endif //BARICUDA
@@ -5184,7 +5235,7 @@ inline void gcode_M121() { enable_endstops_globally(false); }
  */
 inline void gcode_M200() {
 
-  if (setTargetedHotend(200)) return;
+  if (get_target_extruder_from_command(200)) return;
 
   if (code_seen('D')) {
     float diameter = code_value();
@@ -5436,7 +5487,7 @@ inline void gcode_M206() {
    *   Z<zoffset> - Available with DUAL_X_CARRIAGE
    */
   inline void gcode_M218() {
-    if (setTargetedHotend(218)) return;
+    if (get_target_extruder_from_command(218)) return;
 
     if (code_seen('X')) extruder_offset[X_AXIS][target_extruder] = code_value();
     if (code_seen('Y')) extruder_offset[Y_AXIS][target_extruder] = code_value();
@@ -5475,7 +5526,7 @@ inline void gcode_M220() {
 inline void gcode_M221() {
   if (code_seen('S')) {
     int sval = code_value();
-    if (setTargetedHotend(221)) return;
+    if (get_target_extruder_from_command(221)) return;
     extruder_multiplier[target_extruder] = sval;
   }
 }
@@ -5718,7 +5769,7 @@ inline void gcode_M226() {
  *       U<bool> with a non-zero value will apply the result to current settings
  */
 inline void gcode_M303() {
-  #if ENABLED(PIDTEMP)
+  #if HAS_PID_HEATING
     int e = code_seen('E') ? code_value_short() : 0;
     int c = code_seen('C') ? code_value_short() : 5;
     bool u = code_seen('U') && code_value_short() != 0;
@@ -6001,7 +6052,7 @@ inline void gcode_M428() {
   bool err = false;
   for (int8_t i = X_AXIS; i <= Z_AXIS; i++) {
     if (axis_homed[i]) {
-      float base = (current_position[i] > (min_pos[i] + max_pos[i]) / 2) ? base_home_pos(i) : 0,
+      float base = (current_position[i] > (sw_endstop_min[i] + sw_endstop_max[i]) / 2) ? base_home_pos(i) : 0,
             diff = current_position[i] - base;
       if (diff > -20 && diff < 20) {
         set_home_offset((AxisEnum)i, home_offset[i] - diff);
@@ -6237,7 +6288,7 @@ inline void gcode_M503() {
     #endif
 
     #if ENABLED(FILAMENT_RUNOUT_SENSOR)
-      filrunoutEnqueued = false;
+      filament_ran_out = false;
     #endif
 
   }
@@ -7191,8 +7242,8 @@ void ok_to_send() {
 
 void clamp_to_software_endstops(float target[3]) {
   if (min_software_endstops) {
-    NOLESS(target[X_AXIS], min_pos[X_AXIS]);
-    NOLESS(target[Y_AXIS], min_pos[Y_AXIS]);
+    NOLESS(target[X_AXIS], sw_endstop_min[X_AXIS]);
+    NOLESS(target[Y_AXIS], sw_endstop_min[Y_AXIS]);
 
     float negative_z_offset = 0;
     #if ENABLED(AUTO_BED_LEVELING_FEATURE)
@@ -7207,13 +7258,13 @@ void clamp_to_software_endstops(float target[3]) {
         negative_z_offset += home_offset[Z_AXIS];
       }
     #endif
-    NOLESS(target[Z_AXIS], min_pos[Z_AXIS] + negative_z_offset);
+    NOLESS(target[Z_AXIS], sw_endstop_min[Z_AXIS] + negative_z_offset);
   }
 
   if (max_software_endstops) {
-    NOMORE(target[X_AXIS], max_pos[X_AXIS]);
-    NOMORE(target[Y_AXIS], max_pos[Y_AXIS]);
-    NOMORE(target[Z_AXIS], max_pos[Z_AXIS]);
+    NOMORE(target[X_AXIS], sw_endstop_max[X_AXIS]);
+    NOMORE(target[Y_AXIS], sw_endstop_max[Y_AXIS]);
+    NOMORE(target[Z_AXIS], sw_endstop_max[Z_AXIS]);
   }
 }
 
@@ -7873,7 +7924,7 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) {
 
   #if HAS_FILRUNOUT
     if (IS_SD_PRINTING && !(READ(FILRUNOUT_PIN) ^ FIL_RUNOUT_INVERTING))
-      filrunout();
+      handle_filament_runout();
   #endif
 
   if (commands_in_queue < BUFSIZE) get_available_commands();
@@ -8066,9 +8117,9 @@ void kill(const char* lcd_msg) {
 
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
 
-  void filrunout() {
-    if (!filrunoutEnqueued) {
-      filrunoutEnqueued = true;
+  void handle_filament_runout() {
+    if (!filament_ran_out) {
+      filament_ran_out = true;
       enqueue_and_echo_commands_P(PSTR(FILAMENT_RUNOUT_SCRIPT));
       st_synchronize();
     }
@@ -8152,7 +8203,7 @@ void kill(const char* lcd_msg) {
   }
 #endif // FAST_PWM_FAN
 
-void Stop() {
+void stop() {
   disable_all_heaters();
   if (IsRunning()) {
     Running = false;
@@ -8161,27 +8212,6 @@ void Stop() {
     SERIAL_ERRORLNPGM(MSG_ERR_STOPPED);
     LCD_MESSAGEPGM(MSG_STOPPED);
   }
-}
-
-/**
- * Set target_extruder from the T parameter or the active_extruder
- *
- * Returns TRUE if the target is invalid
- */
-bool setTargetedHotend(int code) {
-  target_extruder = active_extruder;
-  if (code_seen('T')) {
-    target_extruder = code_value_short();
-    if (target_extruder >= EXTRUDERS) {
-      SERIAL_ECHO_START;
-      SERIAL_CHAR('M');
-      SERIAL_ECHO(code);
-      SERIAL_ECHOPGM(" " MSG_INVALID_EXTRUDER " ");
-      SERIAL_ECHOLN((int)target_extruder);
-      return true;
-    }
-  }
-  return false;
 }
 
 float calculate_volumetric_multiplier(float diameter) {
