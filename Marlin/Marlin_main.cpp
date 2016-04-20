@@ -2409,8 +2409,18 @@ static void homeaxis(AxisEnum axis) {
  */
 void gcode_get_destination() {
   for (int i = 0; i < NUM_AXIS; i++) {
-    if (code_seen(axis_codes[i]))
-      destination[i] = code_value() + (axis_relative_modes[i] || relative_mode ? current_position[i] : 0);
+    if (code_seen(axis_codes[i])) {
+      float check_destination = code_value() + (axis_relative_modes[i] || relative_mode ? current_position[i] : 0);
+      #define DESTINATION_DO(LETTER) \
+        (    (LETTER##_MIN_PIN > -1 && LETTER##_HOME_DIR==-1 && check_destination <= current_position[i]) \
+          || (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1  && check_destination >= current_position[i]) \
+          || (LETTER##_MIN_PIN > -1 && LETTER##_HOME_DIR==-1 && !READ(LETTER##_MAX_PIN)^LETTER##_MAX_ENDSTOP_INVERTING) \
+          || (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1  && !READ(LETTER##_MIN_PIN)^LETTER##_MIN_ENDSTOP_INVERTING) )
+      if (i == E_AXIS || i == X_AXIS ? DESTINATION_DO(X) : i == Y_AXIS ? DESTINATION_DO(Y) : i == Z_AXIS ? DESTINATION_DO(Z) : 0)
+        destination[i] = check_destination;
+      else
+        destination[i] = current_position[i];
+    }
     else
       destination[i] = current_position[i];
   }

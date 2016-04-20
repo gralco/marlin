@@ -362,7 +362,7 @@ inline void update_endstops() {
 
   #if ENABLED(COREXY) || ENABLED(COREXZ)
 
-    #define _SET_TRIGSTEPS(AXIS) do { \
+    #define _SET_TRIGSTEPS(AXIS, MINMAX) do { \
         float axis_pos = count_position[_AXIS(AXIS)]; \
         if (_AXIS(AXIS) == A_AXIS) \
           axis_pos = (axis_pos + count_position[CORE_AXIS_2]) / 2; \
@@ -373,14 +373,23 @@ inline void update_endstops() {
 
   #else
 
-    #define _SET_TRIGSTEPS(AXIS) endstops_trigsteps[_AXIS(AXIS)] = count_position[_AXIS(AXIS)]
+    #define _SET_TRIGSTEPS(AXIS, MINMAX) do { \
+        endstops_trigsteps[_AXIS(AXIS)] = count_position[_AXIS(AXIS)]; \
+        if (AXIS##_HOME_DIR==-1 && _ENDSTOP(AXIS, MINMAX) == AXIS ##_## MIN) \
+           current_position[_AXIS(AXIS)] = AXIS##_MIN_POS; \
+        else if (AXIS##_HOME_DIR==1 && _ENDSTOP(AXIS, MINMAX) == AXIS ##_## MAX) \
+           current_position[_AXIS(AXIS)] = AXIS##_MAX_POS; \
+        else \
+          current_position[_AXIS(AXIS)] = (float)endstops_trigsteps[_AXIS(AXIS)]/axis_steps_per_unit[_AXIS(AXIS)]; \
+        plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]); \
+    } while(0)
 
   #endif // COREXY || COREXZ
 
   #define UPDATE_ENDSTOP(AXIS,MINMAX) do { \
       SET_ENDSTOP_BIT(AXIS, MINMAX); \
       if (TEST_ENDSTOP(_ENDSTOP(AXIS, MINMAX)) && current_block->steps[_AXIS(AXIS)] > 0) { \
-        _SET_TRIGSTEPS(AXIS); \
+        _SET_TRIGSTEPS(AXIS, MINMAX); \
         _ENDSTOP_HIT(AXIS); \
         step_events_completed = current_block->step_event_count; \
       } \
