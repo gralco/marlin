@@ -567,7 +567,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
     #define FRONT_PROBE_BED_POSITION 0
     #define BACK_PROBE_BED_POSITION 160
 
-    #define MIN_PROBE_EDGE -2 // The Z probe minimum square sides can be no smaller than this.
+    #define MIN_PROBE_EDGE 10 // The Z probe minimum square sides can be no smaller than this.
 
     // Set the number of grid points per dimension.
     // You probably don't need more than 3 (squared=9).
