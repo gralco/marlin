@@ -1460,6 +1460,7 @@ inline void sync_plan_position() {
   #endif
   plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
 }
+inline void sync_plan_position_e() { plan_set_e_position(current_position[E_AXIS]); }
 inline void set_current_to_destination() { memcpy(current_position, destination, sizeof(current_position)); }
 inline void set_destination_to_current() { memcpy(destination, current_position, sizeof(destination)); }
 
@@ -2406,7 +2407,7 @@ static void homeaxis(AxisEnum axis) {
 
       feedrate = retract_feedrate * 60;
       current_position[E_AXIS] += (swapping ? retract_length_swap : retract_length) / volumetric_multiplier[active_extruder];
-      plan_set_e_position(current_position[E_AXIS]);
+      sync_plan_position_e();
       prepare_move();
 
       if (retract_zlift > 0.01) {
@@ -2434,7 +2435,7 @@ static void homeaxis(AxisEnum axis) {
       feedrate = retract_recover_feedrate * 60;
       float move_e = swapping ? retract_length_swap + retract_recover_length_swap : retract_length + retract_recover_length;
       current_position[E_AXIS] -= move_e / volumetric_multiplier[active_extruder];
-      plan_set_e_position(current_position[E_AXIS]);
+      sync_plan_position_e();
       prepare_move();
     }
 
@@ -2535,7 +2536,7 @@ inline void gcode_G0_G1() {
         // Is this move an attempt to retract or recover?
         if ((echange < -MIN_RETRACT && !retracted[active_extruder]) || (echange > MIN_RETRACT && retracted[active_extruder])) {
           current_position[E_AXIS] = destination[E_AXIS]; // hide the slicer-generated retract/recover from calculations
-          plan_set_e_position(current_position[E_AXIS]);  // AND from the planner
+          sync_plan_position_e();  // AND from the planner
           retract(!retracted[active_extruder]);
           return;
         }
@@ -3291,20 +3292,20 @@ inline void gcode_G28() {
 
     if (!dryrun) {
 
+      #if ENABLED(DEBUG_LEVELING_FEATURE) && DISABLED(DELTA)
+        if (DEBUGGING(LEVELING)) {
+          vector_3 corrected_position = plan_get_position();
+          DEBUG_POS("BEFORE matrix.set_to_identity", corrected_position);
+          DEBUG_POS("BEFORE matrix.set_to_identity", current_position);
+        }
+      #endif
+
       // make sure the bed_level_rotation_matrix is identity or the planner will get it wrong
       plan_bed_level_matrix.set_to_identity();
 
       #if ENABLED(DELTA)
         reset_bed_level();
       #else //!DELTA
-
-        #if ENABLED(DEBUG_LEVELING_FEATURE)
-          if (DEBUGGING(LEVELING)) {
-            vector_3 corrected_position = plan_get_position();
-            DEBUG_POS("BEFORE matrix.set_to_identity", corrected_position);
-            DEBUG_POS("BEFORE matrix.set_to_identity", current_position);
-          }
-        #endif
 
         //vector_3 corrected_position = plan_get_position();
         //corrected_position.debug("position before G29");
@@ -3801,8 +3802,9 @@ inline void gcode_G28() {
  * G92: Set current position to given X Y Z E
  */
 inline void gcode_G92() {
-  if (!code_seen(axis_codes[E_AXIS]))
-    st_synchronize();
+  bool didE = code_seen(axis_codes[E_AXIS]);
+
+  if (!didE) st_synchronize();
 
   bool didXYZ = false;
   for (int i = 0; i < NUM_AXIS; i++) {
@@ -3812,14 +3814,11 @@ inline void gcode_G92() {
 
       current_position[i] = v;
 
-      if (i == E_AXIS)
-        plan_set_e_position(v);
-      else {
+      if (i != E_AXIS) {
         position_shift[i] += v - p; // Offset the coordinate space
         update_software_endstops((AxisEnum)i);
-		  
         didXYZ = true;
-	  }
+      }
     }
   }
   if (didXYZ) {
@@ -3828,6 +3827,9 @@ inline void gcode_G92() {
     #else
       sync_plan_position();
     #endif
+  }
+  else if (didE) {
+    sync_plan_position_e();
   }
 }
 
@@ -6265,7 +6267,7 @@ inline void gcode_M503() {
     #endif
 
     current_position[E_AXIS] = destination[E_AXIS]; //the long retract of L is compensated by manual filament feeding
-    plan_set_e_position(current_position[E_AXIS]);
+    sync_plan_position_e();
 
     RUNPLAN; //should do nothing
 
