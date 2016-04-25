@@ -61,7 +61,7 @@ nulldir = /dev/null
 DEST ?= ${basedir}
 MACHINE = $(shell git rev-parse --abbrev-ref HEAD)
 NOW = $(shell date +"%b_%d_%y")
-VERSION = v$(shell grep -oP "\"1.*.*\" " ${basedir}/Default_Version.h | cut -d \" -f 2)
+VERSION = v$(shell grep -oP "\"1.*.*\" " ${basedir}/Version.h | tr -d [[:space:]])
 HASH = $(shell git rev-parse --verify HEAD --short)
 
 all:
