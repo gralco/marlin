@@ -509,7 +509,7 @@ void serial_echopair_P(const char* s_P, float v)         { serialprintPGM(s_P); 
 void serial_echopair_P(const char* s_P, double v)        { serialprintPGM(s_P); SERIAL_ECHO(v); }
 void serial_echopair_P(const char* s_P, unsigned long v) { serialprintPGM(s_P); SERIAL_ECHO(v); }
 
-void gcode_M114();
+static void report_current_position();
 
 #if ENABLED(DEBUG_LEVELING_FEATURE)
   void print_xyz(const char* prefix, const float x, const float y, const float z) {
@@ -2429,7 +2429,6 @@ static void homeaxis(AxisEnum axis) {
         #else
           sync_plan_position();
         #endif
-        //prepare_move();
       }
 
       feedrate = retract_recover_feedrate * 60;
@@ -2982,8 +2981,7 @@ inline void gcode_G28() {
     }
   #endif
 
-  gcode_M114(); // Send end position to RepetierHost
-
+  report_current_position();
 }
 
 #if ENABLED(MESH_BED_LEVELING)
@@ -3750,8 +3748,7 @@ inline void gcode_G28() {
       }
     #endif
 
-    gcode_M114(); // Send end position to RepetierHost
-
+    report_current_position();
   }
 
   #if DISABLED(Z_PROBE_SLED) // could be avoided
@@ -3791,7 +3788,7 @@ inline void gcode_G28() {
         reprobe_attempts = 0;
       #endif
 
-      gcode_M114(); // Send end position to RepetierHost
+      report_current_position();
     }
 
   #endif //!Z_PROBE_SLED
@@ -4388,7 +4385,7 @@ inline void gcode_M42() {
 
     clean_up_after_endstop_move();
 
-    gcode_M114(); // Send end position to RepetierHost
+    report_current_position();
   }
 
 #endif // AUTO_BED_LEVELING_FEATURE && Z_MIN_PROBE_REPEATABILITY_TEST
@@ -5037,9 +5034,9 @@ inline void gcode_M92() {
 }
 
 /**
- * M114: Output current position to serial port
+ * Output the current position to serial
  */
-inline void gcode_M114() {
+static void report_current_position() {
   SERIAL_PROTOCOLPGM("X:");
   SERIAL_PROTOCOL(current_position[X_AXIS]);
   SERIAL_PROTOCOLPGM(" Y:");
@@ -5099,6 +5096,11 @@ inline void gcode_M114() {
     SERIAL_EOL; SERIAL_EOL;
   #endif
 }
+
+/**
+ * M114: Output current position to serial port
+ */
+inline void gcode_M114() { report_current_position(); }
 
 /**
  * M115: Capabilities string
@@ -5355,7 +5357,9 @@ inline void gcode_M206() {
     if (code_seen('T')) set_home_offset(X_AXIS, code_value()); // Theta
     if (code_seen('P')) set_home_offset(Y_AXIS, code_value()); // Psi
   #endif
+
   sync_plan_position();
+  report_current_position();
 }
 
 #if ENABLED(DELTA)
@@ -6074,6 +6078,7 @@ inline void gcode_M428() {
 
   if (!err) {
     sync_plan_position();
+    report_current_position();
     LCD_MESSAGEPGM(MSG_HOME_OFFSETS_APPLIED);
     #if HAS_BUZZER
       buzz(200, 659);
@@ -6458,131 +6463,134 @@ inline void gcode_T(uint8_t tmp_extruder) {
     SERIAL_CHAR('T');
     SERIAL_PROTOCOL_F(tmp_extruder, DEC);
     SERIAL_ECHOLN(MSG_INVALID_EXTRUDER);
+    return;
+  }
+
+  float stored_feedrate = feedrate;
+
+  if (code_seen('F')) {
+    float next_feedrate = code_value();
+    if (next_feedrate > 0.0) stored_feedrate = feedrate = next_feedrate;
   }
   else {
-    target_extruder = tmp_extruder;
-
-    #if EXTRUDERS > 1
-      bool make_move = false;
+    #ifdef XY_TRAVEL_SPEED
+      feedrate = XY_TRAVEL_SPEED;
+    #else
+      feedrate = min(max_feedrate[X_AXIS], max_feedrate[Y_AXIS]);
     #endif
-
-    if (code_seen('F')) {
-
-      #if EXTRUDERS > 1
-        make_move = true;
-      #endif
-
-      float next_feedrate = code_value();
-      if (next_feedrate > 0.0) feedrate = next_feedrate;
-    }
-    #if EXTRUDERS > 1
-      if (tmp_extruder != active_extruder) {
-        // Save current position to return to after applying extruder offset
-        set_destination_to_current();
-        #if ENABLED(DUAL_X_CARRIAGE)
-          if (dual_x_carriage_mode == DXC_AUTO_PARK_MODE && IsRunning() &&
-              (delayed_move_time || current_position[X_AXIS] != x_home_pos(active_extruder))) {
-            // Park old head: 1) raise 2) move to park position 3) lower
-            plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS] + TOOLCHANGE_PARK_ZLIFT,
-                             current_position[E_AXIS], max_feedrate[Z_AXIS], active_extruder);
-            plan_buffer_line(x_home_pos(active_extruder), current_position[Y_AXIS], current_position[Z_AXIS] + TOOLCHANGE_PARK_ZLIFT,
-                             current_position[E_AXIS], max_feedrate[X_AXIS], active_extruder);
-            plan_buffer_line(x_home_pos(active_extruder), current_position[Y_AXIS], current_position[Z_AXIS],
-                             current_position[E_AXIS], max_feedrate[Z_AXIS], active_extruder);
-            st_synchronize();
-          }
-
-          // apply Y & Z extruder offset (x offset is already used in determining home pos)
-          current_position[Y_AXIS] -= extruder_offset[Y_AXIS][active_extruder] - extruder_offset[Y_AXIS][tmp_extruder];
-          current_position[Z_AXIS] -= extruder_offset[Z_AXIS][active_extruder] - extruder_offset[Z_AXIS][tmp_extruder];
-          active_extruder = tmp_extruder;
-
-          // This function resets the max/min values - the current position may be overwritten below.
-          set_axis_is_at_home(X_AXIS);
-
-          if (dual_x_carriage_mode == DXC_FULL_CONTROL_MODE) {
-            current_position[X_AXIS] = inactive_extruder_x_pos;
-            inactive_extruder_x_pos = destination[X_AXIS];
-          }
-          else if (dual_x_carriage_mode == DXC_DUPLICATION_MODE) {
-            active_extruder_parked = (active_extruder == 0); // this triggers the second extruder to move into the duplication position
-            if (active_extruder == 0 || active_extruder_parked)
-              current_position[X_AXIS] = inactive_extruder_x_pos;
-            else
-              current_position[X_AXIS] = destination[X_AXIS] + duplicate_extruder_x_offset;
-            inactive_extruder_x_pos = destination[X_AXIS];
-            extruder_duplication_enabled = false;
-          }
-          else {
-            // record raised toolhead position for use by unpark
-            memcpy(raised_parked_position, current_position, sizeof(raised_parked_position));
-            raised_parked_position[Z_AXIS] += TOOLCHANGE_UNPARK_ZLIFT;
-            active_extruder_parked = true;
-            delayed_move_time = 0;
-          }
-        #else // !DUAL_X_CARRIAGE
-          #if ENABLED(AUTO_BED_LEVELING_FEATURE)
-            // Offset extruder, make sure to apply the bed level rotation matrix
-            vector_3 tmp_offset_vec = vector_3(extruder_offset[X_AXIS][tmp_extruder],
-                                               extruder_offset[Y_AXIS][tmp_extruder],
-                                               0),
-                     act_offset_vec = vector_3(extruder_offset[X_AXIS][active_extruder],
-                                               extruder_offset[Y_AXIS][active_extruder],
-                                               0),
-                     offset_vec = tmp_offset_vec - act_offset_vec;
-
-            #if ENABLED(DEBUG_LEVELING_FEATURE)
-              if (DEBUGGING(LEVELING)) {
-                SERIAL_ECHOLNPGM(">>> gcode_T");
-                tmp_offset_vec.debug("tmp_offset_vec");
-                act_offset_vec.debug("act_offset_vec");
-                offset_vec.debug("offset_vec (BEFORE)");
-                DEBUG_POS("BEFORE rotation", current_position);
-              }
-            #endif
-
-            offset_vec.apply_rotation(plan_bed_level_matrix.transpose(plan_bed_level_matrix));
-
-            current_position[X_AXIS] += offset_vec.x;
-            current_position[Y_AXIS] += offset_vec.y;
-            current_position[Z_AXIS] += offset_vec.z;
-
-            #if ENABLED(DEBUG_LEVELING_FEATURE)
-              if (DEBUGGING(LEVELING)) {
-                offset_vec.debug("offset_vec (AFTER)");
-                DEBUG_POS("AFTER rotation", current_position);
-                SERIAL_ECHOLNPGM("<<< gcode_T");
-              }
-            #endif
-
-          #else // !AUTO_BED_LEVELING_FEATURE
-            // Offset extruder (only by XY)
-            for (int i=X_AXIS; i<=Y_AXIS; i++)
-              current_position[i] += extruder_offset[i][tmp_extruder] - extruder_offset[i][active_extruder];
-          #endif // !AUTO_BED_LEVELING_FEATURE
-          // Set the new active extruder and position
-          active_extruder = tmp_extruder;
-        #endif // !DUAL_X_CARRIAGE
-        #if ENABLED(DELTA)
-          sync_plan_position_delta();
-        #else
-          sync_plan_position();
-        #endif
-        // Move to the old position if 'F' was in the parameters
-        if (make_move && IsRunning()) prepare_move();
-      }
-
-      #if ENABLED(EXT_SOLENOID)
-        st_synchronize();
-        disable_all_solenoids();
-        enable_solenoid_on_active_extruder();
-      #endif // EXT_SOLENOID
-
-    #endif // EXTRUDERS > 1
-    SERIAL_ECHO_START;
-    SERIAL_ECHO(MSG_ACTIVE_EXTRUDER);
-    SERIAL_PROTOCOLLN((int)active_extruder);
   }
+
+  #if EXTRUDERS > 1
+    if (tmp_extruder != active_extruder) {
+      // Save current position to return to after applying extruder offset
+      set_destination_to_current();
+      #if ENABLED(DUAL_X_CARRIAGE)
+        if (dual_x_carriage_mode == DXC_AUTO_PARK_MODE && IsRunning() &&
+            (delayed_move_time || current_position[X_AXIS] != x_home_pos(active_extruder))) {
+          // Park old head: 1) raise 2) move to park position 3) lower
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS] + TOOLCHANGE_PARK_ZLIFT,
+                           current_position[E_AXIS], max_feedrate[Z_AXIS], active_extruder);
+          plan_buffer_line(x_home_pos(active_extruder), current_position[Y_AXIS], current_position[Z_AXIS] + TOOLCHANGE_PARK_ZLIFT,
+                           current_position[E_AXIS], max_feedrate[X_AXIS], active_extruder);
+          plan_buffer_line(x_home_pos(active_extruder), current_position[Y_AXIS], current_position[Z_AXIS],
+                           current_position[E_AXIS], max_feedrate[Z_AXIS], active_extruder);
+          st_synchronize();
+        }
+
+        // apply Y & Z extruder offset (x offset is already used in determining home pos)
+        current_position[Y_AXIS] -= extruder_offset[Y_AXIS][active_extruder] - extruder_offset[Y_AXIS][tmp_extruder];
+        current_position[Z_AXIS] -= extruder_offset[Z_AXIS][active_extruder] - extruder_offset[Z_AXIS][tmp_extruder];
+        active_extruder = tmp_extruder;
+
+        // This function resets the max/min values - the current position may be overwritten below.
+        set_axis_is_at_home(X_AXIS);
+
+        if (dual_x_carriage_mode == DXC_FULL_CONTROL_MODE) {
+          current_position[X_AXIS] = inactive_extruder_x_pos;
+          inactive_extruder_x_pos = destination[X_AXIS];
+        }
+        else if (dual_x_carriage_mode == DXC_DUPLICATION_MODE) {
+          active_extruder_parked = (active_extruder == 0); // this triggers the second extruder to move into the duplication position
+          if (active_extruder_parked)
+            current_position[X_AXIS] = inactive_extruder_x_pos;
+          else
+            current_position[X_AXIS] = destination[X_AXIS] + duplicate_extruder_x_offset;
+          inactive_extruder_x_pos = destination[X_AXIS];
+          extruder_duplication_enabled = false;
+        }
+        else {
+          // record raised toolhead position for use by unpark
+          memcpy(raised_parked_position, current_position, sizeof(raised_parked_position));
+          raised_parked_position[Z_AXIS] += TOOLCHANGE_UNPARK_ZLIFT;
+          active_extruder_parked = true;
+          delayed_move_time = 0;
+        }
+        // No extra case for AUTO_BED_LEVELING_FEATURE in DUAL_X_CARRIAGE. Does that mean they don't work together?
+      #else // !DUAL_X_CARRIAGE
+        #if ENABLED(AUTO_BED_LEVELING_FEATURE)
+          // Offset extruder, make sure to apply the bed level rotation matrix
+          vector_3 tmp_offset_vec = vector_3(extruder_offset[X_AXIS][tmp_extruder],
+                                             extruder_offset[Y_AXIS][tmp_extruder],
+                                             0),
+                   act_offset_vec = vector_3(extruder_offset[X_AXIS][active_extruder],
+                                             extruder_offset[Y_AXIS][active_extruder],
+                                             0),
+                   offset_vec = tmp_offset_vec - act_offset_vec;
+
+          #if ENABLED(DEBUG_LEVELING_FEATURE)
+            if (DEBUGGING(LEVELING)) {
+              SERIAL_ECHOLNPGM(">>> gcode_T");
+              tmp_offset_vec.debug("tmp_offset_vec");
+              act_offset_vec.debug("act_offset_vec");
+              offset_vec.debug("offset_vec (BEFORE)");
+              DEBUG_POS("BEFORE rotation", current_position);
+            }
+          #endif
+
+          offset_vec.apply_rotation(plan_bed_level_matrix.transpose(plan_bed_level_matrix));
+
+          current_position[X_AXIS] += offset_vec.x;
+          current_position[Y_AXIS] += offset_vec.y;
+          current_position[Z_AXIS] += offset_vec.z;
+
+          #if ENABLED(DEBUG_LEVELING_FEATURE)
+            if (DEBUGGING(LEVELING)) {
+              offset_vec.debug("offset_vec (AFTER)");
+              DEBUG_POS("AFTER rotation", current_position);
+              SERIAL_ECHOLNPGM("<<< gcode_T");
+            }
+          #endif
+
+        #else // !AUTO_BED_LEVELING_FEATURE
+          // Offset extruder (only by XY)
+          for (int i=X_AXIS; i<=Y_AXIS; i++)
+            current_position[i] += extruder_offset[i][tmp_extruder] - extruder_offset[i][active_extruder];
+        #endif // !AUTO_BED_LEVELING_FEATURE
+        // Set the new active extruder and position
+        active_extruder = tmp_extruder;
+      #endif // !DUAL_X_CARRIAGE
+      #if ENABLED(DELTA)
+        sync_plan_position_delta();
+      #else
+        sync_plan_position();
+      #endif
+      // Move to the old position
+      if (IsRunning()) prepare_move();
+    } // (tmp_extruder != active_extruder)
+
+    #if ENABLED(EXT_SOLENOID)
+      st_synchronize();
+      disable_all_solenoids();
+      enable_solenoid_on_active_extruder();
+    #endif // EXT_SOLENOID
+
+  #endif // EXTRUDERS > 1
+
+  feedrate = stored_feedrate;
+
+  SERIAL_ECHO_START;
+  SERIAL_ECHO(MSG_ACTIVE_EXTRUDER);
+  SERIAL_PROTOCOLLN((int)active_extruder);
 }
 
 /**
@@ -7481,12 +7489,8 @@ void mesh_plan_buffer_line(float x, float y, float z, const float e, float feed_
         adjust_delta(target);
       #endif
 
-      //SERIAL_ECHOPGM("target[X_AXIS]="); SERIAL_ECHOLN(target[X_AXIS]);
-      //SERIAL_ECHOPGM("target[Y_AXIS]="); SERIAL_ECHOLN(target[Y_AXIS]);
-      //SERIAL_ECHOPGM("target[Z_AXIS]="); SERIAL_ECHOLN(target[Z_AXIS]);
-      //SERIAL_ECHOPGM("delta[X_AXIS]="); SERIAL_ECHOLN(delta[X_AXIS]);
-      //SERIAL_ECHOPGM("delta[Y_AXIS]="); SERIAL_ECHOLN(delta[Y_AXIS]);
-      //SERIAL_ECHOPGM("delta[Z_AXIS]="); SERIAL_ECHOLN(delta[Z_AXIS]);
+      //DEBUG_POS("prepare_move_delta", target);
+      //DEBUG_POS("prepare_move_delta", delta);
 
       plan_buffer_line(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS], target[E_AXIS], feedrate / 60 * feedrate_multiplier / 100.0, active_extruder);
     }
@@ -7576,13 +7580,10 @@ void prepare_move() {
     if (!prepare_move_scara(destination)) return;
   #elif ENABLED(DELTA)
     if (!prepare_move_delta(destination)) return;
-  #endif
-
-  #if ENABLED(DUAL_X_CARRIAGE)
-    if (!prepare_move_dual_x_carriage()) return;
-  #endif
-
-  #if DISABLED(DELTA) && DISABLED(SCARA)
+  #else
+    #if ENABLED(DUAL_X_CARRIAGE)
+      if (!prepare_move_dual_x_carriage()) return;
+    #endif
     if (!prepare_move_cartesian()) return;
   #endif
 
