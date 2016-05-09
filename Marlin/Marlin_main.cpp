@@ -851,6 +851,9 @@ void setup() {
 
   setup_homepin();
 
+  SET_OUTPUT(Z_MIN_PIN);
+  WRITE(Z_MIN_PIN, LOW); //Disable Z_PROBE when not in use
+
   #ifdef STAT_LED_RED
     pinMode(STAT_LED_RED, OUTPUT);
     digitalWrite(STAT_LED_RED, LOW); // turn it off
@@ -3208,6 +3211,9 @@ inline void gcode_G28() {
    */
   inline void gcode_G29() {
 
+    SET_INPUT(Z_MIN_PIN);
+    WRITE(Z_MIN_PIN, HIGH);
+
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) {
         SERIAL_ECHOLNPGM("gcode_G29 >>>");
@@ -3750,6 +3756,9 @@ inline void gcode_G28() {
     #endif
 
     report_current_position();
+
+    SET_OUTPUT(Z_MIN_PIN);
+    WRITE(Z_MIN_PIN, LOW); //Disable Z_PROBE when not in use
   }
 
   #if DISABLED(Z_PROBE_SLED) // could be avoided
@@ -5139,8 +5148,12 @@ inline void gcode_M119() {
     SERIAL_PROTOCOLLN(((READ(Y_MAX_PIN)^Y_MAX_ENDSTOP_INVERTING) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
   #endif
   #if HAS_Z_MIN
+    SET_INPUT(Z_MIN_PIN);
+    WRITE(Z_MIN_PIN, HIGH);
     SERIAL_PROTOCOLPGM(MSG_Z_MIN);
     SERIAL_PROTOCOLLN(((READ(Z_MIN_PIN)^Z_MIN_ENDSTOP_INVERTING) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
+    SET_OUTPUT(Z_MIN_PIN);
+    WRITE(Z_MIN_PIN, LOW); //Disable Z_PROBE when not in use
   #endif
   #if HAS_Z_MAX
     SERIAL_PROTOCOLPGM(MSG_Z_MAX);
