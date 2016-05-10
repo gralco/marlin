@@ -335,6 +335,7 @@ static uint8_t target_extruder;
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
   int xy_travel_speed = XY_TRAVEL_SPEED;
   float zprobe_zoffset = Z_PROBE_OFFSET_FROM_EXTRUDER;
+  bool probing = false;
   #if ENABLED(REPROBE)
     uint8_t reprobe_attempts = 0;
     bool probe_fail = false;
@@ -1654,6 +1655,9 @@ static void setup_for_endstop_move() {
 
       // Move down until the Z probe (or endstop?) is triggered
       float zPosition = MIN_PROBE_PT;
+      probing = true;
+      SET_INPUT(Z_MIN_PIN);
+      WRITE(Z_MIN_PIN, HIGH);
       line_to_z(zPosition);
       st_synchronize();
 
@@ -1666,6 +1670,9 @@ static void setup_for_endstop_move() {
       #ifdef REPROBE
         if(zPosition == MIN_PROBE_PT && !digitalRead(Z_MIN_PIN)^Z_MIN_ENDSTOP_INVERTING)
         {
+          SET_OUTPUT(Z_MIN_PIN);
+          WRITE(Z_MIN_PIN, LOW); //Disable Z_PROBE when not in use
+          probing = false;
           probing_failed();
           return;
         }
@@ -1684,9 +1691,15 @@ static void setup_for_endstop_move() {
       feedrate /= 10;
 
       zPosition = MIN_PROBE_PT;
+      probing = true;
+      SET_INPUT(Z_MIN_PIN);
+      WRITE(Z_MIN_PIN, HIGH);
       line_to_z(zPosition);
       st_synchronize();
+      SET_OUTPUT(Z_MIN_PIN);
+      WRITE(Z_MIN_PIN, LOW); //Disable Z_PROBE when not in use
       endstops_hit_on_purpose(); // clear endstop hit flags
+      probing = false;
 
       // Get the current stepper position after bumping an endstop
       current_position[Z_AXIS] = st_get_axis_position_mm(Z_AXIS);
@@ -2471,7 +2484,8 @@ void gcode_get_destination() {
           || (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1  && check_destination >= current_position[i]) \
           || (LETTER##_MIN_PIN > -1 && LETTER##_HOME_DIR==-1 && !READ(LETTER##_MAX_PIN)^LETTER##_MAX_ENDSTOP_INVERTING) \
           || (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1  && !READ(LETTER##_MIN_PIN)^LETTER##_MIN_ENDSTOP_INVERTING) )
-      if (i == E_AXIS || i == X_AXIS ? DESTINATION_DO(X) : i == Y_AXIS ? DESTINATION_DO(Y) : i == Z_AXIS ? DESTINATION_DO(Z) : 0)
+      if ((i == Z_AXIS && check_destination <= current_position[i]) || i == E_AXIS ||
+          (i == X_AXIS ? DESTINATION_DO(X) : i == Y_AXIS ? DESTINATION_DO(Y) : i == Z_AXIS ? DESTINATION_DO(Z) : 0))
         destination[i] = check_destination;
       else
         destination[i] = current_position[i];

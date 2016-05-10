@@ -457,7 +457,7 @@ inline void update_endstops() {
     if ((current_block->steps[A_AXIS] != current_block->steps[C_AXIS]) || (TEST(out_bits, A_AXIS) != TEST(out_bits, C_AXIS))) {
       if (TEST(out_bits, Z_HEAD))
   #else
-      if (TEST(out_bits, Z_AXIS))
+      if (TEST(out_bits, Z_AXIS) && probing)
   #endif
       { // z -direction
         #if HAS_Z_MIN
@@ -495,6 +495,8 @@ inline void update_endstops() {
           }
         #endif
       }
+      if (TEST(out_bits, Z_AXIS) && !probing)
+        COPY_BIT(current_endstop_bits, 0, Z_MIN); // ignore the Z_MIN_PIN endstop when not probing
       else { // z +direction
         #if HAS_Z_MAX
 
