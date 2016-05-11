@@ -85,6 +85,7 @@ The current Marlin dev team consists of:
  - Roxanne Neufeld [@Roxy-3DPrintBoard] - English
 
 More features have been added by:
+  - Aleph Objects Inc.
   - Alberto Cotronei [@MagoKimbra]
   - Lampmaker,
   - Bradley Feldman,
