@@ -405,7 +405,7 @@
   #if ENABLED(CONFIG_STEPPERS_TOSHIBA)
     #define MAX_STEP_FREQUENCY 10000 // Max step frequency for Toshiba Stepper Controllers
   #else
-    #define MAX_STEP_FREQUENCY 40000 // Max step frequency for Ultimaker (5000 pps / half step)
+    #define MAX_STEP_FREQUENCY 40000 // Max step frequency for LulzBot Mini
   #endif
 
   // MS1 MS2 Stepper Driver Microstepping mode table
