@@ -8220,7 +8220,7 @@ void kill(const char* lcd_msg) {
         //WGM3:0 == B1000 == 8 <- Mode 8 PWM phase and frequency correct
                                //check atmega2560 datasheet page 145 table 17-2
 
-         ICR4 = 65535; // (2^8-1) is the top of the counter
+         ICR4 = 65535; // (2^16-1) is the top of the counter
          break;
       #endif
       #if defined(TCCR5A)
