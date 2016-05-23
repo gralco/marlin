@@ -104,7 +104,6 @@
  * G4  - Dwell S<seconds> or P<milliseconds>
  * G10 - retract filament according to settings of M207
  * G11 - retract recover filament according to settings of M208
- * G26 - Allow G-codes to enter the buffer again after a PROBE_FAIL_PANIC occurs during a G29
  * G28 - Home one or more axes
  * G29 - Detailed Z probe, probes the bed at 3 or more points.  Will fail if you haven't homed yet.
  * G30 - Single Z probe, probes bed at current XY location.
@@ -340,6 +339,7 @@ static uint8_t target_extruder;
   #if ENABLED(REPROBE)
     uint8_t reprobe_attempts = 0;
     bool probe_fail = false;
+    uint32_t probe_fail_time = 0;
   #endif
 #endif
 
@@ -931,8 +931,8 @@ void gcode_line_error(const char* err, bool doFlush = true) {
 }
 
 void clear_buffer() {
-  for(uint8_t i=0; i < BUFSIZE; i++)
-    for(uint8_t j=0; j < MAX_CMD_SIZE; j++)
+  for (uint8_t i=0; i < BUFSIZE; i++)
+    for (uint8_t j=0; j < MAX_CMD_SIZE; j++)
       command_queue[i][j] = NULL;
   MYSERIAL.flush();
   serial_count = 0;
@@ -1040,14 +1040,14 @@ inline void get_serial_commands() {
       // If command was e-stop process now
       if (strcmp(command, "M112") == 0) kill(PSTR(MSG_KILLED));
       #if ENABLED(PROBE_FAIL_PANIC)
-        if (strcmp(command, "G26") == 0) {
+        if (strcmp(command, "M999 S1") == 0) {
           LCD_MESSAGEPGM(WELCOME_MSG);
           probe_fail = false;
         }
-        else if(probe_fail && (strchr(command, 'G') != NULL || strchr(command, 'M') != NULL) && strstr(command, "M105") == NULL) {
-          for(uint8_t j=0; j < MAX_CMD_SIZE; j++)
+        else if (probe_fail && (strchr(command, 'G') != NULL || strchr(command, 'M') != NULL) && strstr(command, "M105") == NULL) {
+          for (uint8_t j=0; j < MAX_CMD_SIZE; j++)
             command_queue[cmd_queue_index_r][j] = 0;
-          if(commands_in_queue) {
+          if (commands_in_queue) {
             commands_in_queue = 1;
             cmd_queue_index_r = (cmd_queue_index_r + 1) % BUFSIZE;
           }
@@ -1579,7 +1579,7 @@ static void setup_for_endstop_move() {
 
   #if ENABLED(REPROBE)
     void probing_failed() {
-      if(reprobe_attempts < NUM_ATTEMPTS-1)
+      if (reprobe_attempts < NUM_ATTEMPTS-1)
       {
         #if DISABLED(REWIPE)
           SERIAL_ERRORLNPGM(MSG_REPROBE);
@@ -1593,8 +1593,7 @@ static void setup_for_endstop_move() {
           float rewipe_second_pt[2] = REWIPE_SECOND_PT;
           do_blocking_move_to_xy(rewipe_first_pt[X_AXIS], rewipe_first_pt[Y_AXIS]);
           do_blocking_move_to_z(Z_REWIPE_PT);
-          for(uint8_t i=0; i<NUM_REWIPES; i++)
-          {
+          for (uint8_t i=0; i<NUM_REWIPES; i++) {
             do_blocking_move_to_xy(rewipe_second_pt[X_AXIS], rewipe_second_pt[Y_AXIS]);
             do_blocking_move_to_xy(rewipe_first_pt[X_AXIS], rewipe_first_pt[Y_AXIS]);
           }
@@ -1669,7 +1668,7 @@ static void setup_for_endstop_move() {
         current_position[E_AXIS]
       );
       #ifdef REPROBE
-        if(zPosition == MIN_PROBE_PT && !digitalRead(Z_MIN_PIN)^Z_MIN_ENDSTOP_INVERTING)
+        if (zPosition == MIN_PROBE_PT && !digitalRead(Z_MIN_PIN)^Z_MIN_ENDSTOP_INVERTING)
         {
           SET_OUTPUT(Z_MIN_PIN);
           WRITE(Z_MIN_PIN, LOW); //Disable Z_PROBE when not in use
@@ -2033,7 +2032,7 @@ static void setup_for_endstop_move() {
     run_z_probe();
     float measured_z = current_position[Z_AXIS];
     #ifdef REPROBE
-      if(measured_z == Z_RETRY_PT)
+      if (measured_z == Z_RETRY_PT)
         return MIN_PROBE_PT;
     #endif
 
@@ -3393,7 +3392,7 @@ inline void gcode_G28() {
         int xStart, xStop, xInc;
 
         #if ENABLED(REPROBE)
-          if(reprobe_attempts == NUM_ATTEMPTS && probePointCounter == -1)
+          if (reprobe_attempts == NUM_ATTEMPTS && probePointCounter == -1)
             break;
         #endif
 
@@ -3453,8 +3452,8 @@ inline void gcode_G28() {
           measured_z = probe_pt(xProbe, yProbe, z_before, act, verbose_level);
 
           #if ENABLED(REPROBE)
-            if(measured_z == MIN_PROBE_PT) {
-              if(reprobe_attempts < NUM_ATTEMPTS) {
+            if (measured_z == MIN_PROBE_PT) {
+              if (reprobe_attempts < NUM_ATTEMPTS) {
                 probePointCounter = 0;
                 zig = true;
                 yCount = -1;
@@ -3487,13 +3486,9 @@ inline void gcode_G28() {
       } //yProbe
 
       #if ENABLED(PROBE_FAIL_PANIC)
-        if(reprobe_attempts == NUM_ATTEMPTS && probePointCounter == -1)
-        {
-          if(!IS_SD_PRINTING)
-            probe_fail = true;
-            disable_all_heaters();
+        if (reprobe_attempts == NUM_ATTEMPTS && probePointCounter == -1) {
           #if ENABLED(THERMAL_RUNAWAY_PROTECTION_PERIOD)
-            for(int i=0; i<EXTRUDERS; i++) target_temp_reached[i] = false;
+            for (int i=0; i<EXTRUDERS; i++) target_temp_reached[i] = false;
           #endif
           #if ENABLED(SDSUPPORT)
             card.closefile();
@@ -3501,11 +3496,11 @@ inline void gcode_G28() {
           #endif
           clear_buffer();
           reprobe_attempts = 0;
-          do_blocking_move_to_z(Z_RETRY_PT);
-          // Move E back to 0 after a failed probe
-          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 0.0, feedrate/60, active_extruder);
-          st_synchronize();
-          plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+          // Move to probe fail position
+          float probe_fail_pos[] = PROBE_FAIL_POS;
+          do_blocking_move_to(probe_fail_pos[X_AXIS], probe_fail_pos[Y_AXIS], probe_fail_pos[Z_AXIS]);
+          plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], probe_fail_pos[E_AXIS], max_feedrate[Z_AXIS], active_extruder);
+          sync_plan_position();
           acceleration = DEFAULT_ACCELERATION;
           #if ENABLED(ULTIPANEL)
             buzz(750, 1750);
@@ -3513,16 +3508,17 @@ inline void gcode_G28() {
           SERIAL_ERROR_START;
           SERIAL_ERRORLNPGM(MSG_LEVEL_FAIL);
           LCD_MESSAGEPGM(MSG_LEVEL_FAIL);
+          probe_fail_time = millis();
+          if (!IS_SD_PRINTING)
+            probe_fail = true;
           return;
         }
-      #else
-        #if ENABLED(REPROBE)
-          SERIAL_ERROR_START;
-          SERIAL_ERRORLNPGM(MSG_LEVEL_QUIT);
-          LCD_MESSAGEPGM(MSG_LEVEL_QUIT);
-          reprobe_attempts = 0;
-          return;
-        #endif
+      #else if ENABLED(REPROBE)
+        SERIAL_ERROR_START;
+        SERIAL_ERRORLNPGM(MSG_LEVEL_QUIT);
+        LCD_MESSAGEPGM(MSG_LEVEL_QUIT);
+        reprobe_attempts = 0;
+        return;
       #endif
 
       #if ENABLED(DEBUG_LEVELING_FEATURE)
@@ -7961,14 +7957,16 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) {
 
   if (commands_in_queue < BUFSIZE) get_available_commands();
 
+  if(probe_fail && millis() > (probe_fail_time + 30000))
+    disable_all_heaters();
+
   static bool reportrx_once = true;
-  if(rxbuf_filled && reportrx_once)
-  {
+  if (rxbuf_filled && reportrx_once) {
     SERIAL_ERROR_START;
     SERIAL_ERRORPGM(MSG_ERR_RXBUF_FULL);
     reportrx_once = false;
   }
-  else if(!rxbuf_filled)
+  else if (!rxbuf_filled)
    reportrx_once = true;
 
   millis_t ms = millis();

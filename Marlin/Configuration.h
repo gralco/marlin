@@ -579,6 +579,9 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
       #define Z_RETRY_PT 5 // Z height to move the hotend after failed probe
       #define NUM_ATTEMPTS 3 // Number of attempts to make before quiting
       #define PROBE_FAIL_PANIC // Completely give up printing if the final attempt fails (use G26 to get out of failed state)
+      #ifdef PROBE_FAIL_PANIC
+        #define PROBE_FAIL_POS {80.0, 0.0, 80.0, 0.0}
+      #endif
       #define REWIPE // Re-attempts wiping
       #ifdef REWIPE
         #define NUM_REWIPES 6 // Number of (back-and-forth) re-wipe attemps to make, e.g. 6 would produce 12 strokes
