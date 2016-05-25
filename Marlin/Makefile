@@ -14,24 +14,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-CC = ${bindir}/avr-gcc
+CC = avr-gcc
 CFLAGS = -c -g -Os -w -std=gnu11 -ffunction-sections -fdata-sections -MMD
 
-CXX = ${bindir}/avr-g++
+CXX = avr-g++
 CXXFLAGS = -c -g -Os -w -std=gnu++11 -fno-exceptions -ffunction-sections -fdata-sections -fno-threadsafe-statics
 
 CPPFLAGS = -mmcu=atmega2560 -DF_CPU=16000000L -DARDUINO=10608 -DARDUINO_AVR_RAMBO -DARDUINO_ARCH_AVR   "-I${ardcoresdir}" "-I${rambodir}"
 
-AR = ${bindir}/avr-ar
+AR = avr-ar
 ARFLAGS = rcs  "${coredir}/core.a"
 
-OBJCOPY = ${bindir}/avr-objcopy
+OBJCOPY = avr-objcopy
 OBJFLAGS = -O ihex
 
-ARD = ${toolsdir}/arduino-builder
-ADRFLAGS = -logger=machine -hardware "${hardwdir}" -tools "${toolsbdir}" -tools "${avrdir}" -built-in-libraries "${libdir}" -libraries "${libdir}" -fqbn=arduino:avr:rambo -vid-pid=0X27B1_0X0001 -ide-version=10608 -build-path "${builddir}" -warnings=none -prefs=build.warn_data_percentage=75 -verbose "${basedir}/Marlin.ino"
-
-CTAGS = ${ctagsdir}/ctags
+CTAGS = ctags
 CTAGSFLAGS = -u --language-force=c++ -f - --c++-kinds=svpf --fields=KSTtzns --line-directives "${preprocdir}/ctags_target_for_gcc_minus_e.cpp"
 
 RM_RF = rm -rf
@@ -39,8 +36,6 @@ MKDIR_P = mkdir -p
 LN_F = ln -f
 
 basedir = .
-# required for arduino-builder -dump-prefs -build-path argument
-builddir = $(shell pwd)/obj
 objdir = ${basedir}/obj
 sketchdir = ${objdir}/sketch
 preprocdir = ${objdir}/preproc
@@ -51,11 +46,6 @@ coresdir = ${hardwdir}/arduino/avr/cores
 ardcoresdir = ${coresdir}/arduino
 rambodir = ${hardwdir}/arduino/avr/variants/rambo
 coredir = ${objdir}/core
-toolsdir = ${hardwdir}/tools
-avrdir = ${toolsdir}/avr
-bindir = ${avrdir}/bin
-toolsbdir = ${toolsdir}/tools-builder
-ctagsdir = ${toolsbdir}/ctags/5.8-arduino10
 nulldir = /dev/null
 
 DEST ?= ${basedir}
@@ -68,8 +58,7 @@ all:
 	$(RM_RF) ${sketchdir}/*  # required to build consecutively without running make clean
 	$(LN_F) ${basedir}/Marlin.ino ${basedir}/Marlin.ino.cpp
 	$(MKDIR_P) ${objdir}
-	$(ARD) -dump-prefs $(ADRFLAGS)
-	$(ARD) -compile $(ADRFLAGS)
+	$(MKDIR_P) ${coredir}
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/Marlin.ino.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/M100_Free_Mem_Chk.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/Marlin.ino.cpp" -o "${nulldir}"
