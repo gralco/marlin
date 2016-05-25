@@ -52,7 +52,7 @@
 
 // Define this to set a unique identifier for this printer, (Used by some programs to differentiate between machines)
 // You can use an online service to generate a random UUID. (eg http://www.uuidgenerator.net/version4)
-#define UUID "845f003c-aebd-4e53-a6b9-7d0984fde609"
+#define UUID "d651819d-4a79-4b73-bc5b-ae1fe1aab36b"
 
 // This defines the number of extruders
 #define EXTRUDERS 1
