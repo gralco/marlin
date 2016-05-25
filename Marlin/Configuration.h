@@ -163,10 +163,15 @@
   #define PID_dT ((OVERSAMPLENR * 10.0)/(F_CPU / 64.0 / 256.0)) //sampling period of the temperature routine
 
 // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
+// LulzBot Hellish Longblock (24v)
+      #define DEFAULT_Kp 35.68
+      #define DEFAULT_Ki 3.13
+      #define DEFAULT_Kd 101.56
+
 // LulzBot AO-Hexagon (24v)
-      #define DEFAULT_Kp 28.79
-      #define DEFAULT_Ki 1.91
-      #define DEFAULT_Kd 108.51
+//      #define DEFAULT_Kp 28.79
+//      #define DEFAULT_Ki 1.91
+//      #define DEFAULT_Kd 108.51
 
 // LulzBot Buda 2.0 (24v)
 //    #define DEFAULT_Kp 6
@@ -315,7 +320,7 @@ const bool X_MIN_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 const bool Y_MIN_ENDSTOP_INVERTING = false; // set to true to invert the logic of the endstop.
 const bool Z_MIN_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
 const bool Z_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
-const bool X_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic of the endstop.
+const bool X_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of the endstop.
 const bool Y_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic of the endstop. USED FOR EMI ATTENUATION!
 const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic of the endstop.
 //#define DISABLE_MAX_ENDSTOPS
@@ -356,7 +361,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 #define max_software_endstops true  // If true, axis won't move to coordinates greater than the defined lengths below.
 
 // Travel limits after homing
-#define X_MAX_POS 300
+#define X_MAX_POS 290
 #define X_MIN_POS -20
 #define Y_MAX_POS 303
 #define Y_MIN_POS -20
@@ -506,7 +511,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
 #define DEFAULT_MAX_FEEDRATE          {800, 800, 3, 40}    // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {9000,9000,100,10000}    // X, Y, Z, E maximum start speed for accelerated moves.
 
-#define DEFAULT_ACCELERATION          500    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
+#define DEFAULT_ACCELERATION          250    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  3000   // X, Y, Z and E max acceleration in mm/s^2 for retracts
 
 // Offset of the extruders (uncomment if using more than one and relying on firmware to position when changing).
