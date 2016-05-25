@@ -7967,8 +7967,10 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) {
 
   if (commands_in_queue < BUFSIZE) get_available_commands();
 
-  if(probe_fail && millis() > (probe_fail_time + 30000))
-    disable_all_heaters();
+  #if ENABLED(PROBE_FAIL_PANIC)
+    if(probe_fail && millis() > (probe_fail_time + PROBE_FAIL_TEMP_TIME))
+      disable_all_heaters();
+  #endif
 
   static bool reportrx_once = true;
   if (rxbuf_filled && reportrx_once) {

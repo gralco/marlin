@@ -581,6 +581,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
       #define PROBE_FAIL_PANIC // Completely give up printing if the final attempt fails (use G26 to get out of failed state)
       #ifdef PROBE_FAIL_PANIC
         #define PROBE_FAIL_POS {80.0, 0.0, 80.0, 0.0}
+        #define PROBE_FAIL_TEMP_TIME 30 // How long (in seconds) to hold the temperatures after probing fails
       #endif
       #define REWIPE // Re-attempts wiping
       #ifdef REWIPE
