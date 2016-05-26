@@ -37,7 +37,6 @@ LN_F = ln -f
 
 basedir = .
 objdir = ${basedir}/obj
-sketchdir = ${objdir}/sketch
 preprocdir = ${objdir}/preproc
 arddir = ${basedir}${basedir}/ArduinoAddons/Arduino_1.6.x
 libdir = ${arddir}/libraries
@@ -55,10 +54,10 @@ VERSION = v$(shell grep -oP "\"1.*.*\" " ${basedir}/Version.h | tr -d [[:space:]
 HASH = $(shell git rev-parse --verify HEAD --short)
 
 all:
-	$(RM_RF) ${sketchdir}/*  # required to build consecutively without running make clean
 	$(LN_F) ${basedir}/Marlin.ino ${basedir}/Marlin.ino.cpp
 	$(MKDIR_P) ${objdir}
 	$(MKDIR_P) ${coredir}
+	$(MKDIR_P) ${preprocdir}
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/Marlin.ino.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/M100_Free_Mem_Chk.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/Marlin.ino.cpp" -o "${nulldir}"
@@ -87,7 +86,7 @@ all:
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/ultralcd.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/vector_3.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/watchdog.cpp" -o "${nulldir}"
-	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/Marlin.ino.cpp" -o "${preprocdir}ctags_target_for_gcc_minus_e.cpp"
+	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/Marlin.ino.cpp" -o "${preprocdir}/ctags_target_for_gcc_minus_e.cpp"
 	"$(CTAGS)" $(CTAGSFLAGS)
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/M100_Free_Mem_Chk.cpp" -o "${objdir}/M100_Free_Mem_Chk.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/Marlin.ino.cpp" -o "${objdir}/Marlin.ino.cpp.o"
