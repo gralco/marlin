@@ -7968,7 +7968,7 @@ void manage_inactivity(bool ignore_stepper_queue/*=false*/) {
   if (commands_in_queue < BUFSIZE) get_available_commands();
 
   #if ENABLED(PROBE_FAIL_PANIC)
-    if(probe_fail && millis() > (probe_fail_time + PROBE_FAIL_TEMP_TIME))
+    if(probe_fail && millis() > (probe_fail_time + PROBE_FAIL_TEMP_TIME*1000))
       disable_all_heaters();
   #endif
 
