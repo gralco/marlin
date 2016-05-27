@@ -346,6 +346,7 @@ void Config_RetrieveSettings() {
 
   if (strncmp(ver, stored_ver, 3) != 0) {
     Config_ResetDefault();
+    Config_StoreSettings();
   }
   else {
     float dummy = 0;
