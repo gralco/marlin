@@ -1040,7 +1040,7 @@ inline void get_serial_commands() {
       // If command was e-stop process now
       if (strcmp(command, "M112") == 0) kill(PSTR(MSG_KILLED));
       #if ENABLED(PROBE_FAIL_PANIC)
-        if (strcmp(command, "M999 S1") == 0) {
+        if (strcmp(command, "G26") == 0 || strcmp(command, "M999 S1") == 0) {
           LCD_MESSAGEPGM(WELCOME_MSG);
           probe_fail = false;
         }
