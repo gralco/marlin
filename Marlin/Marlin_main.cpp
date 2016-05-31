@@ -2635,6 +2635,17 @@ inline void gcode_G4() {
 
 #endif //FWRETRACT
 
+#if ENABLED(PROBE_FAIL_PANIC)
+
+  /**
+   * G26: Escape from PROBE_FAIL_PANIC state
+   */
+  inline void gcode_G26() {
+    probe_fail = false;
+  }
+
+#endif //FWRETRACT
+
 /**
  * G28: Home all axes according to settings
  *
@@ -6712,6 +6723,12 @@ void process_next_command() {
           break;
 
       #endif //FWRETRACT
+
+      #if ENABLED(PROBE_FAIL_PANIC)
+        case 26: // G26: Escape from PROBE_FAIL_PANIC state
+          gcode_G26();
+          break;
+      #endif
 
       case 28: // G28: Home all axes, one at a time
         gcode_G28();
