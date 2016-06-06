@@ -54,13 +54,10 @@ VERSION = v$(shell grep -oP "\"1.*.*\" " ${basedir}/Version.h | tr -d [[:space:]
 HASH = $(shell git rev-parse --verify HEAD --short)
 
 all:
-	$(LN_F) ${basedir}/Marlin.ino ${basedir}/Marlin.ino.cpp
 	$(MKDIR_P) ${objdir}
 	$(MKDIR_P) ${coredir}
 	$(MKDIR_P) ${preprocdir}
-	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/Marlin.ino.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/M100_Free_Mem_Chk.cpp" -o "${nulldir}"
-	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/Marlin.ino.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/MarlinSerial.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/Marlin_main.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/Sd2Card.cpp" -o "${nulldir}"
@@ -86,10 +83,7 @@ all:
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/ultralcd.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/vector_3.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/watchdog.cpp" -o "${nulldir}"
-	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/Marlin.ino.cpp" -o "${preprocdir}/ctags_target_for_gcc_minus_e.cpp"
-	"$(CTAGS)" $(CTAGSFLAGS)
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/M100_Free_Mem_Chk.cpp" -o "${objdir}/M100_Free_Mem_Chk.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/Marlin.ino.cpp" -o "${objdir}/Marlin.ino.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/MarlinSerial.cpp" -o "${objdir}/MarlinSerial.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/Marlin_main.cpp" -o "${objdir}/Marlin_main.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/Sd2Card.cpp" -o "${objdir}/Sd2Card.cpp.o"
@@ -165,7 +159,7 @@ all:
 	"$(AR)" $(ARFLAGS) "${coredir}/abi.cpp.o"
 	"$(AR)" $(ARFLAGS) "${coredir}/main.cpp.o"
 	"$(AR)" $(ARFLAGS) "${coredir}/new.cpp.o"
-	"$(CC)" -w -Os -Wl,--gc-sections,--relax -mmcu=atmega2560  -o "${objdir}/Marlin.ino.elf" "${objdir}/M100_Free_Mem_Chk.cpp.o" "${objdir}/Marlin.ino.cpp.o" "${objdir}/MarlinSerial.cpp.o" "${objdir}/Marlin_main.cpp.o" "${objdir}/Sd2Card.cpp.o" "${objdir}/SdBaseFile.cpp.o" "${objdir}/SdFatUtil.cpp.o" "${objdir}/SdFile.cpp.o" "${objdir}/SdVolume.cpp.o" "${objdir}/blinkm.cpp.o" "${objdir}/buzzer.cpp.o" "${objdir}/cardreader.cpp.o" "${objdir}/configuration_store.cpp.o" "${objdir}/dac_mcp4728.cpp.o" "${objdir}/digipot_mcp4451.cpp.o" "${objdir}/mesh_bed_leveling.cpp.o" "${objdir}/planner.cpp.o" "${objdir}/qr_solve.cpp.o" "${objdir}/servo.cpp.o" "${objdir}/stepper.cpp.o" "${objdir}/stepper_dac.cpp.o" "${objdir}/stepper_indirection.cpp.o" "${objdir}/stopwatch.cpp.o" "${objdir}/temperature.cpp.o" "${objdir}/ultralcd.cpp.o" "${objdir}/vector_3.cpp.o" "${objdir}/watchdog.cpp.o" "${coredir}/core.a" "-L${objdir}" -lm
+	"$(CC)" -w -Os -Wl,--gc-sections,--relax -mmcu=atmega2560  -o "${objdir}/Marlin.ino.elf" "${objdir}/M100_Free_Mem_Chk.cpp.o" "${objdir}/MarlinSerial.cpp.o" "${objdir}/Marlin_main.cpp.o" "${objdir}/Sd2Card.cpp.o" "${objdir}/SdBaseFile.cpp.o" "${objdir}/SdFatUtil.cpp.o" "${objdir}/SdFile.cpp.o" "${objdir}/SdVolume.cpp.o" "${objdir}/blinkm.cpp.o" "${objdir}/buzzer.cpp.o" "${objdir}/cardreader.cpp.o" "${objdir}/configuration_store.cpp.o" "${objdir}/dac_mcp4728.cpp.o" "${objdir}/digipot_mcp4451.cpp.o" "${objdir}/mesh_bed_leveling.cpp.o" "${objdir}/planner.cpp.o" "${objdir}/qr_solve.cpp.o" "${objdir}/servo.cpp.o" "${objdir}/stepper.cpp.o" "${objdir}/stepper_dac.cpp.o" "${objdir}/stepper_indirection.cpp.o" "${objdir}/stopwatch.cpp.o" "${objdir}/temperature.cpp.o" "${objdir}/ultralcd.cpp.o" "${objdir}/vector_3.cpp.o" "${objdir}/watchdog.cpp.o" "${coredir}/core.a" "-L${objdir}" -lm
 	"$(OBJCOPY)" $(OBJFLAGS) -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0  "${objdir}/Marlin.ino.elf" "${objdir}/Marlin.ino.eep"
 	if test ! -f ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH).hex; \
 		then $(OBJCOPY) $(OBJFLAGS) -R .eeprom ${objdir}/Marlin.ino.elf ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH).hex; \
@@ -182,5 +176,4 @@ all:
 
 clean:
 	rm -rf ${objdir}
-	rm ${basedir}/Marlin.ino.cpp
 	rm ${basedir}/Marlin_*.hex
