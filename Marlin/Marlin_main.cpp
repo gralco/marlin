@@ -3512,6 +3512,7 @@ inline void gcode_G28() {
           do_blocking_move_to(probe_fail_pos[X_AXIS], probe_fail_pos[Y_AXIS], probe_fail_pos[Z_AXIS]);
           plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], probe_fail_pos[E_AXIS], max_feedrate[Z_AXIS], active_extruder);
           sync_plan_position();
+          disable_all_steppers();
           acceleration = DEFAULT_ACCELERATION;
           #if ENABLED(ULTIPANEL)
             buzz(750, 1750);
