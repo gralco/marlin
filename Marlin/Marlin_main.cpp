@@ -3481,8 +3481,9 @@ inline void gcode_G28() {
             mean += measured_z;
 
             eqnBVector[probePointCounter] = measured_z;
-            eqnAMatrix[probePointCounter + 0 * abl2] = xProbe;
-            eqnAMatrix[probePointCounter + 1 * abl2] = yProbe;
+            eqnAMatrix[probePointCounter + 0 * abl2] = current_position[X_AXIS];
+            eqnAMatrix[probePointCounter + 1 * abl2] = current_position[Y_AXIS];
+            SERIAL_ECHOLN(eqnAMatrix[probePointCounter + 0 * abl2]);
             eqnAMatrix[probePointCounter + 2 * abl2] = 1;
             indexIntoAB[xCount][yCount] = probePointCounter;
           #else
