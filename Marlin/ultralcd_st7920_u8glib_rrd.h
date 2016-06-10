@@ -70,10 +70,10 @@
     #define ST7920_DELAY_1 DELAY_0_NOP
   #endif
   #ifndef ST7920_DELAY_2
-    #define ST7920_DELAY_2 DELAY_0_NOP
+    #define ST7920_DELAY_2 DELAY_3_NOP
   #endif
   #ifndef ST7920_DELAY_3
-    #define ST7920_DELAY_3 DELAY_1_NOP
+    #define ST7920_DELAY_3 DELAY_0_NOP
   #endif
 #elif F_CPU == 16000000
   #ifndef ST7920_DELAY_1
