@@ -91,6 +91,87 @@ script:
   #
   ### LCDS ###
   #
+  - restore_configs
+  - opt_set MOTHERBOARD BOARD_RUMBA
+  - opt_set EXTRUDERS 2
+  - opt_set TEMP_SENSOR_1 1
+  - opt_enable USE_XMAX_PLUG
+  - opt_enable_adv DUAL_X_CARRIAGE
+  - build_marlin
+  #
+  # Test SPEAKER with BOARD_BQ_ZUM_MEGA_3D and BQ_LCD_SMART_CONTROLLER
+  #
+  - restore_configs
+  - opt_set MOTHERBOARD BOARD_BQ_ZUM_MEGA_3D
+  - opt_set LCD_FEEDBACK_FREQUENCY_DURATION_MS 10
+  - opt_set LCD_FEEDBACK_FREQUENCY_HZ 100
+  - opt_enable BQ_LCD_SMART_CONTROLLER SPEAKER
+  - build_marlin
+  #
+  # Enable FILAMENTCHANGEENABLE
+  #
+  - restore_configs
+  - opt_enable ULTIMAKERCONTROLLER
+  - opt_enable_adv FILAMENTCHANGEENABLE
+  - build_marlin
+  #
+  # Enable filament sensor
+  #
+  - restore_configs
+  - opt_enable FILAMENT_WIDTH_SENSOR
+  - build_marlin
+  #
+  # Enable filament sensor with LCD display
+  #
+  - opt_enable ULTIMAKERCONTROLLER FILAMENT_LCD_DISPLAY
+  - build_marlin
+  #
+  # Enable BEZIER_CURVE_SUPPORT
+  #
+  - restore_configs
+  - opt_enable_adv BEZIER_CURVE_SUPPORT
+  - build_marlin
+  #
+  # Enable COREXY
+  #
+  - restore_configs
+  - opt_enable COREXY
+  - build_marlin
+  #
+  # Enable COREXZ
+  #
+  - restore_configs
+  - opt_enable COREXZ
+  - build_marlin
+  #
+  # Enable Z_DUAL_STEPPER_DRIVERS, Z_DUAL_ENDSTOPS
+  #
+  - restore_configs
+  - opt_enable_adv Z_DUAL_STEPPER_DRIVERS Z_DUAL_ENDSTOPS
+  - pins_set RAMPS_14 X_MAX_PIN -1
+  - opt_set_adv Z2_MAX_PIN 2
+  - build_marlin
+  #
+  # Test PRINTCOUNTER
+  #
+  - restore_configs
+  - opt_enable PRINTCOUNTER
+  - build_marlin
+  #
+  #
+  ######## STANDARD LCD/PANELS ##############
+  #
+  # ULTRA_LCD
+  #
+  - restore_configs
+  - opt_enable ULTRA_LCD
+  - build_marlin
+  #
+  # DOGLCD
+  #
+  - restore_configs
+  - opt_enable DOGLCD
+  - build_marlin
   #
   # ULTIMAKERCONTROLLER
   #

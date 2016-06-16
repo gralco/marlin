@@ -512,4 +512,11 @@
   #error LANGUAGE_INCLUDE has been replaced by LCD_LANGUAGE. Please update your configuration.
 #endif
 
+/**
+ * Nozzle cleaning
+ */
+#if ENABLED(CLEAN_NOZZLE_FEATURE) && DISABLED(AUTO_BED_LEVELING_FEATURE)
+  #error You must enable AUTO_BED_LEVELING_FEATURE for CLEAN_NOZZLE_FEATURE to work
+#endif
+
 #endif //SANITYCHECK_H

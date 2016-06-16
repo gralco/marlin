@@ -102,8 +102,12 @@
  * G2  - CW ARC
  * G3  - CCW ARC
  * G4  - Dwell S<seconds> or P<milliseconds>
- * G10 - retract filament according to settings of M207
- * G11 - retract recover filament according to settings of M208
+ * G5  - Cubic B-spline with XYZE destination and IJPQ offsets
+ * G10 - Retract filament according to settings of M207
+ * G11 - Retract recover filament according to settings of M208
+ * G12 - Clean tool
+ * G20 - Set input units to inches
+ * G21 - Set input units to millimeters
  * G28 - Home one or more axes
  * G29 - Detailed Z probe, probes the bed at 3 or more points.  Will fail if you haven't homed yet.
  * G30 - Single Z probe, probes bed at current XY location.
@@ -1761,6 +1765,10 @@ static void setup_for_endstop_move() {
     do_blocking_move_to(x, current_position[Y_AXIS], current_position[Z_AXIS]);
   }
 
+  inline void do_blocking_move_to_y(float y) {
+    do_blocking_move_to(current_position[X_AXIS], y, current_position[Z_AXIS]);
+  }
+
   inline void do_blocking_move_to_z(float z) {
     do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], z);
   }
@@ -2148,7 +2156,7 @@ static void setup_for_endstop_move() {
 
 #endif // AUTO_BED_LEVELING_FEATURE
 
-#if ENABLED(Z_PROBE_SLED) || ENABLED(Z_SAFE_HOMING) || ENABLED(AUTO_BED_LEVELING_FEATURE)
+#if ENABLED(Z_PROBE_SLED) || ENABLED(Z_SAFE_HOMING) || ENABLED(AUTO_BED_LEVELING_FEATURE) || ENABLED(CLEAN_NOZZLE_FEATURE)
   static void axis_unhomed_error() {
     LCD_MESSAGEPGM(MSG_YX_UNHOMED);
     SERIAL_ECHO_START;
@@ -2635,8 +2643,24 @@ inline void gcode_G4() {
 
 #endif //FWRETRACT
 
-#if ENABLED(PROBE_FAIL_PANIC)
+#if ENABLED(PROBE_FAIL_PANIC) && ENABLED(CLEAN_NOZZLE_FEATURE) && ENABLED(AUTO_BED_LEVELING_FEATURE)
+  #include "clean_nozzle.h"
 
+  inline void gcode_G12() {
+    // Don't allow nozzle cleaning without homing first
+    if (!axis_homed[X_AXIS] || !axis_homed[Y_AXIS] || !axis_homed[Z_AXIS]) {
+      axis_unhomed_error(true);
+      return;
+    }
+
+    uint8_t const pattern = code_seen('P') ? code_value_ushort() : 0;
+    uint8_t const strokes = code_seen('S') ? code_value_ushort() : CLEAN_NOZZLE_STROKES;
+
+    CleanNozzle::start(pattern, strokes);
+  }
+#endif
+
+#if ENABLED(INCH_MODE_SUPPORT)
   /**
    * G26: Escape from PROBE_FAIL_PANIC state
    */
@@ -6725,6 +6749,12 @@ void process_next_command() {
           break;
 
       #endif //FWRETRACT
+
+      #if ENABLED(CLEAN_NOZZLE_FEATURE) && ENABLED(AUTO_BED_LEVELING_FEATURE)
+        case 12:
+          gcode_G12(); // G12: Clean Nozzle
+          break;
+      #endif // CLEAN_NOZZLE_FEATURE
 
       #if ENABLED(PROBE_FAIL_PANIC)
         case 26: // G26: Escape from PROBE_FAIL_PANIC state
