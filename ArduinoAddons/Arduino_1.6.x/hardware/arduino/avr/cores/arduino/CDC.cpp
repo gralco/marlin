@@ -34,8 +34,6 @@ typedef struct
 static volatile LineInfo _usbLineInfo = { 57600, 0x00, 0x00, 0x00, 0x00 };
 static volatile int32_t breakValue = -1;
 
-bool _updatedLUFAbootloader = false;
-
 #define WEAK __attribute__ ((weak))
 
 extern const CDCDescriptor _cdcInterface PROGMEM;
@@ -101,32 +99,24 @@ bool CDC_Setup(USBSetup& setup)
 			// with a relatively long period so it can finish housekeeping tasks
 			// like servicing endpoints before the sketch ends
 
-			uint16_t magic_key_pos = MAGIC_KEY_POS;
-
-// If we don't use the new RAMEND directly, check manually if we have a newer bootloader.
-// This is used to keep compatible with the old leonardo bootloaders.
-// You are still able to set the magic key position manually to RAMEND-1 to save a few bytes for this check.
-#if MAGIC_KEY_POS != (RAMEND-1)
-			// For future boards save the key in the inproblematic RAMEND
-			// Which is reserved for the main() return value (which will never return)
-			if (_updatedLUFAbootloader) {
-				// horray, we got a new bootloader!
-				magic_key_pos = (RAMEND-1);
-			}
+#ifndef MAGIC_KEY
+#define MAGIC_KEY 0x7777
+#endif
+#ifndef MAGIC_KEY_POS
+#define MAGIC_KEY_POS 0x0800
 #endif
 
 			// We check DTR state to determine if host port is open (bit 0 of lineState).
 			if (1200 == _usbLineInfo.dwDTERate && (_usbLineInfo.lineState & 0x01) == 0)
 			{
 #if MAGIC_KEY_POS != (RAMEND-1)
-				// Backup ram value if its not a newer bootloader.
-				// This should avoid memory corruption at least a bit, not fully
-				if (magic_key_pos != (RAMEND-1)) {
-					*(uint16_t *)(RAMEND-1) = *(uint16_t *)magic_key_pos;
-				}
+				*(uint16_t *)(RAMEND-1) = *(uint16_t *)MAGIC_KEY_POS;
+				*(uint16_t *)MAGIC_KEY_POS = MAGIC_KEY;
+#else
+				// for future boards save the key in the inproblematic RAMEND
+				// which is reserved for the main() return value (which will never return)
+				*(uint16_t *)MAGIC_KEY_POS = MAGIC_KEY;
 #endif
-				// Store boot key
-				*(uint16_t *)magic_key_pos = MAGIC_KEY;
 				wdt_enable(WDTO_120MS);
 			}
 			else
@@ -139,15 +129,10 @@ bool CDC_Setup(USBSetup& setup)
 				wdt_disable();
 				wdt_reset();
 #if MAGIC_KEY_POS != (RAMEND-1)
-				// Restore backed up (old bootloader) magic key data
-				if (magic_key_pos != (RAMEND-1)) {
-					*(uint16_t *)magic_key_pos = *(uint16_t *)(RAMEND-1);
-				} else
+				*(uint16_t *)MAGIC_KEY_POS = *(uint16_t *)(RAMEND-1);
+#else
+				*(uint16_t *)MAGIC_KEY_POS = 0x0000;
 #endif
-				{
-				// Clean up RAMEND key
-					*(uint16_t *)magic_key_pos = 0x0000;
-				}
 			}
 		}
 		return true;
