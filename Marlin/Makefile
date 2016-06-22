@@ -20,7 +20,7 @@ CFLAGS = -c -g -Os -w -std=gnu11 -ffunction-sections -fdata-sections -MMD
 CXX = avr-g++
 CXXFLAGS = -c -g -Os -w -std=gnu++11 -fno-exceptions -ffunction-sections -fdata-sections -fno-threadsafe-statics
 
-CPPFLAGS = -mmcu=atmega2560 -DF_CPU=16000000L -DARDUINO=10608 -DARDUINO_AVR_RAMBO -DARDUINO_ARCH_AVR   "-I${ardcoresdir}" "-I${rambodir}"
+CPPFLAGS = -mmcu=atmega2560 -DF_CPU=16000000L -DARDUINO=10608 -DARDUINO_AVR_RAMBO -DARDUINO_ARCH_AVR   "-I${coresdir}" "-I${rambodir}"
 
 AR = avr-ar
 ARFLAGS = rcs  "${coredir}/core.a"
@@ -38,13 +38,11 @@ LN_F = ln -f
 basedir = .
 objdir = ${basedir}/obj
 preprocdir = ${objdir}/preproc
-arddir = ${basedir}${basedir}/ArduinoAddons/Arduino_1.6.x
-libdir = ${arddir}/libraries
-hardwdir = ${arddir}/hardware
-coresdir = ${hardwdir}/arduino/avr/cores
-ardcoresdir = ${coresdir}/arduino
-rambodir = ${hardwdir}/arduino/avr/variants/rambo
 coredir = ${objdir}/core
+arddir = ${basedir}${basedir}/ArduinoAddons
+libdir = ${arddir}/libraries
+coresdir = ${arddir}/cores/arduino
+rambodir = ${arddir}/variants/rambo
 nulldir = /dev/null
 
 DEST ?= ${basedir}
@@ -109,31 +107,31 @@ all:
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/ultralcd.cpp" -o "${objdir}/ultralcd.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/vector_3.cpp" -o "${objdir}/vector_3.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/watchdog.cpp" -o "${objdir}/watchdog.cpp.o"
-	"$(CC)" -c -g -x assembler-with-cpp $(CPPFLAGS) "${ardcoresdir}/wiring_pulse.S" -o "${coredir}/wiring_pulse.S.o"
-	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${ardcoresdir}/WInterrupts.c" -o "${coredir}/WInterrupts.c.o"
-	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${ardcoresdir}/hooks.c" -o "${coredir}/hooks.c.o"
-	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${ardcoresdir}/wiring.c" -o "${coredir}/wiring.c.o"
-	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${ardcoresdir}/wiring_analog.c" -o "${coredir}/wiring_analog.c.o"
-	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${ardcoresdir}/wiring_digital.c" -o "${coredir}/wiring_digital.c.o"
-	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${ardcoresdir}/wiring_pulse.c" -o "${coredir}/wiring_pulse.c.o"
-	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${ardcoresdir}/wiring_shift.c" -o "${coredir}/wiring_shift.c.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/CDC.cpp" -o "${coredir}/CDC.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/HardwareSerial.cpp" -o "${coredir}/HardwareSerial.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/HardwareSerial0.cpp" -o "${coredir}/HardwareSerial0.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/HardwareSerial1.cpp" -o "${coredir}/HardwareSerial1.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/HardwareSerial2.cpp" -o "${coredir}/HardwareSerial2.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/HardwareSerial3.cpp" -o "${coredir}/HardwareSerial3.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/IPAddress.cpp" -o "${coredir}/IPAddress.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/PluggableUSB.cpp" -o "${coredir}/PluggableUSB.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/Print.cpp" -o "${coredir}/Print.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/Stream.cpp" -o "${coredir}/Stream.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/Tone.cpp" -o "${coredir}/Tone.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/USBCore.cpp" -o "${coredir}/USBCore.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/WMath.cpp" -o "${coredir}/WMath.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/WString.cpp" -o "${coredir}/WString.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/abi.cpp" -o "${coredir}/abi.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/main.cpp" -o "${coredir}/main.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${ardcoresdir}/new.cpp" -o "${coredir}/new.cpp.o"
+	"$(CC)" -c -g -x assembler-with-cpp $(CPPFLAGS) "${coresdir}/wiring_pulse.S" -o "${coredir}/wiring_pulse.S.o"
+	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${coresdir}/WInterrupts.c" -o "${coredir}/WInterrupts.c.o"
+	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${coresdir}/hooks.c" -o "${coredir}/hooks.c.o"
+	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${coresdir}/wiring.c" -o "${coredir}/wiring.c.o"
+	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${coresdir}/wiring_analog.c" -o "${coredir}/wiring_analog.c.o"
+	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${coresdir}/wiring_digital.c" -o "${coredir}/wiring_digital.c.o"
+	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${coresdir}/wiring_pulse.c" -o "${coredir}/wiring_pulse.c.o"
+	"$(CC)" $(CFLAGS) $(CPPFLAGS) "${coresdir}/wiring_shift.c" -o "${coredir}/wiring_shift.c.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/CDC.cpp" -o "${coredir}/CDC.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/HardwareSerial.cpp" -o "${coredir}/HardwareSerial.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/HardwareSerial0.cpp" -o "${coredir}/HardwareSerial0.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/HardwareSerial1.cpp" -o "${coredir}/HardwareSerial1.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/HardwareSerial2.cpp" -o "${coredir}/HardwareSerial2.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/HardwareSerial3.cpp" -o "${coredir}/HardwareSerial3.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/IPAddress.cpp" -o "${coredir}/IPAddress.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/PluggableUSB.cpp" -o "${coredir}/PluggableUSB.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/Print.cpp" -o "${coredir}/Print.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/Stream.cpp" -o "${coredir}/Stream.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/Tone.cpp" -o "${coredir}/Tone.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/USBCore.cpp" -o "${coredir}/USBCore.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/WMath.cpp" -o "${coredir}/WMath.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/WString.cpp" -o "${coredir}/WString.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/abi.cpp" -o "${coredir}/abi.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/main.cpp" -o "${coredir}/main.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${coresdir}/new.cpp" -o "${coredir}/new.cpp.o"
 	"$(AR)" $(ARFLAGS) "${coredir}/wiring_pulse.S.o"
 	"$(AR)" $(ARFLAGS) "${coredir}/WInterrupts.c.o"
 	"$(AR)" $(ARFLAGS) "${coredir}/hooks.c.o"
