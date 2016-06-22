@@ -1805,8 +1805,7 @@ static void setup_for_endstop_move() {
 
   #if ENABLED(REPROBE)
     void probing_failed() {
-      if (reprobe_attempts < NUM_ATTEMPTS-1)
-      {
+      if (reprobe_attempts < NUM_ATTEMPTS-1) {
         #if DISABLED(REWIPE)
           SERIAL_ERRORLNPGM(MSG_REPROBE);
           LCD_MESSAGEPGM(MSG_REPROBE);
