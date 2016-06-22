@@ -3732,41 +3732,44 @@ inline void gcode_G28() {
         } //xProbe
       } //yProbe
 
-      #if ENABLED(PROBE_FAIL_PANIC)
-        if (reprobe_attempts == NUM_ATTEMPTS && probePointCounter == -1) {
-          #if ENABLED(THERMAL_RUNAWAY_PROTECTION_PERIOD)
-            for (int i=0; i<EXTRUDERS; i++) target_temp_reached[i] = false;
-          #endif
-          #if ENABLED(SDSUPPORT)
-            card.closefile();
-            card.sdprinting = false;
-          #endif
-          clear_buffer();
-          reprobe_attempts = 0;
-          // Move to probe fail position
-          float probe_fail_pos[] = PROBE_FAIL_POS;
-          do_blocking_move_to(probe_fail_pos[X_AXIS], probe_fail_pos[Y_AXIS], probe_fail_pos[Z_AXIS]);
-          planner.buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], probe_fail_pos[E_AXIS], planner.max_feedrate[Z_AXIS], active_extruder);
-          sync_plan_position();
-          disable_all_steppers();
-          planner.acceleration = DEFAULT_ACCELERATION;
-          #if ENABLED(ULTIPANEL)
-            buzz(750, 1750);
-          #endif
-          SERIAL_ERROR_START;
-          SERIAL_ERRORLNPGM(MSG_LEVEL_FAIL);
-          LCD_MESSAGEPGM(MSG_LEVEL_FAIL);
-          probe_fail_time = millis();
-          if (!IS_SD_PRINTING)
-            probe_fail = true;
-          return;
-        }
-      #else if ENABLED(REPROBE)
-        SERIAL_ERROR_START;
-        SERIAL_ERRORLNPGM(MSG_LEVEL_QUIT);
-        LCD_MESSAGEPGM(MSG_LEVEL_QUIT);
+      #if ENABLED(REPROBE)
+        if (reprobe_attempts == NUM_ATTEMPTS && probePointCounter == -1)
+        #if ENABLED(PROBE_FAIL_PANIC)
+          {
+            #if ENABLED(SDSUPPORT)
+              card.closefile();
+              card.sdprinting = false;
+            #endif
+            clear_buffer();
+            reprobe_attempts = 0;
+            // Move to probe fail position
+            float probe_fail_pos[] = PROBE_FAIL_POS;
+            do_blocking_move_to(probe_fail_pos[X_AXIS], probe_fail_pos[Y_AXIS], probe_fail_pos[Z_AXIS]);
+            planner.buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], probe_fail_pos[E_AXIS], planner.max_feedrate[Z_AXIS], active_extruder);
+            sync_plan_position();
+            disable_all_steppers();
+            planner.acceleration = DEFAULT_ACCELERATION;
+            #if ENABLED(ULTIPANEL)
+              buzz(750, 1750);
+            #endif
+            SERIAL_ERROR_START;
+            SERIAL_ERRORLNPGM(MSG_LEVEL_FAIL);
+            LCD_MESSAGEPGM(MSG_LEVEL_FAIL);
+            probe_fail_time = millis();
+            if (!IS_SD_PRINTING)
+              probe_fail = true;
+            return;
+          }
+        #else
+          {
+            SERIAL_ERROR_START;
+            SERIAL_ERRORLNPGM(MSG_LEVEL_QUIT);
+            LCD_MESSAGEPGM(MSG_LEVEL_QUIT);
+            reprobe_attempts = 0;
+            return;
+          }
+        #endif
         reprobe_attempts = 0;
-        return;
       #endif
 
       #if ENABLED(DEBUG_LEVELING_FEATURE)
@@ -4046,10 +4049,6 @@ inline void gcode_G28() {
       clean_up_after_endstop_move(); // Too early. must be done after the stowing.
 
       stow_z_probe(); // Retract Z Servo endstop if available. Z_PROBE_SLED is missed here.
-
-      #if ENABLED(REPROBE)
-        reprobe_attempts = 0;
-      #endif
 
       report_current_position();
     }
