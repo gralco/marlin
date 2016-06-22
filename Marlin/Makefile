@@ -28,9 +28,6 @@ ARFLAGS = rcs  "${coredir}/core.a"
 OBJCOPY = avr-objcopy
 OBJFLAGS = -O ihex
 
-CTAGS = ctags
-CTAGSFLAGS = -u --language-force=c++ -f - --c++-kinds=svpf --fields=KSTtzns --line-directives "${preprocdir}/ctags_target_for_gcc_minus_e.cpp"
-
 RM_RF = rm -rf
 MKDIR_P = mkdir -p
 
@@ -171,5 +168,5 @@ all:
 	fi
 
 clean:
-	rm -rf ${objdir}
-	rm ${basedir}/Marlin_*.hex
+	$(RM_RF) ${objdir}
+	$(RM_RF) ${basedir}/Marlin_*.hex
