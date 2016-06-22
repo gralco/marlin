@@ -33,7 +33,6 @@ CTAGSFLAGS = -u --language-force=c++ -f - --c++-kinds=svpf --fields=KSTtzns --li
 
 RM_RF = rm -rf
 MKDIR_P = mkdir -p
-LN_F = ln -f
 
 basedir = .
 objdir = ${basedir}/obj
@@ -47,7 +46,6 @@ nulldir = /dev/null
 
 DEST ?= ${basedir}
 MACHINE = $(shell git rev-parse --abbrev-ref HEAD)
-NOW = $(shell date +"%b_%d_%y")
 VERSION = v$(shell grep -oP "\"1.*.*\" " ${basedir}/Version.h | tr -d [[:space:]])
 HASH = $(shell git rev-parse --verify HEAD --short)
 
