@@ -2195,8 +2195,8 @@ static void setup_for_endstop_move() {
     #endif
 
     // this also updates current_position
-    do_blocking_move_to_x(x - (X_PROBE_OFFSET_FROM_EXTRUDER));
     do_blocking_move_to_xy(current_position[X_AXIS], y - (Y_PROBE_OFFSET_FROM_EXTRUDER));
+    do_blocking_move_to_x(x - (X_PROBE_OFFSET_FROM_EXTRUDER));
 
     #if DISABLED(Z_PROBE_SLED) && DISABLED(Z_PROBE_ALLEN_KEY)
       if (probe_action & ProbeDeploy) {
