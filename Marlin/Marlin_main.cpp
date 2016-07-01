@@ -2660,7 +2660,8 @@ inline void gcode_G4() {
   }
 #endif
 
-#if ENABLED(INCH_MODE_SUPPORT)
+#if ENABLED(PROBE_FAIL_PANIC)
+
   /**
    * G26: Escape from PROBE_FAIL_PANIC state
    */
@@ -2668,7 +2669,7 @@ inline void gcode_G4() {
     probe_fail = false;
   }
 
-#endif //FWRETRACT
+#endif //PROBE_FAIL_PANIC
 
 /**
  * G28: Home all axes according to settings
