@@ -865,24 +865,6 @@ void Stepper::endstop_triggered(AxisEnum axis) {
 
     endstops_trigsteps[axis] = count_position[axis];
 
-    const char axis_codes[NUM_AXIS-1] = {'X', 'Y', 'Z'};
-    const float axis_min_pos[NUM_AXIS-1] = {X_MIN_POS, Y_MIN_POS, Z_MIN_POS};
-    const float axis_max_pos[NUM_AXIS-1] = {X_MAX_POS, Y_MAX_POS, Z_MAX_POS};
-
-    #define ENDSTOP_MIN(LETTER) \
-      (LETTER##_MIN_PIN > -1 && LETTER##_HOME_DIR==-1 && !READ(LETTER##_MAX_PIN)^LETTER##_MAX_ENDSTOP_INVERTING)
-    #define ENDSTOP_MAX(LETTER) \
-      (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1  && !READ(LETTER##_MIN_PIN)^LETTER##_MIN_ENDSTOP_INVERTING)
-
-    if ((axis == X_AXIS ? ENDSTOP_MIN(X) : axis == Y_AXIS ? ENDSTOP_MIN(Y) : axis == Z_AXIS ? ENDSTOP_MIN(Z) : 0))
-      current_position[axis] = axis_min_pos[axis];
-    else if ((axis == X_AXIS ? ENDSTOP_MAX(X) : axis == Y_AXIS ? ENDSTOP_MAX(Y) : axis == Z_AXIS ? ENDSTOP_MAX(Z) : 0))
-      current_position[axis] = axis_max_pos[axis];
-    else
-      current_position[axis] = (float)endstops_trigsteps[axis]/planner.axis_steps_per_mm[axis];
-
-    planner.set_position_mm(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
-
   #endif // !COREXY && !COREXZ && !COREYZ
 
   kill_current_block();
