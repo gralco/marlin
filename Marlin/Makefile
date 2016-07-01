@@ -59,11 +59,11 @@ all:
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/SdFile.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/SdVolume.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/blinkm.cpp" -o "${nulldir}"
+	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/buzzer.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/cardreader.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/configuration_store.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/dac_mcp4728.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/digipot_mcp4451.cpp" -o "${nulldir}"
-	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/endstops.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/mesh_bed_leveling.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/planner.cpp" -o "${nulldir}"
 	"$(CXX)" $(CXXFLAGS)  -w -x c++ -E -CC $(CPPFLAGS) "${basedir}/qr_solve.cpp" -o "${nulldir}"
@@ -85,11 +85,11 @@ all:
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/SdFile.cpp" -o "${objdir}/SdFile.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/SdVolume.cpp" -o "${objdir}/SdVolume.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/blinkm.cpp" -o "${objdir}/blinkm.cpp.o"
+	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/buzzer.cpp" -o "${objdir}/buzzer.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/cardreader.cpp" -o "${objdir}/cardreader.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/configuration_store.cpp" -o "${objdir}/configuration_store.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/dac_mcp4728.cpp" -o "${objdir}/dac_mcp4728.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/digipot_mcp4451.cpp" -o "${objdir}/digipot_mcp4451.cpp.o"
-	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/endstops.cpp" -o "${objdir}/endstops.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/mesh_bed_leveling.cpp" -o "${objdir}/mesh_bed_leveling.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/planner.cpp" -o "${objdir}/planner.cpp.o"
 	"$(CXX)" $(CXXFLAGS) -MMD $(CPPFLAGS) "${basedir}/qr_solve.cpp" -o "${objdir}/qr_solve.cpp.o"
@@ -152,7 +152,7 @@ all:
 	"$(AR)" $(ARFLAGS) "${coredir}/abi.cpp.o"
 	"$(AR)" $(ARFLAGS) "${coredir}/main.cpp.o"
 	"$(AR)" $(ARFLAGS) "${coredir}/new.cpp.o"
-	"$(CC)" -w -Os -Wl,--gc-sections,--relax -mmcu=atmega2560  -o "${objdir}/Marlin.ino.elf" "${objdir}/M100_Free_Mem_Chk.cpp.o" "${objdir}/MarlinSerial.cpp.o" "${objdir}/Marlin_main.cpp.o" "${objdir}/Sd2Card.cpp.o" "${objdir}/SdBaseFile.cpp.o" "${objdir}/SdFatUtil.cpp.o" "${objdir}/SdFile.cpp.o" "${objdir}/SdVolume.cpp.o" "${objdir}/blinkm.cpp.o" "${objdir}/cardreader.cpp.o" "${objdir}/configuration_store.cpp.o" "${objdir}/dac_mcp4728.cpp.o" "${objdir}/digipot_mcp4451.cpp.o" "${objdir}/endstops.cpp.o" "${objdir}/mesh_bed_leveling.cpp.o" "${objdir}/planner.cpp.o" "${objdir}/qr_solve.cpp.o" "${objdir}/servo.cpp.o" "${objdir}/stepper.cpp.o" "${objdir}/stepper_dac.cpp.o" "${objdir}/stepper_indirection.cpp.o" "${objdir}/stopwatch.cpp.o" "${objdir}/temperature.cpp.o" "${objdir}/ultralcd.cpp.o" "${objdir}/vector_3.cpp.o" "${objdir}/watchdog.cpp.o" "${coredir}/core.a" "-L${objdir}" -lm
+	"$(CC)" -w -Os -Wl,--gc-sections,--relax -mmcu=atmega2560  -o "${objdir}/Marlin.ino.elf" "${objdir}/M100_Free_Mem_Chk.cpp.o" "${objdir}/MarlinSerial.cpp.o" "${objdir}/Marlin_main.cpp.o" "${objdir}/Sd2Card.cpp.o" "${objdir}/SdBaseFile.cpp.o" "${objdir}/SdFatUtil.cpp.o" "${objdir}/SdFile.cpp.o" "${objdir}/SdVolume.cpp.o" "${objdir}/blinkm.cpp.o" "${objdir}/buzzer.cpp.o" "${objdir}/cardreader.cpp.o" "${objdir}/configuration_store.cpp.o" "${objdir}/dac_mcp4728.cpp.o" "${objdir}/digipot_mcp4451.cpp.o" "${objdir}/mesh_bed_leveling.cpp.o" "${objdir}/planner.cpp.o" "${objdir}/qr_solve.cpp.o" "${objdir}/servo.cpp.o" "${objdir}/stepper.cpp.o" "${objdir}/stepper_dac.cpp.o" "${objdir}/stepper_indirection.cpp.o" "${objdir}/stopwatch.cpp.o" "${objdir}/temperature.cpp.o" "${objdir}/ultralcd.cpp.o" "${objdir}/vector_3.cpp.o" "${objdir}/watchdog.cpp.o" "${coredir}/core.a" "-L${objdir}" -lm
 	"$(OBJCOPY)" $(OBJFLAGS) -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0  "${objdir}/Marlin.ino.elf" "${objdir}/Marlin.ino.eep"
 	if test ! -f ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH).hex; \
 		then $(OBJCOPY) $(OBJFLAGS) -R .eeprom ${objdir}/Marlin.ino.elf ${DEST}/Marlin_$(MACHINE)_$(VERSION)_$(HASH).hex; \

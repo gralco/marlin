@@ -48,7 +48,6 @@ public:
   void openAndPrintFile(const char *name);
   void startFileprint();
   void pauseSDPrint();
-  void stopSDPrint();
   void getStatus();
   void printingHasFinished();
 

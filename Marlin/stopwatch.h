@@ -29,9 +29,9 @@
 //#define DEBUG_STOPWATCH
 
 enum StopwatchState {
-  STOPWATCH_STOPPED,
-  STOPWATCH_RUNNING,
-  STOPWATCH_PAUSED
+  STPWTCH_STOPPED,
+  STPWTCH_RUNNING,
+  STPWTCH_PAUSED
 };
 
 /**
@@ -56,25 +56,22 @@ class Stopwatch {
      * @brief Stops the stopwatch
      * @details Stops the running timer, it will silently ignore the request if
      * no timer is currently running.
-     * @return true is method was successful
      */
-    bool stop();
+    void stop();
 
     /**
-     * @brief Pause the stopwatch
+     * @brief Pauses the stopwatch
      * @details Pauses the running timer, it will silently ignore the request if
      * no timer is currently running.
-     * @return true is method was successful
      */
-    bool pause();
+    void pause();
 
     /**
      * @brief Starts the stopwatch
      * @details Starts the timer, it will silently ignore the request if the
      * timer is already running.
-     * @return true is method was successful
      */
-    bool start();
+    void start();
 
     /**
      * @brief Resets the stopwatch
@@ -85,21 +82,21 @@ class Stopwatch {
     /**
      * @brief Checks if the timer is running
      * @details Returns true if the timer is currently running, false otherwise.
-     * @return true if stopwatch is running
+     * @return bool
      */
     bool isRunning();
 
     /**
      * @brief Checks if the timer is paused
      * @details Returns true if the timer is currently paused, false otherwise.
-     * @return true if stopwatch is paused
+     * @return bool
      */
     bool isPaused();
 
     /**
      * @brief Gets the running time
      * @details Returns the total number of seconds the timer has been running.
-     * @return the delta since starting the stopwatch
+     * @return uint16_t
      */
     uint16_t duration();
 
