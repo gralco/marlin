@@ -370,6 +370,7 @@ static uint8_t target_extruder;
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
   int xy_travel_speed = XY_TRAVEL_SPEED;
   bool bed_leveling_in_progress = false;
+  bool probing = false;
   #if ENABLED(REPROBE)
     uint8_t reprobe_attempts = 0;
     bool probe_fail = false;
@@ -1882,7 +1883,7 @@ static void setup_for_endstop_move() {
 
       // Move down until the Z probe (or endstop?) is triggered
       float zPosition = MIN_PROBE_PT;
-      endstops.z_probe_enabled = true;
+      probing = true;
       SET_INPUT(Z_MIN_PIN);
       WRITE(Z_MIN_PIN, HIGH);
       line_to_z(zPosition);
@@ -1899,7 +1900,7 @@ static void setup_for_endstop_move() {
         {
           SET_OUTPUT(Z_MIN_PIN);
           WRITE(Z_MIN_PIN, LOW); //Disable Z_PROBE when not in use
-          endstops.z_probe_enabled = false;
+          probing = false;
           probing_failed();
           return;
         }
@@ -1918,7 +1919,7 @@ static void setup_for_endstop_move() {
       feedrate /= 10;
 
       zPosition = MIN_PROBE_PT;
-      endstops.z_probe_enabled = true;
+      probing = true;
       SET_INPUT(Z_MIN_PIN);
       WRITE(Z_MIN_PIN, HIGH);
       line_to_z(zPosition);
@@ -1926,7 +1927,7 @@ static void setup_for_endstop_move() {
       SET_OUTPUT(Z_MIN_PIN);
       WRITE(Z_MIN_PIN, LOW); //Disable Z_PROBE when not in use
       endstops.hit_on_purpose(); // clear endstop hit flags
-      endstops.z_probe_enabled = false;
+      probing = false;
 
       // Get the current stepper position after bumping an endstop
       current_position[Z_AXIS] = stepper.get_axis_position_mm(Z_AXIS);
