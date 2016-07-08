@@ -175,11 +175,14 @@
   #define PID_dT ((OVERSAMPLENR * 8.0)/(F_CPU / 64.0 / 256.0)) //sampling period of the temperature routine
 
 // If you are using a preconfigured hotend then you can use one of the value sets by uncommenting it
-
+// LulzBot Hellish Longblock (24v)
+      #define DEFAULT_Kp 55.64
+      #define DEFAULT_Ki 6.79
+      #define DEFAULT_Kd 113.94
 // AO-Hexagon (24V)
-    #define  DEFAULT_Kp 28.79
-    #define  DEFAULT_Ki 1.91
-    #define  DEFAULT_Kd 108.51
+//    #define  DEFAULT_Kp 28.79
+//    #define  DEFAULT_Ki 1.91
+//    #define  DEFAULT_Kd 108.51
 
 // Buda 2.0 on 24V
 //    #define  DEFAULT_Kp 6
@@ -432,7 +435,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define DEFAULT_MAX_FEEDRATE          {800, 800, 8, 40}      // (mm/sec)
 #define DEFAULT_MAX_ACCELERATION      {9000,9000,100,10000}  // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
 
-#define DEFAULT_ACCELERATION          500    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
+#define DEFAULT_ACCELERATION          250    // X, Y, Z and E max acceleration in mm/s^2 for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  3000   // X, Y, Z and E max acceleration in mm/s^2 for retracts
 
 // Offset of the extruders (uncomment if using more than one and relying on firmware to position when changing).
@@ -462,7 +465,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define EEPROM_CHITCHAT
 
 // Preheat Constants
-#define PLA_PREHEAT_HOTEND_TEMP 205
+#define PLA_PREHEAT_HOTEND_TEMP 220
 #define PLA_PREHEAT_HPB_TEMP 60
 #define PLA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
@@ -482,16 +485,16 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define PCTPE_PREHEAT_HPB_TEMP 100
 #define PCTPE_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define ALLOY_910_PREHEAT_HOTEND_TEMP 240
-#define ALLOY_910_PREHEAT_HPB_TEMP 100
+#define ALLOY_910_PREHEAT_HOTEND_TEMP 250
+#define ALLOY_910_PREHEAT_HPB_TEMP 110
 #define ALLOY_910_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
 //~ #define BAMBOO_PREHEAT_HOTEND_TEMP 190
 //~ #define BAMBOO_PREHEAT_HPB_TEMP 60
 //~ #define BAMBOO_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define N_VENT_PREHEAT_HOTEND_TEMP 235
-#define N_VENT_PREHEAT_HPB_TEMP 60
+#define N_VENT_PREHEAT_HOTEND_TEMP 245
+#define N_VENT_PREHEAT_HPB_TEMP 80
 #define N_VENT_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
 #define LAYBRICK_PREHEAT_HOTEND_TEMP 190
@@ -502,11 +505,11 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define LAYWOOD_PREHEAT_HPB_TEMP 60
 #define LAYWOOD_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define POLYCARBONATE_PREHEAT_HOTEND_TEMP 290
+#define POLYCARBONATE_PREHEAT_HOTEND_TEMP 250
 #define POLYCARBONATE_PREHEAT_HPB_TEMP 110
 #define POLYCARBONATE_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define TGLASE_PREHEAT_HOTEND_TEMP 245
+#define TGLASE_PREHEAT_HOTEND_TEMP 225
 #define TGLASE_PREHEAT_HPB_TEMP 60
 #define TGLASE_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
