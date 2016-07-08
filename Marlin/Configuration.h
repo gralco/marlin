@@ -164,9 +164,9 @@
 
 // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
 // LulzBot Hellish Longblock (24v)
-      #define DEFAULT_Kp 35.68
-      #define DEFAULT_Ki 3.13
-      #define DEFAULT_Kd 101.56
+      #define DEFAULT_Kp 55.64
+      #define DEFAULT_Ki 6.79
+      #define DEFAULT_Kd 113.94
 
 // LulzBot AO-Hexagon (24v)
 //      #define DEFAULT_Kp 28.79
