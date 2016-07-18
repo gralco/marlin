@@ -2196,7 +2196,7 @@ void process_commands()
               clear_buffer();
               reprobe_attempts[0] = 0;
               reprobe_attempts[1] = 0;
-              do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], 10.0);
+              do_blocking_move_to(145.0, current_position[Y_AXIS], 100.0);
               active_extruder = 0;
               plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 0.0, feedrate/60, active_extruder);
               st_synchronize();
@@ -2205,6 +2205,10 @@ void process_commands()
               st_synchronize();
               active_extruder = 0;
               plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], 0.0);
+              disable_e0();
+              disable_e1();
+              disable_e2();
+              finishAndDisableSteppers();
               acceleration = DEFAULT_ACCELERATION;
               tone(BEEPER, 1750);
               delay(750);
