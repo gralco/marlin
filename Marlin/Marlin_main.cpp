@@ -2934,7 +2934,13 @@ Sigma_Exit:
 #if defined (THERMAL_RUNAWAY_PROTECTION_PERIOD) && THERMAL_RUNAWAY_PROTECTION_PERIOD > 0
       target_temp_reached[EXTRUDERS] = false;
 #endif
-      if (code_seen('S')) setTargetBed(code_value());
+      if (code_seen('S'))
+      {
+        uint8_t bedtemp = code_value();
+        if(bedtemp > BED_MAXTEMP)
+          bedtemp = BED_MAXTEMP;
+        setTargetBed(bedtemp);
+      }
       break;
     case 105 : // M105
       if(setTargetedHotend(105)){
@@ -3124,14 +3130,20 @@ Sigma_Exit:
         target_temp_reached[EXTRUDERS] = false;
 #endif
         if (code_seen('S')) {
-          setTargetBed(code_value());
+          uint8_t bedtemp = code_value();
+          if(bedtemp > BED_MAXTEMP)
+            bedtemp = BED_MAXTEMP;
+          setTargetBed(bedtemp);
           if(degTargetBed() > degBed())
             LCD_MESSAGEPGM(MSG_BED_HEATING);
           else
             LCD_MESSAGEPGM(MSG_BED_COOLING);
           CooldownNoWait = true;
         } else if (code_seen('R')) {
-          setTargetBed(code_value());
+          uint8_t bedtemp = code_value();
+          if(bedtemp > BED_MAXTEMP)
+            bedtemp = BED_MAXTEMP;
+          setTargetBed(bedtemp);
           CooldownNoWait = false;
         }
         codenum = millis();
