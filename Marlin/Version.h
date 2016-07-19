@@ -29,7 +29,7 @@
 /**
  * Marlin release version identifier
  */
-#define SHORT_BUILD_VERSION "1.1.0.4 " //based off of the upstream RCBugFix branch
+#define SHORT_BUILD_VERSION "1.1.0.5 " //based off of the upstream RCBugFix branch
 
 /**
  * Verbose version identifier which should contain a reference to the location
