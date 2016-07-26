@@ -2580,7 +2580,7 @@ void unknown_command_error() {
  */
 inline void gcode_G0_G1() {
   if (IsRunning()) {
-    if (!inverting_known) {
+    if (!inverting_known && (!code_seen('E') || (code_seen('E') && (code_seen('X') || code_seen('Y') || code_seen('Z'))))) {
       SERIAL_ECHOLN(MSG_HOME_Y);
       return;
     }
