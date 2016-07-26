@@ -332,6 +332,9 @@ Stopwatch print_job_timer = Stopwatch();
 
 static uint8_t target_extruder;
 
+bool inverting = Y_MIN_ENDSTOP_INVERTING;
+bool ignore_y_min = false;
+
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
   int xy_travel_speed = XY_TRAVEL_SPEED;
   float zprobe_zoffset = Z_PROBE_OFFSET_FROM_EXTRUDER;
@@ -2270,8 +2273,42 @@ static void homeaxis(AxisEnum axis) {
       if (axis == Z_AXIS) In_Homing_Process(true);
     #endif
 
+    // Discover if the endstops are N.C. or N.O.
+    static bool inverting_known = false;
+    if (!inverting_known/* && axis == Y_AXIS*/) {
+      if (READ(Y_MAX_PIN)^Y_MAX_ENDSTOP_INVERTING && READ(Y_MIN_PIN)^Y_MIN_ENDSTOP_INVERTING)
+        inverting = !Y_MIN_ENDSTOP_INVERTING;
+      else if (READ(Y_MIN_PIN)^Y_MIN_ENDSTOP_INVERTING) {
+        current_position[axis] = Y_MIN_POS;
+        sync_plan_position();
+        // attempt to move 1~2mm off the min endstop
+        ignore_y_min = true;
+        destination[axis] = current_position[axis] - 1.5;
+        feedrate = homing_feedrate[axis];
+        line_to_destination();
+        st_synchronize();
+        ignore_y_min = false;
+        // is it still triggered?
+        if (READ(Y_MAX_PIN)^Y_MAX_ENDSTOP_INVERTING)
+          inverting = !Y_MIN_ENDSTOP_INVERTING;
+      }
+      else if (READ(Y_MAX_PIN)^Y_MAX_ENDSTOP_INVERTING) {
+        current_position[axis] = Y_MAX_POS;
+        sync_plan_position();
+        // attempt to move 1~2mm off the max endstop
+        destination[axis] = current_position[axis] - 1.5;
+        feedrate = homing_feedrate[axis];
+        line_to_destination();
+        st_synchronize();
+        // is it still triggered?
+        if (READ(Y_MAX_PIN)^Y_MAX_ENDSTOP_INVERTING)
+          inverting = !Y_MAX_ENDSTOP_INVERTING;
+      }
+      inverting_known = true;
+    }
+
     // Move towards the endstop until an endstop is triggered
-    destination[axis] = 1.5 * max_length(axis) * axis_home_dir;
+    destination[axis] = 3 * max_length(axis) * axis_home_dir;
     feedrate = homing_feedrate[axis];
     line_to_destination();
     st_synchronize();
@@ -2481,8 +2518,8 @@ void gcode_get_destination() {
       #define DESTINATION_DO(LETTER) \
         (    (LETTER##_MIN_PIN > -1 && LETTER##_HOME_DIR==-1 && check_destination <= current_position[i]) \
           || (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1  && check_destination >= current_position[i]) \
-          || (LETTER##_MIN_PIN > -1 && LETTER##_HOME_DIR==-1 && !READ(LETTER##_MAX_PIN)^LETTER##_MAX_ENDSTOP_INVERTING) \
-          || (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1  && !READ(LETTER##_MIN_PIN)^LETTER##_MIN_ENDSTOP_INVERTING) )
+          || (LETTER##_MIN_PIN > -1 && LETTER##_HOME_DIR==-1 && !READ(LETTER##_MAX_PIN)^inverting) \
+          || (LETTER##_MAX_PIN > -1 && LETTER##_HOME_DIR==1  && !READ(LETTER##_MIN_PIN)^inverting) )
       if ((i == Z_AXIS && check_destination <= current_position[i]) || i == E_AXIS ||
           (i == X_AXIS ? DESTINATION_DO(X) : i == Y_AXIS ? DESTINATION_DO(Y) : i == Z_AXIS ? DESTINATION_DO(Z) : 0))
         destination[i] = check_destination;
@@ -2543,6 +2580,11 @@ void unknown_command_error() {
  */
 inline void gcode_G0_G1() {
   if (IsRunning()) {
+    if (!axis_known_position[Y_AXIS]) {
+      SERIAL_ECHOLN(MSG_HOME_Y);
+      return;
+    }
+
     gcode_get_destination(); // For X Y Z E F
 
     #if ENABLED(FWRETRACT)
@@ -2735,7 +2777,7 @@ inline void gcode_G28() {
 
     home_all_axis = (!homeX && !homeY && !homeZ) || (homeX && homeY && homeZ);
 
-    #if Z_HOME_DIR > 0  // If homing away from BED do Z first
+    #if Z_HOME_DIR < 0
 
       if (home_all_axis || homeZ) {
         HOMEAXIS(Z);
@@ -2827,28 +2869,6 @@ inline void gcode_G28() {
       if (home_all_axis || homeY) HOMEAXIS(Y);
     #endif
 
-    // Home X
-    if (home_all_axis || homeX) {
-      #if ENABLED(DUAL_X_CARRIAGE)
-        int tmp_extruder = active_extruder;
-        extruder_duplication_enabled = false;
-        active_extruder = !active_extruder;
-        HOMEAXIS(X);
-        inactive_extruder_x_pos = current_position[X_AXIS];
-        active_extruder = tmp_extruder;
-        HOMEAXIS(X);
-        // reset state used by the different modes
-        memcpy(raised_parked_position, current_position, sizeof(raised_parked_position));
-        delayed_move_time = 0;
-        active_extruder_parked = true;
-      #else
-        HOMEAXIS(X);
-      #endif
-      #if ENABLED(DEBUG_LEVELING_FEATURE)
-        if (DEBUGGING(LEVELING)) DEBUG_POS("> homeX", current_position);
-      #endif
-    }
-
     #if DISABLED(HOME_Y_BEFORE_X)
       // Home Y
       if (home_all_axis || homeY) {
@@ -2859,8 +2879,7 @@ inline void gcode_G28() {
       }
     #endif
 
-    // Home Z last if homing towards the bed
-    #if Z_HOME_DIR < 0
+    #if Z_HOME_DIR > 0
 
       if (home_all_axis || homeZ) {
 
@@ -2952,6 +2971,10 @@ inline void gcode_G28() {
 
         #else // !Z_SAFE_HOMING
 
+          if (homeZ && !axis_known_position[Y_AXIS]) {
+            SERIAL_ECHOLN(MSG_HOME_Y);
+            return;
+          }
           HOMEAXIS(Z);
 
         #endif // !Z_SAFE_HOMING
@@ -2962,7 +2985,33 @@ inline void gcode_G28() {
 
       } // home_all_axis || homeZ
 
-    #endif // Z_HOME_DIR < 0
+    #endif // Z_HOME_DIR > 0
+
+    // Home X
+    if (home_all_axis || homeX) {
+      #if ENABLED(DUAL_X_CARRIAGE)
+        int tmp_extruder = active_extruder;
+        extruder_duplication_enabled = false;
+        active_extruder = !active_extruder;
+        HOMEAXIS(X);
+        inactive_extruder_x_pos = current_position[X_AXIS];
+        active_extruder = tmp_extruder;
+        HOMEAXIS(X);
+        // reset state used by the different modes
+        memcpy(raised_parked_position, current_position, sizeof(raised_parked_position));
+        delayed_move_time = 0;
+        active_extruder_parked = true;
+      #else
+        if (homeX && !axis_known_position[Y_AXIS]) {
+          SERIAL_ECHOLN(MSG_HOME_Y);
+          return;
+        }
+        HOMEAXIS(X);
+      #endif
+      #if ENABLED(DEBUG_LEVELING_FEATURE)
+        if (DEBUGGING(LEVELING)) DEBUG_POS("> homeX", current_position);
+      #endif
+    }
 
     sync_plan_position();
 
@@ -5158,22 +5207,24 @@ inline void gcode_M117() {
  * M119: Output endstop states to serial output
  */
 inline void gcode_M119() {
+  if (!axis_known_position[Y_AXIS])
+    SERIAL_ECHOLN(MSG_HOME_Y);
   SERIAL_PROTOCOLLN(MSG_M119_REPORT);
   #if HAS_X_MIN
     SERIAL_PROTOCOLPGM(MSG_X_MIN);
-    SERIAL_PROTOCOLLN(((READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
+    SERIAL_PROTOCOLLN(((READ(X_MIN_PIN)^inverting) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
   #endif
   #if HAS_X_MAX
     SERIAL_PROTOCOLPGM(MSG_X_MAX);
-    SERIAL_PROTOCOLLN(((READ(X_MAX_PIN)^X_MAX_ENDSTOP_INVERTING) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
+    SERIAL_PROTOCOLLN(((READ(X_MAX_PIN)^inverting) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
   #endif
   #if HAS_Y_MIN
     SERIAL_PROTOCOLPGM(MSG_Y_MIN);
-    SERIAL_PROTOCOLLN(((READ(Y_MIN_PIN)^Y_MIN_ENDSTOP_INVERTING) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
+    SERIAL_PROTOCOLLN(((READ(Y_MIN_PIN)^inverting) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
   #endif
   #if HAS_Y_MAX
     SERIAL_PROTOCOLPGM(MSG_Y_MAX);
-    SERIAL_PROTOCOLLN(((READ(Y_MAX_PIN)^Y_MAX_ENDSTOP_INVERTING) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
+    SERIAL_PROTOCOLLN(((READ(Y_MAX_PIN)^inverting) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
   #endif
   #if HAS_Z_MIN
     SET_INPUT(Z_MIN_PIN);
@@ -5185,15 +5236,15 @@ inline void gcode_M119() {
   #endif
   #if HAS_Z_MAX
     SERIAL_PROTOCOLPGM(MSG_Z_MAX);
-    SERIAL_PROTOCOLLN(((READ(Z_MAX_PIN)^Z_MAX_ENDSTOP_INVERTING) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
+    SERIAL_PROTOCOLLN(((READ(Z_MAX_PIN)^inverting) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
   #endif
   #if HAS_Z2_MAX
     SERIAL_PROTOCOLPGM(MSG_Z2_MAX);
-    SERIAL_PROTOCOLLN(((READ(Z2_MAX_PIN)^Z2_MAX_ENDSTOP_INVERTING) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
+    SERIAL_PROTOCOLLN(((READ(Z2_MAX_PIN)^inverting) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
   #endif
   #if HAS_Z_PROBE
     SERIAL_PROTOCOLPGM(MSG_Z_PROBE);
-    SERIAL_PROTOCOLLN(((READ(Z_MIN_PROBE_PIN)^Z_MIN_PROBE_ENDSTOP_INVERTING) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
+    SERIAL_PROTOCOLLN(((READ(Z_MIN_PROBE_PIN)^inverting) ? MSG_ENDSTOP_HIT : MSG_ENDSTOP_OPEN));
   #endif
 }
 
