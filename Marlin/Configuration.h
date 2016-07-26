@@ -587,8 +587,8 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = false; // set to true to invert the l
       #ifdef REWIPE
         #define NUM_REWIPES 6 // Number of (back-and-forth) re-wipe attemps to make, e.g. 6 would produce 12 strokes
         // Re-wipe line from REWIPE_FIRST_PT to REWIPE_SECOND_PT
-        #define REWIPE_FIRST_PT {45, 173}
-        #define REWIPE_SECOND_PT {115, 173}
+        #define REWIPE_FIRST_PT {115, 173}
+        #define REWIPE_SECOND_PT {45, 173}
         #define Z_REWIPE_PT (Z_MIN_POS + 1) // Depth to re-wipe at
       #endif
     #endif
