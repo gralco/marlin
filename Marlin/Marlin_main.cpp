@@ -333,6 +333,7 @@ Stopwatch print_job_timer = Stopwatch();
 static uint8_t target_extruder;
 
 bool inverting = Y_MIN_ENDSTOP_INVERTING;
+bool inverting_known = false;
 bool ignore_y_min = false;
 
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
@@ -2274,7 +2275,6 @@ static void homeaxis(AxisEnum axis) {
     #endif
 
     // Discover if the endstops are N.C. or N.O.
-    static bool inverting_known = false;
     if (!inverting_known/* && axis == Y_AXIS*/) {
       if (READ(Y_MAX_PIN)^Y_MAX_ENDSTOP_INVERTING && READ(Y_MIN_PIN)^Y_MIN_ENDSTOP_INVERTING)
         inverting = !Y_MIN_ENDSTOP_INVERTING;
@@ -2580,7 +2580,7 @@ void unknown_command_error() {
  */
 inline void gcode_G0_G1() {
   if (IsRunning()) {
-    if (!axis_known_position[Y_AXIS]) {
+    if (!inverting_known) {
       SERIAL_ECHOLN(MSG_HOME_Y);
       return;
     }
@@ -2971,7 +2971,7 @@ inline void gcode_G28() {
 
         #else // !Z_SAFE_HOMING
 
-          if (homeZ && !axis_known_position[Y_AXIS]) {
+          if (homeZ && !inverting_known) {
             SERIAL_ECHOLN(MSG_HOME_Y);
             return;
           }
@@ -3002,7 +3002,7 @@ inline void gcode_G28() {
         delayed_move_time = 0;
         active_extruder_parked = true;
       #else
-        if (homeX && !axis_known_position[Y_AXIS]) {
+        if (homeX && !inverting_known) {
           SERIAL_ECHOLN(MSG_HOME_Y);
           return;
         }
@@ -5207,7 +5207,7 @@ inline void gcode_M117() {
  * M119: Output endstop states to serial output
  */
 inline void gcode_M119() {
-  if (!axis_known_position[Y_AXIS])
+  if (!inverting_known)
     SERIAL_ECHOLN(MSG_HOME_Y);
   SERIAL_PROTOCOLLN(MSG_M119_REPORT);
   #if HAS_X_MIN
