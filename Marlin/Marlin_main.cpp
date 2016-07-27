@@ -2748,7 +2748,7 @@ inline void gcode_G28() {
       if (READ(X_MAX_PIN)^X_MAX_ENDSTOP_INVERTING) {
         current_position[X_AXIS] = X_MAX_POS;
         sync_plan_position();
-        // attempt to move 1~2mm off the max endstop
+        // attempt to move 1~2mm off the min endstop
         ignore_x_max = true;
         destination[X_AXIS] = current_position[X_AXIS] + 1.5;
         feedrate = homing_feedrate[X_AXIS];
