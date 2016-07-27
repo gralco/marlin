@@ -50,8 +50,8 @@
   extern bool abort_on_endstop_hit;
 #endif
 
-extern bool inverting;
-extern bool ignore_y_min;
+extern uint8_t inverting;
+extern bool ignore_x_max;
 
 // Initialize and start the stepper motor subsystem
 void st_init();

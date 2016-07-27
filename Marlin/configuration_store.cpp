@@ -36,7 +36,7 @@
  *
  */
 
-#define EEPROM_VERSION "V23"
+#define EEPROM_VERSION "V24"
 
 /**
  * V23 EEPROM Layout:
@@ -153,6 +153,15 @@ void _EEPROM_readData(int &pos, uint8_t* value, uint8_t size) {
 }
 #define EEPROM_WRITE_VAR(pos, value) _EEPROM_writeData(pos, (uint8_t*)&value, sizeof(value))
 #define EEPROM_READ_VAR(pos, value) _EEPROM_readData(pos, (uint8_t*)&value, sizeof(value))
+
+int i_inverting;
+
+void Config_StoreInv()
+{
+    int i_inv = i_inverting;
+    //SERIAL_ECHOLN(i_bed_level);
+    EEPROM_WRITE_VAR(i_inv, inverting);
+}
 
 /**
  * Store Configuration Settings - M500
@@ -315,6 +324,9 @@ void Config_StoreSettings()  {
   #endif // FWRETRACT
 
   EEPROM_WRITE_VAR(i, volumetric_enabled);
+
+  i_inverting = i;
+  EEPROM_WRITE_VAR(i, inverting);
 
   // Save filament sizes
   for (uint8_t q = 0; q < 4; q++) {
@@ -497,6 +509,9 @@ void Config_RetrieveSettings() {
 
     EEPROM_READ_VAR(i, volumetric_enabled);
 
+    i_inverting = i;
+    EEPROM_READ_VAR(i, inverting);
+
     for (uint8_t q = 0; q < 4; q++) {
       EEPROM_READ_VAR(i, dummy);
       if (q < EXTRUDERS) filament_size[q] = dummy;
@@ -632,6 +647,8 @@ void Config_ResetDefault() {
   for (uint8_t q = 0; q < COUNT(filament_size); q++)
     filament_size[q] = DEFAULT_NOMINAL_FILAMENT_DIA;
   calculate_volumetric_multipliers();
+
+  inverting = X_MIN_ENDSTOP_INVERTING;
 
   SERIAL_ECHO_START;
   SERIAL_ECHOLNPGM("Hardcoded Default Settings Loaded");
@@ -936,14 +953,22 @@ void Config_PrintSettings(bool forReplay) {
       }
       CONFIG_ECHO_START;
       SERIAL_ECHOPAIR("  M" STRINGIFY(CUSTOM_M_CODE_SET_Z_PROBE_OFFSET) " Z", zprobe_zoffset);
+      SERIAL_ECHOLN("");
     #else
       if (!forReplay) {
         CONFIG_ECHO_START;
         SERIAL_ECHOPAIR("Z-Probe Offset (mm):", zprobe_zoffset);
       }
     #endif
-    SERIAL_EOL;
   #endif
+
+  SERIAL_ECHO("Endstops: ");
+  if (!(inverting & B00000001))
+    SERIAL_ECHOLN("NC");
+  else
+    SERIAL_ECHOLN("NO");
+
+  SERIAL_EOL;
 }
 
 #endif // !DISABLE_M503

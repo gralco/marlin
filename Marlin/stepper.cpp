@@ -355,8 +355,8 @@ inline void update_endstops() {
 
   // SET_ENDSTOP_BIT: set the current endstop bits for an endstop to its status
   #define SET_ENDSTOP_BIT(AXIS, MINMAX) \
-  if (_ENDSTOP(AXIS, MINMAX) != Z ##_## MIN && (!ignore_y_min || _ENDSTOP(AXIS, MINMAX) != Y ##_## MIN)) \
-    SET_BIT(current_endstop_bits, _ENDSTOP(AXIS, MINMAX), (READ(_ENDSTOP_PIN(AXIS, MINMAX)) != inverting)); \
+  if (_ENDSTOP(AXIS, MINMAX) != Z ##_## MIN && (!ignore_x_max || _ENDSTOP(AXIS, MINMAX) != X ##_## MAX)) \
+    SET_BIT(current_endstop_bits, _ENDSTOP(AXIS, MINMAX), (READ(_ENDSTOP_PIN(AXIS, MINMAX)) != (inverting & B00000001))); \
   else if (_ENDSTOP(AXIS, MINMAX) == Z ##_## MIN) \
     SET_BIT(current_endstop_bits, _ENDSTOP(AXIS, MINMAX), (READ(_ENDSTOP_PIN(AXIS, MINMAX)) != _ENDSTOP_INVERTING(AXIS, MINMAX)));
   // COPY_BIT: copy the value of COPY_BIT to BIT in bits
