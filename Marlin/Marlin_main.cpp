@@ -2273,48 +2273,6 @@ static void homeaxis(AxisEnum axis) {
       if (axis == Z_AXIS) In_Homing_Process(true);
     #endif
 
-    // Determine if the endstops are N.C. or N.O.
-    if (!(inverting >> 1)/* && axis == X_AXIS*/) {
-      if (READ(X_MAX_PIN)^X_MAX_ENDSTOP_INVERTING && READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING) {
-        SERIAL_ECHOLN("both triggered");
-        inverting = 1;
-      }
-      else if (READ(X_MAX_PIN)^X_MAX_ENDSTOP_INVERTING) {
-        current_position[axis] = X_MAX_POS;
-        sync_plan_position();
-        // attempt to move 1~2mm off the max endstop
-        ignore_x_max = true;
-        destination[axis] = current_position[axis] + 1.5;
-        feedrate = homing_feedrate[axis];
-        line_to_destination();
-        st_synchronize();
-        ignore_x_max = false;
-        // is it still triggered?
-        SERIAL_ECHOLN("max triggered");
-        if (READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING) {
-          SERIAL_ECHOLN("min");
-          inverting = 1;
-        }
-      }
-      else if (READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING) {
-        current_position[axis] = X_MIN_POS;
-        sync_plan_position();
-        // attempt to move 1~2mm off the min endstop
-        destination[axis] = current_position[axis] + 1.5;
-        feedrate = homing_feedrate[axis];
-        line_to_destination();
-        st_synchronize();
-        // is it still triggered?
-        SERIAL_ECHOLN("min triggered");
-        if (READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING) {
-          SERIAL_ECHOLN("min");
-          inverting = 1;
-        }
-      }
-      inverting += 2; // set bit 1 high to indicate that inverting is known
-      Config_StoreInv(); // store it to the EEPROM
-    }
-
     // Move towards the endstop until an endstop is triggered
     destination[axis] = 3 * max_length(axis) * axis_home_dir;
     feedrate = homing_feedrate[axis];
@@ -2785,7 +2743,43 @@ inline void gcode_G28() {
 
     home_all_axis = (!homeX && !homeY && !homeZ) || (homeX && homeY && homeZ);
 
-    #if Z_HOME_DIR < 0
+    // Determine if the endstops are N.C. or N.O.
+    if (!(inverting >> 1) && (homeX || home_all_axis)/* && axis == X_AXIS*/) {
+      if (READ(X_MAX_PIN)^X_MAX_ENDSTOP_INVERTING) {
+        current_position[X_AXIS] = X_MAX_POS;
+        sync_plan_position();
+        // attempt to move 1~2mm off the max endstop
+        ignore_x_max = true;
+        destination[X_AXIS] = current_position[X_AXIS] + 1.5;
+        feedrate = homing_feedrate[X_AXIS];
+        line_to_destination();
+        st_synchronize();
+        ignore_x_max = false;
+        // is it still triggered?
+        if (READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING)
+          inverting = 1;
+      }
+      else if (READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING) {
+        current_position[X_AXIS] = X_MIN_POS;
+        sync_plan_position();
+        // attempt to move 1~2mm off the min endstop
+        destination[X_AXIS] = current_position[X_AXIS] + 1.5;
+        feedrate = homing_feedrate[X_AXIS];
+        line_to_destination();
+        st_synchronize();
+        // is it still triggered?
+        if (READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING)
+          inverting = 1;
+      }
+      inverting += 2; // set bit 1 high to indicate that inverting is known
+      Config_StoreInv(); // store it to the EEPROM
+    }
+    else if (!(inverting >> 1)){
+      SERIAL_ECHOLN(MSG_HOME_X);
+      return;
+    }
+
+    #if Z_HOME_DIR > 0
 
       if (home_all_axis || homeZ) {
         HOMEAXIS(Z);
@@ -2821,8 +2815,7 @@ inline void gcode_G28() {
     #endif
 
     #if ENABLED(QUICK_HOME)
-
-      if (home_all_axis || (homeX && homeY)) {  // First diagonal move
+      if ((inverting >> 1) && (home_all_axis || (homeX && homeY))) {  // First diagonal move
 
         current_position[X_AXIS] = current_position[Y_AXIS] = 0;
 
@@ -2869,12 +2862,11 @@ inline void gcode_G28() {
           if (DEBUGGING(LEVELING)) DEBUG_POS("> QUICK_HOME 2", current_position);
         #endif
       }
-
     #endif // QUICK_HOME
 
     #if ENABLED(HOME_Y_BEFORE_X)
       // Home Y
-      if (home_all_axis || homeY) HOMEAXIS(Y);
+      HOMEAXIS(Y);
     #endif
 
     // Home X
@@ -2892,13 +2884,14 @@ inline void gcode_G28() {
         delayed_move_time = 0;
         active_extruder_parked = true;
       #else
-        HOMEAXIS(X);
+      HOMEAXIS(X);
       #endif
       #if ENABLED(DEBUG_LEVELING_FEATURE)
         if (DEBUGGING(LEVELING)) DEBUG_POS("> homeX", current_position);
       #endif
+    }
 
-    #if Z_HOME_DIR > 0
+    #if Z_HOME_DIR < 0
 
       if (home_all_axis || homeZ) {
 
@@ -2990,10 +2983,6 @@ inline void gcode_G28() {
 
         #else // !Z_SAFE_HOMING
 
-          if (!(inverting >> 1) && homeZ && !homeX) {
-            SERIAL_ECHOLN(MSG_HOME_X);
-            return;
-          }
           HOMEAXIS(Z);
 
         #endif // !Z_SAFE_HOMING
@@ -3004,23 +2993,17 @@ inline void gcode_G28() {
 
       } // home_all_axis || homeZ
 
-    #endif // Z_HOME_DIR > 0
+    #endif // Z_HOME_DIR < 0
 
     #if DISABLED(HOME_Y_BEFORE_X)
       // Home Y
       if (home_all_axis || homeY) {
-        if (!(inverting >> 1) && homeY && !homeX) {
-          SERIAL_ECHOLN(MSG_HOME_X);
-          return;
-        }
         HOMEAXIS(Y);
         #if ENABLED(DEBUG_LEVELING_FEATURE)
           if (DEBUGGING(LEVELING)) DEBUG_POS("> homeY", current_position);
         #endif
       }
     #endif
-
-    }
 
     sync_plan_position();
 
