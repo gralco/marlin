@@ -2744,7 +2744,7 @@ inline void gcode_G28() {
     home_all_axis = (!homeX && !homeY && !homeZ) || (homeX && homeY && homeZ);
 
     // Determine if the endstops are N.C. or N.O.
-    if (!(inverting >> 1) && (homeX || home_all_axis)/* && axis == X_AXIS*/) {
+    if (!(inverting >> 1) && (homeX || home_all_axis)) {
       if (READ(X_MAX_PIN)^X_MAX_ENDSTOP_INVERTING) {
         current_position[X_AXIS] = X_MAX_POS;
         sync_plan_position();
@@ -2755,9 +2755,9 @@ inline void gcode_G28() {
         line_to_destination();
         st_synchronize();
         ignore_x_max = false;
-        // is it still triggered?
+        // is min triggered?
         if (READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING)
-          inverting = 1;
+          inverting = 1; // set bit 0 high to indicate that it's N.O.
       }
       else if (READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING) {
         current_position[X_AXIS] = X_MIN_POS;
@@ -2767,14 +2767,14 @@ inline void gcode_G28() {
         feedrate = homing_feedrate[X_AXIS];
         line_to_destination();
         st_synchronize();
-        // is it still triggered?
+        // is min still triggered?
         if (READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING)
-          inverting = 1;
+          inverting = 1; // set bit 0 high to indicate that it's N.O.
       }
       inverting += 2; // set bit 1 high to indicate that inverting is known
       Config_StoreInv(); // store it to the EEPROM
     }
-    else if (!(inverting >> 1)){
+    else if (!(inverting >> 1)) {
       SERIAL_ECHOLN(MSG_HOME_X);
       return;
     }
