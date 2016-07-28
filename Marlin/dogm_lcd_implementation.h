@@ -127,9 +127,9 @@ static void lcd_implementation_init()
 			u8g.setFont(u8g_font_6x10_marlin);
 			u8g.drawStr(61,17,"TAZ 6"); 
 			u8g.setFont(u8g_font_5x8);
-			u8g.drawStr(95,17,"BigNoz");
-			u8g.setFont(u8g_font_6x10_marlin);
-			u8g.drawStr(62,28,"3D Printer");
+			u8g.drawStr(95,17,"Single");
+			u8g.setFont(u8g_font_5x8);
+			u8g.drawStr(62,28,"MOAR struder");
 			u8g.setFont(u8g_font_5x8);
 			u8g.drawStr(63,41,"LulzBot.com");
 			u8g.setFont(u8g_font_5x8);
