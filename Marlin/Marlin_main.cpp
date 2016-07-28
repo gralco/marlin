@@ -2745,7 +2745,9 @@ inline void gcode_G28() {
 
     // Determine if the endstops are N.C. or N.O.
     if (!(inverting >> 1) && (homeX || home_all_axis)) {
-      if (READ(X_MAX_PIN)^X_MAX_ENDSTOP_INVERTING) {
+      if (READ(X_MAX_PIN)^X_MAX_ENDSTOP_INVERTING && READ(X_MIN_PIN)^X_MIN_ENDSTOP_INVERTING)
+          inverting = 1; // set bit 0 high to indicate that it's N.O.
+      else if (READ(X_MAX_PIN)^X_MAX_ENDSTOP_INVERTING) {
         current_position[X_AXIS] = X_MAX_POS;
         sync_plan_position();
         // attempt to move 1~2mm off the min endstop
