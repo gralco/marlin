@@ -1601,7 +1601,8 @@ static void setup_for_endstop_move() {
           }
         #endif
         do_blocking_move_to_z(Z_RETRY_PT);
-        do_blocking_move_to_xy(LEFT_PROBE_BED_POSITION, FRONT_PROBE_BED_POSITION);
+        do_blocking_move_to_x(LEFT_PROBE_BED_POSITION);
+        do_blocking_move_to_xy(current_position[X_AXIS], FRONT_PROBE_BED_POSITION);
         reprobe_attempts++;
       }
       else
