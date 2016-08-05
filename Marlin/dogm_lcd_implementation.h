@@ -129,7 +129,7 @@ static void lcd_implementation_init()
 			u8g.setFont(u8g_font_5x8);
 			u8g.drawStr(95,17,"Single");
 			u8g.setFont(u8g_font_5x8);
-			u8g.drawStr(62,28,"MOAR struder");
+			u8g.drawStr(62,28,"MOARstruder");
 			u8g.setFont(u8g_font_5x8);
 			u8g.drawStr(63,41,"LulzBot.com");
 			u8g.setFont(u8g_font_5x8);
