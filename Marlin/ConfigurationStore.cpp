@@ -66,7 +66,6 @@ void Config_StoreSettings()
   int plaPreheatHotendTemp = PLA_PREHEAT_HOTEND_TEMP, plaPreheatHPBTemp = PLA_PREHEAT_HPB_TEMP, plaPreheatFanSpeed = PLA_PREHEAT_FAN_SPEED;
   int hipsPreheatHotendTemp = HIPS_PREHEAT_HOTEND_TEMP, hipsPreheatHPBTemp = HIPS_PREHEAT_HPB_TEMP, hipsPreheatFanSpeed = HIPS_PREHEAT_FAN_SPEED;
   int absPreheatHotendTemp = ABS_PREHEAT_HOTEND_TEMP, absPreheatHPBTemp = ABS_PREHEAT_HPB_TEMP, absPreheatFanSpeed = ABS_PREHEAT_FAN_SPEED;
-  int bridgePreheatHotendTemp = BRIDGE_PREHEAT_HOTEND_TEMP, bridgePreheatHPBTemp = BRIDGE_PREHEAT_HPB_TEMP, bridgePreheatFanSpeed = BRIDGE_PREHEAT_FAN_SPEED;
   int pctpePreheatHotendTemp = PCTPE_PREHEAT_HOTEND_TEMP, pctpePreheatHPBTemp = PCTPE_PREHEAT_HPB_TEMP, pctpePreheatFanSpeed = PCTPE_PREHEAT_FAN_SPEED;
   int alloy_910PreheatHotendTemp = ALLOY_910_PREHEAT_HOTEND_TEMP, alloy_910PreheatHPBTemp = ALLOY_910_PREHEAT_HPB_TEMP, alloy_910PreheatFanSpeed = ALLOY_910_PREHEAT_FAN_SPEED;
   int n_ventPreheatHotendTemp = N_VENT_PREHEAT_HOTEND_TEMP, n_ventPreheatHPBTemp = N_VENT_PREHEAT_HPB_TEMP, n_ventPreheatFanSpeed = N_VENT_PREHEAT_FAN_SPEED;
@@ -85,9 +84,6 @@ void Config_StoreSettings()
   EEPROM_WRITE_VAR(i,absPreheatHotendTemp);
   EEPROM_WRITE_VAR(i,absPreheatHPBTemp);
   EEPROM_WRITE_VAR(i,absPreheatFanSpeed);
-  EEPROM_WRITE_VAR(i,bridgePreheatHotendTemp);
-  EEPROM_WRITE_VAR(i,bridgePreheatHPBTemp);
-  EEPROM_WRITE_VAR(i,bridgePreheatFanSpeed);
   EEPROM_WRITE_VAR(i,pctpePreheatHotendTemp);
   EEPROM_WRITE_VAR(i,pctpePreheatHPBTemp);
   EEPROM_WRITE_VAR(i,pctpePreheatFanSpeed);
@@ -247,7 +243,6 @@ void Config_RetrieveSettings()
         int plaPreheatHotendTemp, plaPreheatHPBTemp, plaPreheatFanSpeed;
         int hipsPreheatHotendTemp, hipsPreheatHPBTemp, hipsPreheatFanSpeed;
         int absPreheatHotendTemp, absPreheatHPBTemp, absPreheatFanSpeed;
-        int bridgePreheatHotendTemp, bridgePreheatHPBTemp, bridgePreheatFanSpeed;
         int pctpePreheatHotendTemp, pctpePreheatHPBTemp, pctpePreheatFanSpeed;
         int alloy_910PreheatHotendTemp, alloy_910PreheatHPBTemp, alloy_910PreheatFanSpeed;
         int n_ventPreheatHotendTemp, n_ventPreheatHPBTemp, n_ventPreheatFanSpeed;
@@ -265,9 +260,6 @@ void Config_RetrieveSettings()
         EEPROM_READ_VAR(i,absPreheatHotendTemp);
         EEPROM_READ_VAR(i,absPreheatHPBTemp);
         EEPROM_READ_VAR(i,absPreheatFanSpeed);
-        EEPROM_READ_VAR(i,bridgePreheatHotendTemp);
-        EEPROM_READ_VAR(i,bridgePreheatHPBTemp);
-        EEPROM_READ_VAR(i,bridgePreheatFanSpeed);
         EEPROM_READ_VAR(i,pctpePreheatHotendTemp);
         EEPROM_READ_VAR(i,pctpePreheatHPBTemp);
         EEPROM_READ_VAR(i,pctpePreheatFanSpeed);
@@ -369,9 +361,6 @@ void Config_ResetDefault()
     absPreheatHotendTemp = ABS_PREHEAT_HOTEND_TEMP;
     absPreheatHPBTemp = ABS_PREHEAT_HPB_TEMP;
     absPreheatFanSpeed = ABS_PREHEAT_FAN_SPEED;
-    bridgePreheatHotendTemp = BRIDGE_PREHEAT_HOTEND_TEMP;
-    bridgePreheatHPBTemp = BRIDGE_PREHEAT_HPB_TEMP;
-    bridgePreheatFanSpeed = BRIDGE_PREHEAT_FAN_SPEED;
     pctpePreheatHotendTemp = PCTPE_PREHEAT_HOTEND_TEMP;
     pctpePreheatHPBTemp = PCTPE_PREHEAT_HPB_TEMP;
     pctpePreheatFanSpeed = PCTPE_PREHEAT_FAN_SPEED;

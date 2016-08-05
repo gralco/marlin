@@ -477,10 +477,6 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define ABS_PREHEAT_HPB_TEMP 110
 #define ABS_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define BRIDGE_PREHEAT_HOTEND_TEMP 240
-#define BRIDGE_PREHEAT_HPB_TEMP 100
-#define BRIDGE_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
-
 #define PCTPE_PREHEAT_HOTEND_TEMP 235
 #define PCTPE_PREHEAT_HPB_TEMP 100
 #define PCTPE_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255

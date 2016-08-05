@@ -23,10 +23,6 @@ int absPreheatHotendTemp;
 int absPreheatHPBTemp;
 int absPreheatFanSpeed;
 
-int bridgePreheatHotendTemp;
-int bridgePreheatHPBTemp;
-int bridgePreheatFanSpeed;
-
 int pctpePreheatHotendTemp;
 int pctpePreheatHPBTemp;
 int pctpePreheatFanSpeed;
@@ -92,7 +88,6 @@ static void lcd_control_temperature_menu();
 static void lcd_control_temperature_preheat_pla_settings_menu();
 static void lcd_control_temperature_preheat_hips_settings_menu();
 static void lcd_control_temperature_preheat_abs_settings_menu();
-static void lcd_control_temperature_preheat_bridge_settings_menu();
 static void lcd_control_temperature_preheat_pctpe_settings_menu();
 static void lcd_control_temperature_preheat_alloy_910_settings_menu();
 static void lcd_control_temperature_preheat_n_vent_settings_menu();
@@ -379,16 +374,6 @@ void lcd_preheat_abs()
     lcd_return_to_status();
     setWatch(); // heater sanity check timer
 }
-void lcd_preheat_bridge()
-{
-    setTargetHotend0(bridgePreheatHotendTemp);
-    setTargetHotend1(bridgePreheatHotendTemp);
-    setTargetHotend2(bridgePreheatHotendTemp);
-    setTargetBed(bridgePreheatHPBTemp);
-    fanSpeed = bridgePreheatFanSpeed;
-    lcd_return_to_status();
-    setWatch(); // heater sanity check timer
-}
 void lcd_preheat_pctpe()
 {
     setTargetHotend0(pctpePreheatHotendTemp);
@@ -593,7 +578,6 @@ static void lcd_temperature_menu()
     MENU_ITEM(function, MSG_PREHEAT_PLA, lcd_preheat_pla);
     MENU_ITEM(function, MSG_PREHEAT_HIPS, lcd_preheat_hips);
     MENU_ITEM(function, MSG_PREHEAT_ABS, lcd_preheat_abs);
-    MENU_ITEM(function, MSG_PREHEAT_BRIDGE, lcd_preheat_bridge);
     MENU_ITEM(function, MSG_PREHEAT_PCTPE, lcd_preheat_pctpe);
     MENU_ITEM(function, MSG_PREHEAT_ALLOY_910, lcd_preheat_alloy_910);
     MENU_ITEM(function, MSG_PREHEAT_N_VENT, lcd_preheat_n_vent);
@@ -821,7 +805,6 @@ static void lcd_control_temperature_menu()
     MENU_ITEM(submenu, MSG_PREHEAT_PLA_SETTINGS, lcd_control_temperature_preheat_pla_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_HIPS_SETTINGS, lcd_control_temperature_preheat_hips_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_ABS_SETTINGS, lcd_control_temperature_preheat_abs_settings_menu);
-    MENU_ITEM(submenu, MSG_PREHEAT_BRIDGE_SETTINGS, lcd_control_temperature_preheat_bridge_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_PCTPE_SETTINGS, lcd_control_temperature_preheat_pctpe_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_ALLOY_910_SETTINGS, lcd_control_temperature_preheat_alloy_910_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_N_VENT_SETTINGS, lcd_control_temperature_preheat_n_vent_settings_menu);
@@ -869,20 +852,6 @@ static void lcd_control_temperature_preheat_abs_settings_menu()
     MENU_ITEM_EDIT(int3, MSG_NOZZLE, &absPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
 #if TEMP_SENSOR_BED != 0
     MENU_ITEM_EDIT(int3, MSG_BED, &absPreheatHPBTemp, 0, BED_MAXTEMP - 15);
-#endif
-#ifdef EEPROM_SETTINGS
-    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
-#endif
-    END_MENU();
-}
-static void lcd_control_temperature_preheat_bridge_settings_menu()
-{
-    START_MENU();
-    MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &bridgePreheatFanSpeed, 0, 255);
-    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &bridgePreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
-#if TEMP_SENSOR_BED != 0
-    MENU_ITEM_EDIT(int3, MSG_BED, &bridgePreheatHPBTemp, 0, BED_MAXTEMP - 15);
 #endif
 #ifdef EEPROM_SETTINGS
     MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);

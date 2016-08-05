@@ -47,10 +47,6 @@
   extern int absPreheatHPBTemp;
   extern int absPreheatFanSpeed;
   
-  extern int bridgePreheatHotendTemp;
-  extern int bridgePreheatHPBTemp;
-  extern int bridgePreheatFanSpeed;
-  
   extern int pctpePreheatHotendTemp;
   extern int pctpePreheatHPBTemp;
   extern int pctpePreheatFanSpeed;
