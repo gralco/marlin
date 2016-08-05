@@ -43,9 +43,9 @@ int n_ventPreheatHotendTemp;
 int n_ventPreheatHPBTemp;
 int n_ventPreheatFanSpeed;
 
-int laybrickPreheatHotendTemp;
-int laybrickPreheatHPBTemp;
-int laybrickPreheatFanSpeed;
+int pc_maxPreheatHotendTemp;
+int pc_maxPreheatHPBTemp;
+int pc_maxPreheatFanSpeed;
 
 int laywoodPreheatHotendTemp;
 int laywoodPreheatHPBTemp;
@@ -101,7 +101,7 @@ static void lcd_control_temperature_preheat_pctpe_settings_menu();
 static void lcd_control_temperature_preheat_alloy_910_settings_menu();
 //~ static void lcd_control_temperature_preheat_bamboo_settings_menu();
 static void lcd_control_temperature_preheat_n_vent_settings_menu();
-static void lcd_control_temperature_preheat_laybrick_settings_menu();
+static void lcd_control_temperature_preheat_pc_max_settings_menu();
 static void lcd_control_temperature_preheat_laywood_settings_menu();
 static void lcd_control_temperature_preheat_polycarbonate_settings_menu();
 static void lcd_control_temperature_preheat_tglase_settings_menu();
@@ -434,13 +434,13 @@ void lcd_preheat_n_vent()
     lcd_return_to_status();
     setWatch(); // heater sanity check timer
 }
-void lcd_preheat_laybrick()
+void lcd_preheat_pc_max()
 {
-    setTargetHotend0(laybrickPreheatHotendTemp);
-    setTargetHotend1(laybrickPreheatHotendTemp);
-    setTargetHotend2(laybrickPreheatHotendTemp);
-    setTargetBed(laybrickPreheatHPBTemp);
-    fanSpeed = laybrickPreheatFanSpeed;
+    setTargetHotend0(pc_maxPreheatHotendTemp);
+    setTargetHotend1(pc_maxPreheatHotendTemp);
+    setTargetHotend2(pc_maxPreheatHotendTemp);
+    setTargetBed(pc_maxPreheatHPBTemp);
+    fanSpeed = pc_maxPreheatFanSpeed;
     lcd_return_to_status();
     setWatch(); // heater sanity check timer
 }
@@ -613,7 +613,7 @@ static void lcd_temperature_menu()
     MENU_ITEM(function, MSG_PREHEAT_ALLOY_910, lcd_preheat_alloy_910);
     //~ MENU_ITEM(function, MSG_PREHEAT_BAMBOO, lcd_preheat_bamboo);
     MENU_ITEM(function, MSG_PREHEAT_N_VENT, lcd_preheat_n_vent);
-    MENU_ITEM(function, MSG_PREHEAT_LAYBRICK, lcd_preheat_laybrick);
+    MENU_ITEM(function, MSG_PREHEAT_PC_MAX, lcd_preheat_pc_max);
     MENU_ITEM(function, MSG_PREHEAT_LAYWOOD, lcd_preheat_laywood);
     MENU_ITEM(function, MSG_PREHEAT_POLYCARBONATE, lcd_preheat_polycarbonate);
     MENU_ITEM(function, MSG_PREHEAT_TGLASE, lcd_preheat_tglase);
@@ -842,7 +842,7 @@ static void lcd_control_temperature_menu()
     MENU_ITEM(submenu, MSG_PREHEAT_ALLOY_910_SETTINGS, lcd_control_temperature_preheat_alloy_910_settings_menu);
     //~ MENU_ITEM(submenu, MSG_PREHEAT_BAMBOO_SETTINGS, lcd_control_temperature_preheat_bamboo_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_N_VENT_SETTINGS, lcd_control_temperature_preheat_n_vent_settings_menu);
-    MENU_ITEM(submenu, MSG_PREHEAT_LAYBRICK_SETTINGS, lcd_control_temperature_preheat_laybrick_settings_menu);
+    MENU_ITEM(submenu, MSG_PREHEAT_PC_MAX_SETTINGS, lcd_control_temperature_preheat_pc_max_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_POLYCARBONATE_SETTINGS, lcd_control_temperature_preheat_polycarbonate_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_TGLASE_SETTINGS, lcd_control_temperature_preheat_tglase_settings_menu);
     END_MENU();
@@ -962,14 +962,14 @@ static void lcd_control_temperature_preheat_n_vent_settings_menu()
 #endif
     END_MENU();
 }
-static void lcd_control_temperature_preheat_laybrick_settings_menu()
+static void lcd_control_temperature_preheat_pc_max_settings_menu()
 {
     START_MENU();
     MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &laybrickPreheatFanSpeed, 0, 255);
-    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &laybrickPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &pc_maxPreheatFanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &pc_maxPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
 #if TEMP_SENSOR_BED != 0
-    MENU_ITEM_EDIT(int3, MSG_BED, &laybrickPreheatHPBTemp, 0, BED_MAXTEMP - 15);
+    MENU_ITEM_EDIT(int3, MSG_BED, &pc_maxPreheatHPBTemp, 0, BED_MAXTEMP - 15);
 #endif
 #ifdef EEPROM_SETTINGS
     MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);

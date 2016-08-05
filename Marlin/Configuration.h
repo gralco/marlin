@@ -497,9 +497,9 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define N_VENT_PREHEAT_HPB_TEMP 80
 #define N_VENT_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define LAYBRICK_PREHEAT_HOTEND_TEMP 190
-#define LAYBRICK_PREHEAT_HPB_TEMP 60
-#define LAYBRICK_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+#define PC_MAX_PREHEAT_HOTEND_TEMP 245
+#define PC_MAX_PREHEAT_HPB_TEMP 80
+#define PC_MAX_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
 #define LAYWOOD_PREHEAT_HOTEND_TEMP 190
 #define LAYWOOD_PREHEAT_HPB_TEMP 60

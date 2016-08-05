@@ -67,9 +67,9 @@
   extern int n_ventPreheatHPBTemp;
   extern int n_ventPreheatFanSpeed;
   
-  extern int laybrickPreheatHotendTemp;
-  extern int laybrickPreheatHPBTemp;
-  extern int laybrickPreheatFanSpeed;
+  extern int pc_maxPreheatHotendTemp;
+  extern int pc_maxPreheatHPBTemp;
+  extern int pc_maxPreheatFanSpeed;
   
   extern int laywoodPreheatHotendTemp;
   extern int laywoodPreheatHPBTemp;
