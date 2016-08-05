@@ -59,10 +59,6 @@
   extern int alloy_910PreheatHPBTemp;
   extern int alloy_910PreheatFanSpeed;
   
-  //~ extern int bambooPreheatHotendTemp;
-  //~ extern int bambooPreheatHPBTemp;
-  //~ extern int bambooPreheatFanSpeed;
-  
   extern int n_ventPreheatHotendTemp;
   extern int n_ventPreheatHPBTemp;
   extern int n_ventPreheatFanSpeed;
@@ -71,9 +67,9 @@
   extern int pc_maxPreheatHPBTemp;
   extern int pc_maxPreheatFanSpeed;
   
-  extern int laywoodPreheatHotendTemp;
-  extern int laywoodPreheatHPBTemp;
-  extern int laywoodPreheatFanSpeed;
+  extern int ngenPreheatHotendTemp;
+  extern int ngenPreheatHPBTemp;
+  extern int ngenPreheatFanSpeed;
   
   extern int polycarbonatePreheatHotendTemp;
   extern int polycarbonatePreheatHPBTemp;

@@ -35,10 +35,6 @@ int alloy_910PreheatHotendTemp;
 int alloy_910PreheatHPBTemp;
 int alloy_910PreheatFanSpeed;
 
-//~ int bambooPreheatHotendTemp;
-//~ int bambooPreheatHPBTemp;
-//~ int bambooPreheatFanSpeed;
-
 int n_ventPreheatHotendTemp;
 int n_ventPreheatHPBTemp;
 int n_ventPreheatFanSpeed;
@@ -47,9 +43,9 @@ int pc_maxPreheatHotendTemp;
 int pc_maxPreheatHPBTemp;
 int pc_maxPreheatFanSpeed;
 
-int laywoodPreheatHotendTemp;
-int laywoodPreheatHPBTemp;
-int laywoodPreheatFanSpeed;
+int ngenPreheatHotendTemp;
+int ngenPreheatHPBTemp;
+int ngenPreheatFanSpeed;
 
 int polycarbonatePreheatHotendTemp;
 int polycarbonatePreheatHPBTemp;
@@ -99,10 +95,9 @@ static void lcd_control_temperature_preheat_abs_settings_menu();
 static void lcd_control_temperature_preheat_bridge_settings_menu();
 static void lcd_control_temperature_preheat_pctpe_settings_menu();
 static void lcd_control_temperature_preheat_alloy_910_settings_menu();
-//~ static void lcd_control_temperature_preheat_bamboo_settings_menu();
 static void lcd_control_temperature_preheat_n_vent_settings_menu();
 static void lcd_control_temperature_preheat_pc_max_settings_menu();
-static void lcd_control_temperature_preheat_laywood_settings_menu();
+static void lcd_control_temperature_preheat_ngen_settings_menu();
 static void lcd_control_temperature_preheat_polycarbonate_settings_menu();
 static void lcd_control_temperature_preheat_tglase_settings_menu();
 static void lcd_advanced_menu();
@@ -414,16 +409,6 @@ void lcd_preheat_alloy_910()
     lcd_return_to_status();
     setWatch(); // heater sanity check timer
 }
-//~ void lcd_preheat_bamboo()
-//~ {
-    //~ setTargetHotend0(bambooPreheatHotendTemp);
-    //~ setTargetHotend1(bambooPreheatHotendTemp);
-    //~ setTargetHotend2(bambooPreheatHotendTemp);
-    //~ setTargetBed(bambooPreheatHPBTemp);
-    //~ fanSpeed = bambooPreheatFanSpeed;
-    //~ lcd_return_to_status();
-    //~ setWatch(); // heater sanity check timer
-//~ }
 void lcd_preheat_n_vent()
 {
     setTargetHotend0(n_ventPreheatHotendTemp);
@@ -444,13 +429,13 @@ void lcd_preheat_pc_max()
     lcd_return_to_status();
     setWatch(); // heater sanity check timer
 }
-void lcd_preheat_laywood()
+void lcd_preheat_ngen()
 {
-    setTargetHotend0(laywoodPreheatHotendTemp);
-    setTargetHotend1(laywoodPreheatHotendTemp);
-    setTargetHotend2(laywoodPreheatHotendTemp);
-    setTargetBed(laywoodPreheatHPBTemp);
-    fanSpeed = laywoodPreheatFanSpeed;
+    setTargetHotend0(ngenPreheatHotendTemp);
+    setTargetHotend1(ngenPreheatHotendTemp);
+    setTargetHotend2(ngenPreheatHotendTemp);
+    setTargetBed(ngenPreheatHPBTemp);
+    fanSpeed = ngenPreheatFanSpeed;
     lcd_return_to_status();
     setWatch(); // heater sanity check timer
 }
@@ -611,10 +596,9 @@ static void lcd_temperature_menu()
     MENU_ITEM(function, MSG_PREHEAT_BRIDGE, lcd_preheat_bridge);
     MENU_ITEM(function, MSG_PREHEAT_PCTPE, lcd_preheat_pctpe);
     MENU_ITEM(function, MSG_PREHEAT_ALLOY_910, lcd_preheat_alloy_910);
-    //~ MENU_ITEM(function, MSG_PREHEAT_BAMBOO, lcd_preheat_bamboo);
     MENU_ITEM(function, MSG_PREHEAT_N_VENT, lcd_preheat_n_vent);
     MENU_ITEM(function, MSG_PREHEAT_PC_MAX, lcd_preheat_pc_max);
-    MENU_ITEM(function, MSG_PREHEAT_LAYWOOD, lcd_preheat_laywood);
+    MENU_ITEM(function, MSG_PREHEAT_NGEN, lcd_preheat_ngen);
     MENU_ITEM(function, MSG_PREHEAT_POLYCARBONATE, lcd_preheat_polycarbonate);
     MENU_ITEM(function, MSG_PREHEAT_TGLASE, lcd_preheat_tglase);
     MENU_ITEM(function, MSG_COOLDOWN, lcd_cooldown);
@@ -840,7 +824,6 @@ static void lcd_control_temperature_menu()
     MENU_ITEM(submenu, MSG_PREHEAT_BRIDGE_SETTINGS, lcd_control_temperature_preheat_bridge_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_PCTPE_SETTINGS, lcd_control_temperature_preheat_pctpe_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_ALLOY_910_SETTINGS, lcd_control_temperature_preheat_alloy_910_settings_menu);
-    //~ MENU_ITEM(submenu, MSG_PREHEAT_BAMBOO_SETTINGS, lcd_control_temperature_preheat_bamboo_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_N_VENT_SETTINGS, lcd_control_temperature_preheat_n_vent_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_PC_MAX_SETTINGS, lcd_control_temperature_preheat_pc_max_settings_menu);
     MENU_ITEM(submenu, MSG_PREHEAT_POLYCARBONATE_SETTINGS, lcd_control_temperature_preheat_polycarbonate_settings_menu);
@@ -934,20 +917,6 @@ static void lcd_control_temperature_preheat_alloy_910_settings_menu()
 #endif
     END_MENU();
 }
-//~ static void lcd_control_temperature_preheat_bamboo_settings_menu()
-//~ {
-    //~ START_MENU();
-    //~ MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    //~ MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &bambooPreheatFanSpeed, 0, 255);
-    //~ MENU_ITEM_EDIT(int3, MSG_NOZZLE, &bambooPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
-//~ #if TEMP_SENSOR_BED != 0
-    //~ MENU_ITEM_EDIT(int3, MSG_BED, &bambooPreheatHPBTemp, 0, BED_MAXTEMP - 15);
-//~ #endif
-//~ #ifdef EEPROM_SETTINGS
-    //~ MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
-//~ #endif
-    //~ END_MENU();
-//~ }
 static void lcd_control_temperature_preheat_n_vent_settings_menu()
 {
     START_MENU();
@@ -976,14 +945,14 @@ static void lcd_control_temperature_preheat_pc_max_settings_menu()
 #endif
     END_MENU();
 }
-static void lcd_control_temperature_preheat_laywood_settings_menu()
+static void lcd_control_temperature_preheat_ngen_settings_menu()
 {
     START_MENU();
     MENU_ITEM(back, MSG_TEMPERATURE, lcd_control_temperature_menu);
-    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &laywoodPreheatFanSpeed, 0, 255);
-    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &laywoodPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
+    MENU_ITEM_EDIT(int3, MSG_FAN_SPEED, &ngenPreheatFanSpeed, 0, 255);
+    MENU_ITEM_EDIT(int3, MSG_NOZZLE, &ngenPreheatHotendTemp, 0, HEATER_0_MAXTEMP - 15);
 #if TEMP_SENSOR_BED != 0
-    MENU_ITEM_EDIT(int3, MSG_BED, &laywoodPreheatHPBTemp, 0, BED_MAXTEMP - 15);
+    MENU_ITEM_EDIT(int3, MSG_BED, &ngenPreheatHPBTemp, 0, BED_MAXTEMP - 15);
 #endif
 #ifdef EEPROM_SETTINGS
     MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
