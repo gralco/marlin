@@ -2,6 +2,7 @@
 Marlin/obj
 Marlin/*.hex
 Marlin/Marlin.cpp
+Marlin/Version.h
 applet/
 *~
 *.orig
