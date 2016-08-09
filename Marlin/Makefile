@@ -54,6 +54,7 @@ all:
 	$(MKDIR_P) ${objdir}/Wire/
 	$(MKDIR_P) ${objdir}/Wire/utility/
 	$(LN_F) ${basedir}/Marlin.ino ${basedir}/Marlin.cpp
+	$(LN_F) ${basedir}/Default_Version.h ${basedir}/Version.h
 	$(CXX) $(CXXFLAGS) -I${libdir}/Wire -I${libdir}/U8glib -I${libdir}/LiquidCrystal -I${libdir}/SPI ${basedir}/SdVolume.cpp -o ${objdir}/SdVolume.cpp.o 
 	$(CXX) $(CXXFLAGS) -I${libdir}/Wire -I${libdir}/U8glib -I${libdir}/LiquidCrystal -I${libdir}/SPI ${basedir}/Servo.cpp -o ${objdir}/Servo.cpp.o 
 	$(CXX) $(CXXFLAGS) -I${libdir}/Wire -I${libdir}/U8glib -I${libdir}/LiquidCrystal -I${libdir}/SPI ${basedir}/digipot_mcp4451.cpp -o ${objdir}/digipot_mcp4451.cpp.o 
@@ -252,4 +253,5 @@ all:
 clean:
 	rm -rf ${objdir}
 	rm ${basedir}/Marlin.cpp
+	rm ${basedir}/Version.h
 	rm ${basedir}/Marlin_*.hex
