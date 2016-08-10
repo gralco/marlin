@@ -141,7 +141,7 @@ static void lcd_implementation_init()
 			u8g.setFont(u8g_font_5x8);
 			u8g.drawStr(63,53,"Firmware:");
 			u8g.drawStr(63,62,"Marlin");
-			u8g.drawStr(94,62,"1.0.0.1");
+			u8g.drawStr(94,62,"1.0.0.2");
 	   } while( u8g.nextPage() );
 delay(3000);
 }
