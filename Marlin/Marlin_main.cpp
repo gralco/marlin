@@ -1205,8 +1205,21 @@ void process_commands()
       #endif
 
       #ifdef QUICK_HOME
-      if((home_all_axis)||( code_seen(axis_codes[X_AXIS]) && code_seen(axis_codes[Y_AXIS])) )  //first diagonal move
+      if(code_seen(axis_codes[Z_AXIS]) && !axis_known_position[X_AXIS] && !code_seen(axis_codes[X_AXIS]) && current_position[X_AXIS] < 4.0) //Check x position so that it does not crash if manually moved on LulzBot TAZ 5 MOARstruder
       {
+	    SERIAL_ECHOLN("Home X First");
+	    break;
+      }
+      if((home_all_axis)||( code_seen(axis_codes[X_AXIS]) && code_seen(axis_codes[Y_AXIS])) )  //Diagonal move
+      {
+        if(current_position[Z_AXIS] < 8.0) //Move z up for clearance of z thumb screw when homeing x and y together on LulzBot TAZ 5 MOARstruder
+	      destination[Z_AXIS] = 8.0;
+	    feedrate = max_feedrate[Z_AXIS];
+	    plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], destination[Z_AXIS], current_position[E_AXIS], feedrate, active_extruder);
+	    current_position[Z_AXIS] = destination[Z_AXIS];
+	    plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+	    st_synchronize();
+		  
         current_position[X_AXIS] = 0;current_position[Y_AXIS] = 0;
 
        #ifndef DUAL_X_CARRIAGE
@@ -1221,22 +1234,22 @@ void process_commands()
         feedrate = homing_feedrate[X_AXIS];
         if(homing_feedrate[Y_AXIS]<feedrate)
           feedrate =homing_feedrate[Y_AXIS];
-        plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate/60, active_extruder);
+        plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], current_position[Z_AXIS], destination[E_AXIS], feedrate/60, active_extruder);
         st_synchronize();
-
+        
         axis_is_at_home(X_AXIS);
         axis_is_at_home(Y_AXIS);
         plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
         destination[X_AXIS] = current_position[X_AXIS];
         destination[Y_AXIS] = current_position[Y_AXIS];
-        plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feedrate/60, active_extruder);
+        plan_buffer_line(destination[X_AXIS], destination[Y_AXIS], current_position[Z_AXIS], destination[E_AXIS], feedrate/60, active_extruder);
         feedrate = 0.0;
         st_synchronize();
         endstops_hit_on_purpose();
-
         current_position[X_AXIS] = destination[X_AXIS];
         current_position[Y_AXIS] = destination[Y_AXIS];
         current_position[Z_AXIS] = destination[Z_AXIS];
+       
       }
       #endif
 
@@ -1254,8 +1267,26 @@ void process_commands()
         memcpy(raised_parked_position, current_position, sizeof(raised_parked_position));
         delayed_move_time = 0;
         active_extruder_parked = true; 
-      #else      
-        HOMEAXIS(X);
+      #else
+
+      if((home_all_axis) || code_seen(axis_codes[X_AXIS])) //If homing only X make sure there is clearance of z thumb screw on LulzBot TAZ 5 MOARstruder
+      {
+        if(current_position[Z_AXIS] < 8.0)
+	      destination[Z_AXIS] = 8.0;
+	    feedrate = max_feedrate[Z_AXIS];
+	    plan_buffer_line(current_position[X_AXIS], current_position[Y_AXIS], destination[Z_AXIS], current_position[E_AXIS], feedrate, active_extruder);
+	    current_position[Z_AXIS] = destination[Z_AXIS];
+	    plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+	    st_synchronize();
+	    HOMEAXIS(X);
+	     // Moves off X endstop after homing so the LulzBot TAZ 5 MOARstruder doesnt not hit z min thumb screw 
+        destination[X_AXIS] = 4;
+		feedrate = homing_feedrate[X_AXIS];
+		plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+        plan_buffer_line(destination[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS], feedrate, active_extruder);
+        destination[X_AXIS] = 0;
+        st_synchronize();
+	  }  
       #endif         
       }
 
@@ -1345,6 +1376,7 @@ void process_commands()
         }
       #endif
       plan_set_position(current_position[X_AXIS], current_position[Y_AXIS], current_position[Z_AXIS], current_position[E_AXIS]);
+
 #endif // else DELTA
 
       #ifdef ENDSTOPS_ONLY_FOR_HOMING

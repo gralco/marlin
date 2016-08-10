@@ -175,7 +175,7 @@
   #define PID_dT ((OVERSAMPLENR * 8.0)/(F_CPU / 64.0 / 256.0)) //sampling period of the temperature routine
 
 // If you are using a preconfigured hotend then you can use one of the value sets by uncommenting it
-// LulzBot Hellish Longblock (24v)
+// LulzBot MOARstruder (24v)
       #define DEFAULT_Kp 55.64
       #define DEFAULT_Ki 6.79
       #define DEFAULT_Kd 113.94
