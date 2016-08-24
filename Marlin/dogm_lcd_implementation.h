@@ -131,7 +131,7 @@ static void lcd_implementation_init()
 			u8g.drawBitmapP(0,0,LULZBOT_BMPBYTEWIDTH,LULZBOT_BMPHEIGHT,lulzbot_bmp);
 			// Welcome message
 			u8g.setFont(u8g_font_6x10_marlin);
-			u8g.drawStr(61,17,"TAZ 4 5");
+			u8g.drawStr(61,17,"TAZ 5");
 			u8g.setFont(u8g_font_5x8);
 			u8g.drawStr(85,17," ");
 			u8g.setFont(u8g_font_5x8);

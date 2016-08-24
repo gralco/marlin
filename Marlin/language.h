@@ -36,7 +36,7 @@
 	#ifdef CUSTOM_PRINTER_NAME
 		#define MACHINE_NAME CUSTOM_PRINTER_NAME
 	#else
-		#define MACHINE_NAME "LulzBot TAZ 4 5"
+		#define MACHINE_NAME "LulzBot TAZ 5"
 	#endif
 
 	#define FIRMWARE_URL "https://code.alephobjects.com/diffusion/MARLIN/"
