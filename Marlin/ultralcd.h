@@ -47,10 +47,6 @@
   extern int absPreheatHPBTemp;
   extern int absPreheatFanSpeed;
   
-  extern int pctpePreheatHotendTemp;
-  extern int pctpePreheatHPBTemp;
-  extern int pctpePreheatFanSpeed;
-  
   extern int alloy_910PreheatHotendTemp;
   extern int alloy_910PreheatHPBTemp;
   extern int alloy_910PreheatFanSpeed;
