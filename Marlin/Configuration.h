@@ -485,9 +485,9 @@ const bool Z_MAX_ENDSTOP_INVERTING = true; // set to true to invert the logic of
 #define ALLOY_910_PREHEAT_HPB_TEMP 110
 #define ALLOY_910_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
-#define N_VENT_PREHEAT_HOTEND_TEMP 245  //INOVA filament
-#define N_VENT_PREHEAT_HPB_TEMP 80
-#define N_VENT_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
+#define INOVA_PREHEAT_HOTEND_TEMP 245  //INOVA filament
+#define INOVA_PREHEAT_HPB_TEMP 80
+#define INOVA_PREHEAT_FAN_SPEED 0   // Insert Value between 0 and 255
 
 #define PC_MAX_PREHEAT_HOTEND_TEMP 245
 #define PC_MAX_PREHEAT_HPB_TEMP 80

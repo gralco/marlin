@@ -55,9 +55,9 @@
   extern int alloy_910PreheatHPBTemp;
   extern int alloy_910PreheatFanSpeed;
   
-  extern int n_ventPreheatHotendTemp;
-  extern int n_ventPreheatHPBTemp;
-  extern int n_ventPreheatFanSpeed;
+  extern int inovaPreheatHotendTemp;
+  extern int inovaPreheatHPBTemp;
+  extern int inovaPreheatFanSpeed;
   
   extern int pc_maxPreheatHotendTemp;
   extern int pc_maxPreheatHPBTemp;

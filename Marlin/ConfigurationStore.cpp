@@ -68,7 +68,7 @@ void Config_StoreSettings()
   int absPreheatHotendTemp = ABS_PREHEAT_HOTEND_TEMP, absPreheatHPBTemp = ABS_PREHEAT_HPB_TEMP, absPreheatFanSpeed = ABS_PREHEAT_FAN_SPEED;
   int pctpePreheatHotendTemp = PCTPE_PREHEAT_HOTEND_TEMP, pctpePreheatHPBTemp = PCTPE_PREHEAT_HPB_TEMP, pctpePreheatFanSpeed = PCTPE_PREHEAT_FAN_SPEED;
   int alloy_910PreheatHotendTemp = ALLOY_910_PREHEAT_HOTEND_TEMP, alloy_910PreheatHPBTemp = ALLOY_910_PREHEAT_HPB_TEMP, alloy_910PreheatFanSpeed = ALLOY_910_PREHEAT_FAN_SPEED;
-  int n_ventPreheatHotendTemp = N_VENT_PREHEAT_HOTEND_TEMP, n_ventPreheatHPBTemp = N_VENT_PREHEAT_HPB_TEMP, n_ventPreheatFanSpeed = N_VENT_PREHEAT_FAN_SPEED;
+  int inovaPreheatHotendTemp = INOVA_PREHEAT_HOTEND_TEMP, inovaPreheatHPBTemp = INOVA_PREHEAT_HPB_TEMP, inovaPreheatFanSpeed = INOVA_PREHEAT_FAN_SPEED;
   int pc_maxPreheatHotendTemp = PC_MAX_PREHEAT_HOTEND_TEMP, pc_maxPreheatHPBTemp = PC_MAX_PREHEAT_HPB_TEMP, pc_maxPreheatFanSpeed = PC_MAX_PREHEAT_FAN_SPEED;
   int ngenPreheatHotendTemp = NGEN_PREHEAT_HOTEND_TEMP, ngenPreheatHPBTemp = NGEN_PREHEAT_HPB_TEMP, ngenPreheatFanSpeed = NGEN_PREHEAT_FAN_SPEED;
   int polycarbonatePreheatHotendTemp = POLYCARBONATE_PREHEAT_HOTEND_TEMP, polycarbonatePreheatHPBTemp = POLYCARBONATE_PREHEAT_HPB_TEMP, polycarbonatePreheatFanSpeed = POLYCARBONATE_PREHEAT_FAN_SPEED;
@@ -90,9 +90,9 @@ void Config_StoreSettings()
   EEPROM_WRITE_VAR(i,alloy_910PreheatHotendTemp);
   EEPROM_WRITE_VAR(i,alloy_910PreheatHPBTemp);
   EEPROM_WRITE_VAR(i,alloy_910PreheatFanSpeed);
-  EEPROM_WRITE_VAR(i,n_ventPreheatHotendTemp);
-  EEPROM_WRITE_VAR(i,n_ventPreheatHPBTemp);
-  EEPROM_WRITE_VAR(i,n_ventPreheatFanSpeed);
+  EEPROM_WRITE_VAR(i,inovaPreheatHotendTemp);
+  EEPROM_WRITE_VAR(i,inovaPreheatHPBTemp);
+  EEPROM_WRITE_VAR(i,inovaPreheatFanSpeed);
   EEPROM_WRITE_VAR(i,pc_maxPreheatHotendTemp);
   EEPROM_WRITE_VAR(i,pc_maxPreheatHPBTemp);
   EEPROM_WRITE_VAR(i,pc_maxPreheatFanSpeed);
@@ -245,7 +245,7 @@ void Config_RetrieveSettings()
         int absPreheatHotendTemp, absPreheatHPBTemp, absPreheatFanSpeed;
         int pctpePreheatHotendTemp, pctpePreheatHPBTemp, pctpePreheatFanSpeed;
         int alloy_910PreheatHotendTemp, alloy_910PreheatHPBTemp, alloy_910PreheatFanSpeed;
-        int n_ventPreheatHotendTemp, n_ventPreheatHPBTemp, n_ventPreheatFanSpeed;
+        int inovaPreheatHotendTemp, inovaPreheatHPBTemp, inovaPreheatFanSpeed;
         int pc_maxPreheatHotendTemp, pc_maxPreheatHPBTemp, pc_maxPreheatFanSpeed;
         int ngenPreheatHotendTemp, ngenPreheatHPBTemp, ngenPreheatFanSpeed;
         int polycarbonatePreheatHotendTemp, polycarbonatePreheatHPBTemp, polycarbonatePreheatFanSpeed;
@@ -266,9 +266,9 @@ void Config_RetrieveSettings()
         EEPROM_READ_VAR(i,alloy_910PreheatHotendTemp);
         EEPROM_READ_VAR(i,alloy_910PreheatHPBTemp);
         EEPROM_READ_VAR(i,alloy_910PreheatFanSpeed);
-        EEPROM_READ_VAR(i,n_ventPreheatHotendTemp);
-        EEPROM_READ_VAR(i,n_ventPreheatHPBTemp);
-        EEPROM_READ_VAR(i,n_ventPreheatFanSpeed);
+        EEPROM_READ_VAR(i,inovaPreheatHotendTemp);
+        EEPROM_READ_VAR(i,inovaPreheatHPBTemp);
+        EEPROM_READ_VAR(i,inovaPreheatFanSpeed);
         EEPROM_READ_VAR(i,pc_maxPreheatHotendTemp);
         EEPROM_READ_VAR(i,pc_maxPreheatHPBTemp);
         EEPROM_READ_VAR(i,pc_maxPreheatFanSpeed);
@@ -367,9 +367,9 @@ void Config_ResetDefault()
     alloy_910PreheatHotendTemp = ALLOY_910_PREHEAT_HOTEND_TEMP;
     alloy_910PreheatHPBTemp = ALLOY_910_PREHEAT_HPB_TEMP;
     alloy_910PreheatFanSpeed = ALLOY_910_PREHEAT_FAN_SPEED;
-    n_ventPreheatHotendTemp = N_VENT_PREHEAT_HOTEND_TEMP;
-    n_ventPreheatHPBTemp = N_VENT_PREHEAT_HPB_TEMP;
-    n_ventPreheatFanSpeed = N_VENT_PREHEAT_FAN_SPEED;
+    inovaPreheatHotendTemp = INOVA_PREHEAT_HOTEND_TEMP;
+    inovaPreheatHPBTemp = INOVA_PREHEAT_HPB_TEMP;
+    inovaPreheatFanSpeed = INOVA_PREHEAT_FAN_SPEED;
     pc_maxPreheatHotendTemp = PC_MAX_PREHEAT_HOTEND_TEMP;
     pc_maxPreheatHPBTemp = PC_MAX_PREHEAT_HPB_TEMP;
     pc_maxPreheatFanSpeed = PC_MAX_PREHEAT_FAN_SPEED;
