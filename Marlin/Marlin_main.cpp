@@ -1668,7 +1668,7 @@ static void setup_for_endstop_move() {
         current_position[E_AXIS]
       );
       #ifdef REPROBE
-        if (zPosition == MIN_PROBE_PT && !digitalRead(Z_MIN_PIN)^Z_MIN_ENDSTOP_INVERTING)
+        if (zPosition == MIN_PROBE_PT && !READ(Z_MIN_PIN)^Z_MIN_ENDSTOP_INVERTING)
         {
           SET_OUTPUT(Z_MIN_PIN);
           WRITE(Z_MIN_PIN, LOW); //Disable Z_PROBE when not in use
@@ -3236,8 +3236,7 @@ inline void gcode_G28() {
    */
   inline void gcode_G29() {
 
-    SET_INPUT(Z_MIN_PIN);
-    WRITE(Z_MIN_PIN, HIGH);
+    plan_bed_level_matrix.set_to_identity();
 
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING)) {
@@ -3785,9 +3784,6 @@ inline void gcode_G28() {
     #endif
 
     report_current_position();
-
-    SET_OUTPUT(Z_MIN_PIN);
-    WRITE(Z_MIN_PIN, LOW); //Disable Z_PROBE when not in use
   }
 
   #if DISABLED(Z_PROBE_SLED) // could be avoided
