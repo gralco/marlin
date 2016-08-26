@@ -2017,8 +2017,8 @@ static void setup_for_endstop_move() {
     #endif
 
     // this also updates current_position
-    do_blocking_move_to_x(x - (X_PROBE_OFFSET_FROM_EXTRUDER));
     do_blocking_move_to_xy(current_position[X_AXIS], y - (Y_PROBE_OFFSET_FROM_EXTRUDER));
+    do_blocking_move_to_x(x - (X_PROBE_OFFSET_FROM_EXTRUDER));
 
     #if DISABLED(Z_PROBE_SLED) && DISABLED(Z_PROBE_ALLEN_KEY)
       if (probe_action & ProbeDeploy) {
@@ -3482,7 +3482,6 @@ inline void gcode_G28() {
             eqnBVector[probePointCounter] = measured_z;
             eqnAMatrix[probePointCounter + 0 * abl2] = current_position[X_AXIS];
             eqnAMatrix[probePointCounter + 1 * abl2] = current_position[Y_AXIS];
-            SERIAL_ECHOLN(eqnAMatrix[probePointCounter + 0 * abl2]);
             eqnAMatrix[probePointCounter + 2 * abl2] = 1;
             indexIntoAB[xCount][yCount] = probePointCounter;
           #else
