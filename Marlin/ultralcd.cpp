@@ -41,7 +41,7 @@
  */
 #if ENABLED(REVERSE_MENU_DIRECTION)
   int8_t encoderDirection = 1;
-  #define ENCODER_DIRECTION_NORMAL() (encoderDirection = 1)
+  #define ENCODER_DIRECTION_NORMAL() (encoderDirection = -1)
   #define ENCODER_DIRECTION_MENUS() (encoderDirection = -1)
 #else
   #define ENCODER_DIRECTION_NORMAL() ;
