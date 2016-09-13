@@ -493,7 +493,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 #define X_MIN_POS 0
 #define Y_MIN_POS -10
 #define Z_MIN_POS -2
-#define X_MAX_POS 165
+#define X_MAX_POS 175
 #define Y_MAX_POS 191
 #define Z_MAX_POS 159
 
@@ -587,8 +587,8 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
       #ifdef REWIPE
         #define NUM_REWIPES 6 // Number of (back-and-forth) re-wipe attemps to make, e.g. 6 would produce 12 strokes
         // Re-wipe line from REWIPE_FIRST_PT to REWIPE_SECOND_PT
-        #define REWIPE_FIRST_PT {45, 173}
-        #define REWIPE_SECOND_PT {115, 173}
+        #define REWIPE_FIRST_PT {115, 173}
+        #define REWIPE_SECOND_PT {45, 173}
         #define Z_REWIPE_PT (Z_MIN_POS + 1) // Depth to re-wipe at
       #endif
     #endif
@@ -710,7 +710,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 
 #define DEFAULT_ACCELERATION          2000    // X, Y, Z and E acceleration in mm/s^2 for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration in mm/s^2 for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   3000    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves
+#define DEFAULT_TRAVEL_ACCELERATION   2000    // X, Y, Z acceleration in mm/s^2 for travel (non printing) moves
 
 // The speed change that does not require acceleration (i.e. the software might assume it can be done instantaneously)
 #define DEFAULT_XYJERK                12.0    // (mm/sec)
@@ -1029,7 +1029,7 @@ const bool Z_MIN_PROBE_ENDSTOP_INVERTING = true; // set to true to invert the lo
 // RepRapDiscount FULL GRAPHIC Smart Controller
 // http://reprap.org/wiki/RepRapDiscount_Full_Graphic_Smart_Controller
 //
-#define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
+//#define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
 
 //
 // MakerLab Mini Panel with graphic
