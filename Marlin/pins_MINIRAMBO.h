@@ -116,7 +116,8 @@
 
   #if ENABLED(NEWPANEL)
 
-    #define BEEPER_PIN      84  // Beeper on AUX-4
+    // Beeper on AUX-4
+    #define BEEPER_PIN      84
     #define LCD_PINS_RS     82
     #define LCD_PINS_ENABLE 18
     #define LCD_PINS_D4     19
@@ -127,7 +128,8 @@
     //buttons are directly attached using AUX-2
     #define BTN_EN1         14
     #define BTN_EN2         72
-    #define BTN_ENC          9  // the click
+    // the click
+    #define BTN_ENC          9
 
     #define SD_DETECT_PIN   15
 
