@@ -214,8 +214,8 @@
 #ifndef MSG_FLOW
   #define MSG_FLOW                            "Flow"
 #endif
-#ifndef MSG_CONTROL
-  #define MSG_CONTROL                         "Control"
+#ifndef MSG_MOVEMENT
+  #define MSG_MOVEMENT                         "Movement"
 #endif
 #ifndef MSG_MIN
   #define MSG_MIN                             " " LCD_STR_THERMOMETER " Min"

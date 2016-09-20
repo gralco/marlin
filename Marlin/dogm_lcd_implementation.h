@@ -53,7 +53,7 @@
 
 #include <U8glib.h>
 #include "dogm_bitmaps.h"
-
+#include "dogm_font_data_6x9_marlin.h"
 #include "ultralcd.h"
 #include "ultralcd_st7920_u8glib_rrd.h"
 #include "Configuration.h"
@@ -245,6 +245,35 @@ static void lcd_implementation_init() {
   #elif ENABLED(LCD_SCREEN_ROT_270)
     u8g.setRot270();  // Rotate screen by 270°
   #endif
+
+u8g.firstPage();
+	do {
+		u8g.setFont(u8g_font_6x9);
+		u8g.setColorIndex(1);
+		u8g.drawBox (0, 0, u8g.getWidth(), u8g.getHeight());
+		u8g.setColorIndex(1);
+	   } while( u8g.nextPage() );
+	   	u8g.firstPage();
+	do {
+			// LulzBot init bmp
+			u8g.drawBitmapP(0,0,LULZBOT_BMPBYTEWIDTH,LULZBOT_BMPHEIGHT,lulzbot_bmp);
+			// Welcome message
+			u8g.setFont(u8g_font_6x9);
+			u8g.drawStr(61,17,"TAZ 6"); 
+			u8g.setFont(u8g_font_5x8);
+			u8g.drawStr(95,17,"Single");
+			u8g.setFont(u8g_font_6x9);
+			u8g.drawStr(62,28,"3D Printer");
+			u8g.setFont(u8g_font_5x8);
+			u8g.drawStr(63,41,"LulzBot.com");
+			u8g.setFont(u8g_font_5x8);
+			u8g.drawStr(62,53,"Firmware:");
+			u8g.drawStr(62,62,"Marlin V1.0.2");
+			//u8g.drawStr(62,53,"Marlin:");
+			//u8g.drawStr(62,62,"V");
+			//u8g.drawStr(67,62,VERSION_STRING);
+	   } while( u8g.nextPage() );
+	   delay(1000);
 
   #if ENABLED(SHOW_BOOTSCREEN)
     int offx = (u8g.getWidth() - (START_BMPWIDTH)) / 2;

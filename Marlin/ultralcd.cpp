@@ -90,7 +90,7 @@ static void lcd_status_screen();
   static void lcd_tune_menu();
   static void lcd_prepare_menu();
   static void lcd_move_menu();
-  static void lcd_control_menu();
+  static void lcd_movement_menu();
   static void lcd_control_temperature_menu();
   static void lcd_control_temperature_preheat_pla_settings_menu();
   static void lcd_control_temperature_preheat_abs_settings_menu();
@@ -504,7 +504,7 @@ static void lcd_main_menu() {
       MENU_ITEM(submenu, MSG_DELTA_CALIBRATE, lcd_delta_calibrate_menu);
     #endif
   }
-  MENU_ITEM(submenu, MSG_CONTROL, lcd_control_menu);
+  MENU_ITEM(submenu, MSG_MOVEMENT, lcd_movement_menu);
 
   #if ENABLED(SDSUPPORT)
     if (card.cardOK) {
@@ -1108,12 +1108,12 @@ static void lcd_prepare_menu() {
   //
   // Auto Home
   //
-  MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
+  //~ MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
 
   //
   // Set Home Offsets
   //
-  MENU_ITEM(function, MSG_SET_HOME_OFFSETS, lcd_set_home_offsets);
+//  MENU_ITEM(function, MSG_SET_HOME_OFFSETS, lcd_set_home_offsets);
   //MENU_ITEM(gcode, MSG_SET_ORIGIN, PSTR("G92 X0 Y0 Z0"));
 
   //
@@ -1350,25 +1350,28 @@ static void lcd_move_menu() {
  *
  */
 
-static void lcd_control_menu() {
+static void lcd_movement_menu() {
   START_MENU();
   MENU_ITEM(back, MSG_MAIN);
-  MENU_ITEM(submenu, MSG_TEMPERATURE, lcd_control_temperature_menu);
-  MENU_ITEM(submenu, MSG_MOTION, lcd_control_motion_menu);
-  MENU_ITEM(submenu, MSG_VOLUMETRIC, lcd_control_volumetric_menu);
-
-  #if ENABLED(HAS_LCD_CONTRAST)
-    //MENU_ITEM_EDIT(int3, MSG_CONTRAST, &lcd_contrast, 0, 63);
-    MENU_ITEM(submenu, MSG_CONTRAST, lcd_set_contrast);
-  #endif
-  #if ENABLED(FWRETRACT)
-    MENU_ITEM(submenu, MSG_RETRACT, lcd_control_retract_menu);
-  #endif
-  #if ENABLED(EEPROM_SETTINGS)
-    MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
-    MENU_ITEM(function, MSG_LOAD_EPROM, Config_RetrieveSettings);
-  #endif
-  MENU_ITEM(function, MSG_RESTORE_FAILSAFE, Config_ResetDefault);
+  //~ MENU_ITEM(submenu, MSG_TEMPERATURE, lcd_control_temperature_menu);
+  //~ MENU_ITEM(submenu, MSG_MOTION, lcd_control_motion_menu);
+  //~ MENU_ITEM(submenu, MSG_VOLUMETRIC, lcd_control_volumetric_menu);
+  MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
+  MENU_ITEM(gcode, MSG_DISABLE_STEPPERS, PSTR("M84"));
+  MENU_ITEM(submenu, MSG_MOVE_AXIS, lcd_move_menu);
+//~ 
+  //~ #if ENABLED(HAS_LCD_CONTRAST)
+    //~ //MENU_ITEM_EDIT(int3, MSG_CONTRAST, &lcd_contrast, 0, 63);
+    //~ MENU_ITEM(submenu, MSG_CONTRAST, lcd_set_contrast);
+  //~ #endif
+  //~ #if ENABLED(FWRETRACT)
+    //~ MENU_ITEM(submenu, MSG_RETRACT, lcd_control_retract_menu);
+  //~ #endif
+  //~ #if ENABLED(EEPROM_SETTINGS)
+    //~ MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
+    //~ MENU_ITEM(function, MSG_LOAD_EPROM, Config_RetrieveSettings);
+  //~ #endif
+  //~ MENU_ITEM(function, MSG_RESTORE_FAILSAFE, Config_ResetDefault);
   END_MENU();
 }
 
@@ -1461,7 +1464,7 @@ static void lcd_control_temperature_menu() {
   //
   // ^ Control
   //
-  MENU_ITEM(back, MSG_CONTROL);
+  MENU_ITEM(back, MSG_MAIN);
 
   //
   // Nozzle:
@@ -1577,12 +1580,12 @@ static void lcd_control_temperature_menu() {
   //
   // Preheat PLA conf
   //
-  MENU_ITEM(submenu, MSG_PREHEAT_PLA_SETTINGS, lcd_control_temperature_preheat_pla_settings_menu);
+  //~ MENU_ITEM(submenu, MSG_PREHEAT_PLA_SETTINGS, lcd_control_temperature_preheat_pla_settings_menu);
 
   //
   // Preheat ABS conf
   //
-  MENU_ITEM(submenu, MSG_PREHEAT_ABS_SETTINGS, lcd_control_temperature_preheat_abs_settings_menu);
+  //~ MENU_ITEM(submenu, MSG_PREHEAT_ABS_SETTINGS, lcd_control_temperature_preheat_abs_settings_menu);
   END_MENU();
 }
 
@@ -1635,7 +1638,7 @@ static void lcd_control_temperature_preheat_abs_settings_menu() {
  */
 static void lcd_control_motion_menu() {
   START_MENU();
-  MENU_ITEM(back, MSG_CONTROL);
+  MENU_ITEM(back, MSG_MOVEMENT);
   #if ENABLED(AUTO_BED_LEVELING_FEATURE)
     MENU_ITEM_EDIT(float32, MSG_ZPROBE_ZOFFSET, &zprobe_zoffset, Z_PROBE_OFFSET_RANGE_MIN, Z_PROBE_OFFSET_RANGE_MAX);
   #endif
@@ -1688,7 +1691,7 @@ static void lcd_control_motion_menu() {
  */
 static void lcd_control_volumetric_menu() {
   START_MENU();
-  MENU_ITEM(back, MSG_CONTROL);
+  MENU_ITEM(back, MSG_MOVEMENT);
 
   MENU_ITEM_EDIT_CALLBACK(bool, MSG_VOLUMETRIC_ENABLED, &volumetric_enabled, calculate_volumetric_multipliers);
 
@@ -1749,7 +1752,7 @@ static void lcd_control_volumetric_menu() {
 #if ENABLED(FWRETRACT)
   static void lcd_control_retract_menu() {
     START_MENU();
-    MENU_ITEM(back, MSG_CONTROL);
+    MENU_ITEM(back, MSG_MOVEMENT);
     MENU_ITEM_EDIT(bool, MSG_AUTORETRACT, &autoretract_enabled);
     MENU_ITEM_EDIT(float52, MSG_CONTROL_RETRACT, &retract_length, 0, 100);
     #if EXTRUDERS > 1
