@@ -499,7 +499,7 @@ static void lcd_main_menu() {
     MENU_ITEM(submenu, MSG_TUNE, lcd_tune_menu);
   }
   else {
-    MENU_ITEM(submenu, MSG_PREPARE, lcd_prepare_menu);
+    MENU_ITEM(submenu, MSG_TEMPERATURE, lcd_control_temperature_menu);
     #if ENABLED(DELTA_CALIBRATION_MENU)
       MENU_ITEM(submenu, MSG_DELTA_CALIBRATE, lcd_delta_calibrate_menu);
     #endif
@@ -1097,13 +1097,13 @@ void lcd_cooldown() {
  *
  */
 
-static void lcd_prepare_menu() {
-  START_MENU();
+//~ static void lcd_prepare_menu() {
+  //~ START_MENU();
 
   //
   // ^ Main
   //
-  MENU_ITEM(back, MSG_MAIN);
+  //~ MENU_ITEM(back, MSG_MAIN);
 
   //
   // Auto Home
@@ -1119,62 +1119,62 @@ static void lcd_prepare_menu() {
   //
   // Level Bed
   //
-  #if ENABLED(AUTO_BED_LEVELING_FEATURE)
-    MENU_ITEM(gcode, MSG_LEVEL_BED,
-      axis_homed[X_AXIS] && axis_homed[Y_AXIS] ? PSTR("G29") : PSTR("G28\nG29")
-    );
-  #elif ENABLED(MANUAL_BED_LEVELING)
-    MENU_ITEM(submenu, MSG_LEVEL_BED, lcd_level_bed);
-  #endif
+  //~ #if ENABLED(AUTO_BED_LEVELING_FEATURE)
+    //~ MENU_ITEM(gcode, MSG_LEVEL_BED,
+      //~ axis_homed[X_AXIS] && axis_homed[Y_AXIS] ? PSTR("G29") : PSTR("G28\nG29")
+    //~ );
+  //~ #elif ENABLED(MANUAL_BED_LEVELING)
+    //~ MENU_ITEM(submenu, MSG_LEVEL_BED, lcd_level_bed);
+  //~ #endif
 
   //
   // Move Axis
   //
-  MENU_ITEM(submenu, MSG_MOVE_AXIS, lcd_move_menu);
+  //~ MENU_ITEM(submenu, MSG_MOVE_AXIS, lcd_move_menu);
 
   //
   // Disable Steppers
   //
-  MENU_ITEM(gcode, MSG_DISABLE_STEPPERS, PSTR("M84"));
+  //~ MENU_ITEM(gcode, MSG_DISABLE_STEPPERS, PSTR("M84"));
 
   //
   // Preheat PLA
   // Preheat ABS
   //
-  #if TEMP_SENSOR_0 != 0
-    #if TEMP_SENSOR_1 != 0 || TEMP_SENSOR_2 != 0 || TEMP_SENSOR_3 != 0 || TEMP_SENSOR_BED != 0
-      MENU_ITEM(submenu, MSG_PREHEAT_PLA, lcd_preheat_pla_menu);
-      MENU_ITEM(submenu, MSG_PREHEAT_ABS, lcd_preheat_abs_menu);
-    #else
-      MENU_ITEM(function, MSG_PREHEAT_PLA, lcd_preheat_pla0);
-      MENU_ITEM(function, MSG_PREHEAT_ABS, lcd_preheat_abs0);
-    #endif
-  #endif
+  //~ #if TEMP_SENSOR_0 != 0
+    //~ #if TEMP_SENSOR_1 != 0 || TEMP_SENSOR_2 != 0 || TEMP_SENSOR_3 != 0 || TEMP_SENSOR_BED != 0
+      //~ MENU_ITEM(submenu, MSG_PREHEAT_PLA, lcd_preheat_pla_menu);
+      //~ MENU_ITEM(submenu, MSG_PREHEAT_ABS, lcd_preheat_abs_menu);
+    //~ #else
+      //~ MENU_ITEM(function, MSG_PREHEAT_PLA, lcd_preheat_pla0);
+      //~ MENU_ITEM(function, MSG_PREHEAT_ABS, lcd_preheat_abs0);
+    //~ #endif
+  //~ #endif
 
   //
   // Cooldown
   //
-  MENU_ITEM(function, MSG_COOLDOWN, lcd_cooldown);
+  //~ MENU_ITEM(function, MSG_COOLDOWN, lcd_cooldown);
 
   //
   // Switch power on/off
   //
-  #if HAS_POWER_SWITCH
-    if (powersupply)
-      MENU_ITEM(gcode, MSG_SWITCH_PS_OFF, PSTR("M81"));
-    else
-      MENU_ITEM(gcode, MSG_SWITCH_PS_ON, PSTR("M80"));
-  #endif
+  //~ #if HAS_POWER_SWITCH
+    //~ if (powersupply)
+      //~ MENU_ITEM(gcode, MSG_SWITCH_PS_OFF, PSTR("M81"));
+    //~ else
+      //~ MENU_ITEM(gcode, MSG_SWITCH_PS_ON, PSTR("M80"));
+  //~ #endif
 
   //
   // Autostart
   //
-  #if ENABLED(SDSUPPORT) && ENABLED(MENU_ADDAUTOSTART)
-    MENU_ITEM(function, MSG_AUTOSTART, lcd_autostart_sd);
-  #endif
-
-  END_MENU();
-}
+  //~ #if ENABLED(SDSUPPORT) && ENABLED(MENU_ADDAUTOSTART)
+    //~ MENU_ITEM(function, MSG_AUTOSTART, lcd_autostart_sd);
+  //~ #endif
+//~ 
+  //~ END_MENU();
+//~ }
 
 #if ENABLED(DELTA_CALIBRATION_MENU)
 
@@ -1333,7 +1333,7 @@ static void lcd_move_menu_01mm() {
 
 static void lcd_move_menu() {
   START_MENU();
-  MENU_ITEM(back, MSG_PREPARE);
+  MENU_ITEM(back, MSG_MAIN);
 
   if (_MOVE_XYZ_ALLOWED)
     MENU_ITEM(submenu, MSG_MOVE_10MM, lcd_move_menu_10mm);
@@ -1359,6 +1359,14 @@ static void lcd_movement_menu() {
   MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
   MENU_ITEM(gcode, MSG_DISABLE_STEPPERS, PSTR("M84"));
   MENU_ITEM(submenu, MSG_MOVE_AXIS, lcd_move_menu);
+  #if ENABLED(AUTO_BED_LEVELING_FEATURE)
+    MENU_ITEM(gcode, MSG_LEVEL_BED,
+      axis_homed[X_AXIS] && axis_homed[Y_AXIS] ? PSTR("G29") : PSTR("G28\nG29")
+    );
+  #elif ENABLED(MANUAL_BED_LEVELING)
+    MENU_ITEM(submenu, MSG_LEVEL_BED, lcd_level_bed);
+  #endif
+  
 //~ 
   //~ #if ENABLED(HAS_LCD_CONTRAST)
     //~ //MENU_ITEM_EDIT(int3, MSG_CONTRAST, &lcd_contrast, 0, 63);

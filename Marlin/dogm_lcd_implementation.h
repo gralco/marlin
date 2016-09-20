@@ -259,9 +259,9 @@ u8g.firstPage();
 			u8g.drawBitmapP(0,0,LULZBOT_BMPBYTEWIDTH,LULZBOT_BMPHEIGHT,lulzbot_bmp);
 			// Welcome message
 			u8g.setFont(u8g_font_6x9);
-			u8g.drawStr(61,17,"TAZ 6"); 
+			u8g.drawStr(61,17,"Mini"); 
 			u8g.setFont(u8g_font_5x8);
-			u8g.drawStr(95,17,"Single");
+			u8g.drawStr(95,17,"GLCD");
 			u8g.setFont(u8g_font_6x9);
 			u8g.drawStr(62,28,"3D Printer");
 			u8g.setFont(u8g_font_5x8);
