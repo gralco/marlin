@@ -217,6 +217,12 @@
 #ifndef MSG_MOVEMENT
   #define MSG_MOVEMENT                         "Movement"
 #endif
+#ifndef MSG_CONFIGURATION
+  #define MSG_CONFIGURATION                    "Configuration"
+#endif
+#ifndef MSG_ADVANCED
+  #define MSG_ADVANCED                         "Advanced Settings"
+#endif
 #ifndef MSG_MIN
   #define MSG_MIN                             " " LCD_STR_THERMOMETER " Min"
 #endif

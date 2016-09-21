@@ -94,7 +94,8 @@ static void lcd_status_screen();
   static void lcd_control_temperature_menu();
   static void lcd_control_temperature_preheat_pla_settings_menu();
   static void lcd_control_temperature_preheat_abs_settings_menu();
-  static void lcd_control_motion_menu();
+  static void lcd_advanced_menu();
+  static void lcd_configuration_menu();
   static void lcd_control_volumetric_menu();
 
   #if ENABLED(HAS_LCD_CONTRAST)
@@ -499,12 +500,13 @@ static void lcd_main_menu() {
     MENU_ITEM(submenu, MSG_TUNE, lcd_tune_menu);
   }
   else {
-    MENU_ITEM(submenu, MSG_TEMPERATURE, lcd_control_temperature_menu);
+    MENU_ITEM(submenu, MSG_MOVEMENT, lcd_movement_menu);
     #if ENABLED(DELTA_CALIBRATION_MENU)
       MENU_ITEM(submenu, MSG_DELTA_CALIBRATE, lcd_delta_calibrate_menu);
     #endif
   }
-  MENU_ITEM(submenu, MSG_MOVEMENT, lcd_movement_menu);
+  MENU_ITEM(submenu, MSG_TEMPERATURE, lcd_control_temperature_menu);
+  MENU_ITEM(submenu, MSG_CONFIGURATION, lcd_configuration_menu);
 
   #if ENABLED(SDSUPPORT)
     if (card.cardOK) {
@@ -1293,9 +1295,7 @@ static void _lcd_move_menu_axis() {
   if (_MOVE_XYZ_ALLOWED) {
     MENU_ITEM(submenu, MSG_MOVE_X, lcd_move_x);
     MENU_ITEM(submenu, MSG_MOVE_Y, lcd_move_y);
-  }
-  if (move_menu_scale < 10.0) {
-    if (_MOVE_XYZ_ALLOWED) MENU_ITEM(submenu, MSG_MOVE_Z, lcd_move_z);
+    MENU_ITEM(submenu, MSG_MOVE_Z, lcd_move_z);
     #if EXTRUDERS == 1
       MENU_ITEM(submenu, MSG_MOVE_E, lcd_move_e);
     #else
@@ -1304,11 +1304,26 @@ static void _lcd_move_menu_axis() {
       #if EXTRUDERS > 2
         MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E3, lcd_move_e2);
         #if EXTRUDERS > 3
-          MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E4, lcd_move_e3);
+        MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E4, lcd_move_e3);
         #endif
-      #endif
-    #endif // EXTRUDERS > 1
+      #endif 
+    #endif   
   }
+  //~ if (move_menu_scale < 10.0) {
+    //~ if (_MOVE_XYZ_ALLOWED) MENU_ITEM(submenu, MSG_MOVE_Z, lcd_move_z);
+    //~ #if EXTRUDERS == 1
+      //~ MENU_ITEM(submenu, MSG_MOVE_E, lcd_move_e);
+    //~ #else
+      //~ MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E1, lcd_move_e0);
+      //~ MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E2, lcd_move_e1);
+      //~ #if EXTRUDERS > 2
+        //~ MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E3, lcd_move_e2);
+        //~ #if EXTRUDERS > 3
+          //~ MENU_ITEM(submenu, MSG_MOVE_E MSG_MOVE_E4, lcd_move_e3);
+        //~ #endif
+      //~ #endif
+    //~ #endif // EXTRUDERS > 1
+  //~ }
   END_MENU();
 }
 
@@ -1359,13 +1374,13 @@ static void lcd_movement_menu() {
   MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28"));
   MENU_ITEM(gcode, MSG_DISABLE_STEPPERS, PSTR("M84"));
   MENU_ITEM(submenu, MSG_MOVE_AXIS, lcd_move_menu);
-  #if ENABLED(AUTO_BED_LEVELING_FEATURE)
-    MENU_ITEM(gcode, MSG_LEVEL_BED,
-      axis_homed[X_AXIS] && axis_homed[Y_AXIS] ? PSTR("G29") : PSTR("G28\nG29")
-    );
-  #elif ENABLED(MANUAL_BED_LEVELING)
-    MENU_ITEM(submenu, MSG_LEVEL_BED, lcd_level_bed);
-  #endif
+  //~ #if ENABLED(AUTO_BED_LEVELING_FEATURE)
+    //~ MENU_ITEM(gcode, MSG_LEVEL_BED,
+      //~ axis_homed[X_AXIS] && axis_homed[Y_AXIS] ? PSTR("G29") : PSTR("G28\nG29")
+    //~ );
+  //~ #elif ENABLED(MANUAL_BED_LEVELING)
+    //~ MENU_ITEM(submenu, MSG_LEVEL_BED, lcd_level_bed);
+  //~ #endif
   
 //~ 
   //~ #if ENABLED(HAS_LCD_CONTRAST)
@@ -1383,6 +1398,17 @@ static void lcd_movement_menu() {
   END_MENU();
 }
 
+static void lcd_configuration_menu() {
+	START_MENU();
+	MENU_ITEM(back, MSG_MAIN);
+	MENU_ITEM(submenu, MSG_ADVANCED, lcd_advanced_menu);
+	#if ENABLED(EEPROM_SETTINGS)
+	MENU_ITEM(function, MSG_STORE_EPROM, Config_StoreSettings);
+	MENU_ITEM(function, MSG_LOAD_EPROM, Config_RetrieveSettings);
+	#endif
+	MENU_ITEM(function, MSG_RESTORE_FAILSAFE, Config_ResetDefault);
+	END_MENU();
+}
 /**
  *
  * "Temperature" submenu
@@ -1545,45 +1571,45 @@ static void lcd_control_temperature_menu() {
   // PID-P E3, PID-I E3, PID-D E3, PID-C E3, PID Autotune E3
   // PID-P E4, PID-I E4, PID-D E4, PID-C E4, PID Autotune E4
   //
-  #if ENABLED(PIDTEMP)
-
-    #define _PID_BASE_MENU_ITEMS(ELABEL, eindex) \
-      raw_Ki = unscalePID_i(PID_PARAM(Ki, eindex)); \
-      raw_Kd = unscalePID_d(PID_PARAM(Kd, eindex)); \
-      MENU_ITEM_EDIT(float52, MSG_PID_P ELABEL, &PID_PARAM(Kp, eindex), 1, 9990); \
-      MENU_ITEM_EDIT_CALLBACK(float52, MSG_PID_I ELABEL, &raw_Ki, 0.01, 9990, copy_and_scalePID_i_E ## eindex); \
-      MENU_ITEM_EDIT_CALLBACK(float52, MSG_PID_D ELABEL, &raw_Kd, 1, 9990, copy_and_scalePID_d_E ## eindex)
-
-    #if ENABLED(PID_ADD_EXTRUSION_RATE)
-      #define _PID_MENU_ITEMS(ELABEL, eindex) \
-        _PID_BASE_MENU_ITEMS(ELABEL, eindex); \
-        MENU_ITEM_EDIT(float3, MSG_PID_C ELABEL, &PID_PARAM(Kc, eindex), 1, 9990)
-    #else
-      #define _PID_MENU_ITEMS(ELABEL, eindex) _PID_BASE_MENU_ITEMS(ELABEL, eindex)
-    #endif
-
-    #if ENABLED(PID_AUTOTUNE_MENU)
-      #define PID_MENU_ITEMS(ELABEL, eindex) \
-        _PID_MENU_ITEMS(ELABEL, eindex); \
-        MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_PID_AUTOTUNE ELABEL, &autotune_temp[eindex], 150, heater_maxtemp[eindex] - 15, lcd_autotune_callback_E ## eindex)
-    #else
-      #define PID_MENU_ITEMS(ELABEL, eindex) _PID_MENU_ITEMS(ELABEL, eindex)
-    #endif
-
-    #if ENABLED(PID_PARAMS_PER_EXTRUDER) && EXTRUDERS > 1
-      PID_MENU_ITEMS(MSG_E1, 0);
-      PID_MENU_ITEMS(MSG_E2, 1);
-      #if EXTRUDERS > 2
-        PID_MENU_ITEMS(MSG_E3, 2);
-        #if EXTRUDERS > 3
-          PID_MENU_ITEMS(MSG_E4, 3);
-        #endif //EXTRUDERS > 3
-      #endif //EXTRUDERS > 2
-    #else //!PID_PARAMS_PER_EXTRUDER || EXTRUDERS == 1
-      PID_MENU_ITEMS("", 0);
-    #endif //!PID_PARAMS_PER_EXTRUDER || EXTRUDERS == 1
-
-  #endif //PIDTEMP
+  //~ #if ENABLED(PIDTEMP)
+//~ 
+    //~ #define _PID_BASE_MENU_ITEMS(ELABEL, eindex) \
+      //~ raw_Ki = unscalePID_i(PID_PARAM(Ki, eindex)); \
+      //~ raw_Kd = unscalePID_d(PID_PARAM(Kd, eindex)); \
+      //~ MENU_ITEM_EDIT(float52, MSG_PID_P ELABEL, &PID_PARAM(Kp, eindex), 1, 9990); \
+      //~ MENU_ITEM_EDIT_CALLBACK(float52, MSG_PID_I ELABEL, &raw_Ki, 0.01, 9990, copy_and_scalePID_i_E ## eindex); \
+      //~ MENU_ITEM_EDIT_CALLBACK(float52, MSG_PID_D ELABEL, &raw_Kd, 1, 9990, copy_and_scalePID_d_E ## eindex)
+//~ 
+    //~ #if ENABLED(PID_ADD_EXTRUSION_RATE)
+      //~ #define _PID_MENU_ITEMS(ELABEL, eindex) \
+        //~ _PID_BASE_MENU_ITEMS(ELABEL, eindex); \
+        //~ MENU_ITEM_EDIT(float3, MSG_PID_C ELABEL, &PID_PARAM(Kc, eindex), 1, 9990)
+    //~ #else
+      //~ #define _PID_MENU_ITEMS(ELABEL, eindex) _PID_BASE_MENU_ITEMS(ELABEL, eindex)
+    //~ #endif
+//~ 
+    //~ #if ENABLED(PID_AUTOTUNE_MENU)
+      //~ #define PID_MENU_ITEMS(ELABEL, eindex) \
+        //~ _PID_MENU_ITEMS(ELABEL, eindex); \
+        //~ MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_PID_AUTOTUNE ELABEL, &autotune_temp[eindex], 150, heater_maxtemp[eindex] - 15, lcd_autotune_callback_E ## eindex)
+    //~ #else
+      //~ #define PID_MENU_ITEMS(ELABEL, eindex) _PID_MENU_ITEMS(ELABEL, eindex)
+    //~ #endif
+//~ 
+    //~ #if ENABLED(PID_PARAMS_PER_EXTRUDER) && EXTRUDERS > 1
+      //~ PID_MENU_ITEMS(MSG_E1, 0);
+      //~ PID_MENU_ITEMS(MSG_E2, 1);
+      //~ #if EXTRUDERS > 2
+        //~ PID_MENU_ITEMS(MSG_E3, 2);
+        //~ #if EXTRUDERS > 3
+          //~ PID_MENU_ITEMS(MSG_E4, 3);
+        //~ #endif //EXTRUDERS > 3
+      //~ #endif //EXTRUDERS > 2
+    //~ #else //!PID_PARAMS_PER_EXTRUDER || EXTRUDERS == 1
+      //~ PID_MENU_ITEMS("", 0);
+    //~ #endif //!PID_PARAMS_PER_EXTRUDER || EXTRUDERS == 1
+//~ 
+  //~ #endif //PIDTEMP
 
   //
   // Preheat PLA conf
@@ -1594,6 +1620,7 @@ static void lcd_control_temperature_menu() {
   // Preheat ABS conf
   //
   //~ MENU_ITEM(submenu, MSG_PREHEAT_ABS_SETTINGS, lcd_control_temperature_preheat_abs_settings_menu);
+  MENU_ITEM(function, MSG_COOLDOWN, lcd_cooldown);
   END_MENU();
 }
 
@@ -1644,9 +1671,9 @@ static void lcd_control_temperature_preheat_abs_settings_menu() {
  * "Control" > "Motion" submenu
  *
  */
-static void lcd_control_motion_menu() {
+static void lcd_advanced_menu() {
   START_MENU();
-  MENU_ITEM(back, MSG_MOVEMENT);
+  MENU_ITEM(back, MSG_CONFIGURATION);
   #if ENABLED(AUTO_BED_LEVELING_FEATURE)
     MENU_ITEM_EDIT(float32, MSG_ZPROBE_ZOFFSET, &zprobe_zoffset, Z_PROBE_OFFSET_RANGE_MIN, Z_PROBE_OFFSET_RANGE_MAX);
   #endif
