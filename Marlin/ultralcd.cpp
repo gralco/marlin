@@ -501,11 +501,11 @@ static void lcd_main_menu() {
   }
   else {
     MENU_ITEM(submenu, MSG_MOVEMENT, lcd_movement_menu);
+    MENU_ITEM(submenu, MSG_TEMPERATURE, lcd_control_temperature_menu);
     #if ENABLED(DELTA_CALIBRATION_MENU)
       MENU_ITEM(submenu, MSG_DELTA_CALIBRATE, lcd_delta_calibrate_menu);
     #endif
   }
-  MENU_ITEM(submenu, MSG_TEMPERATURE, lcd_control_temperature_menu);
   MENU_ITEM(submenu, MSG_CONFIGURATION, lcd_configuration_menu);
 
   #if ENABLED(SDSUPPORT)

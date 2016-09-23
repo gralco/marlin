@@ -273,7 +273,6 @@ u8g.firstPage();
 			//u8g.drawStr(62,62,"V");
 			//u8g.drawStr(67,62,VERSION_STRING);
 	   } while( u8g.nextPage() );
-	   delay(1000);
 
   #if ENABLED(SHOW_BOOTSCREEN)
     int offx = (u8g.getWidth() - (START_BMPWIDTH)) / 2;
