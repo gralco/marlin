@@ -3195,8 +3195,8 @@ Sigma_Exit:
               /* start/restart the TEMP_RESIDENCY_TIME timer whenever we reach target temp for the first time
                 or when current temp falls outside the hysteresis after target temp was reached */
             if ((residencyBedStart == -1 &&  target_direction && (degBed() >= (degTargetBed()-TEMP_BED_WINDOW))) ||
-                (residencyBedStart == -1 && !target_direction && (degBed() <= (degTargetBed()+TEMP_BED_WINDOW))) ||
-                (residencyBedStart > -1 && labs(degBed() - degTargetBed()) > TEMP_BED_HYSTERESIS) )
+                (residencyBedStart == -1 && !target_direction && (degBed() <= (degTargetBed()+TEMP_BED_WINDOW_COOL))) ||
+                (residencyBedStart > -1 && target_direction && labs(degBed() - degTargetBed()) > TEMP_BED_HYSTERESIS) )
             {
               residencyBedStart = millis();
             }
