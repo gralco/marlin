@@ -4787,7 +4787,10 @@ inline void gcode_M109() {
 
         if (!residency_start_ms) {
           // Start the TEMP_BED_RESIDENCY_TIME timer when we reach target temp for the first time.
-          if (temp_diff < TEMP_BED_WINDOW) residency_start_ms = millis();
+          if ((temp_diff < TEMP_BED_WINDOW) && !wants_to_cool)
+            residency_start_ms = millis();
+          else if (temp_diff < 0.75)
+            residency_start_ms = millis();
         }
         else if (temp_diff > TEMP_BED_HYSTERESIS) {
           // Restart the timer whenever the temperature falls outside the hysteresis.
