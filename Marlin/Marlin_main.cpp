@@ -255,9 +255,6 @@ bool probe_fail = false;
 bool probing = false;
 bool homing_z = false;
 
-bool X_MAX_ENDSTOP_INVERTING = true;
-bool axis_max_endstop_inverting[] = {X_MAX_ENDSTOP_INVERTING, Y_MAX_ENDSTOP_INVERTING, Z_MAX_ENDSTOP_INVERTING};
-
 // Extruder offset
 #if EXTRUDERS > 1
 #ifndef DUAL_X_CARRIAGE
@@ -1242,23 +1239,12 @@ void probing_failed() {
     {
       SERIAL_ERRORLNPGM(MSG_REWIPE);
       LCD_MESSAGEPGM(MSG_REWIPE);
-      if (X_MAX_ENDSTOP_INVERTING)
-        do_blocking_move_to(-16.0, 73.0, 10.0);
-      else
-        do_blocking_move_to(-16.0, 31.0, 10.0);
+      do_blocking_move_to(-16.0, 73.0, 10.0);
       do_blocking_move_to(current_position[X_AXIS], current_position[Y_AXIS], 1.0);
       for(uint8_t i=0; i<6; i++)
       {
-        if (X_MAX_ENDSTOP_INVERTING)
-        {
-          do_blocking_move_to(current_position[X_AXIS], 95.0, current_position[Z_AXIS]);
-          do_blocking_move_to(current_position[X_AXIS], 73.0, current_position[Z_AXIS]);
-        }
-        else
-        {
-          do_blocking_move_to(current_position[X_AXIS], 100.0, current_position[Z_AXIS]);
-          do_blocking_move_to(current_position[X_AXIS], 31.0, current_position[Z_AXIS]);
-        }
+        do_blocking_move_to(current_position[X_AXIS], 95.0, current_position[Z_AXIS]);
+        do_blocking_move_to(current_position[X_AXIS], 73.0, current_position[Z_AXIS]);
       }
       do_blocking_move_to(LEFT_PROBE_BED_POSITION, FRONT_PROBE_BED_POSITION, 10.0);
       if(!reprobe_attempts[0])
@@ -1891,13 +1877,6 @@ void process_commands()
         active_extruder_parked = true;
       #else
         HOMEAXIS(X);
-        static bool x_max_known = false;
-        if (!x_max_known && !READ(X_MAX_PIN))
-        {
-          X_MAX_ENDSTOP_INVERTING = false;
-          axis_max_endstop_inverting[0] = X_MAX_ENDSTOP_INVERTING;
-          x_max_known = true;
-        }
       #endif
       }
 
